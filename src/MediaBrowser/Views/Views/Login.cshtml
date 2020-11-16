@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Media Browser Login</title>
+    <link href='https://fonts.googleapis.com/css?family=Archivo Narrow' rel='stylesheet'>
+    <environment include="Development">
+        <link rel="stylesheet" type="text/css" href="~/login/main.css">
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" type="text/css" href="~/login/main.min.css">
+    </environment>
+</head>
+<body>
+    <div class="login-modal">
+        <form method="post">
+            <input type="text" placeholder="Username" name="UserName" required>
+
+            <input type="password" placeholder="Password" name="Password" required>
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>
