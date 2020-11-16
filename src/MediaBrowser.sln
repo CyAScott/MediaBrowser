@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaBrowser", "MediaBrowser\MediaBrowser.csproj", "{AA32DA3B-4C39-462C-A8F1-0E6F8867E4EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaBrowser", "MediaBrowser\MediaBrowser.csproj", "{AA32DA3B-4C39-462C-A8F1-0E6F8867E4EF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaBrowser.Core", "MediaBrowser.Core\MediaBrowser.Core.csproj", "{37638902-4D93-45E0-A685-CDE9847E6215}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaBrowser.Tests", "MediaBrowser.Tests\MediaBrowser.Tests.csproj", "{B46DAF25-C09B-4ABA-9964-DB7DB15E8853}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{AA32DA3B-4C39-462C-A8F1-0E6F8867E4EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AA32DA3B-4C39-462C-A8F1-0E6F8867E4EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AA32DA3B-4C39-462C-A8F1-0E6F8867E4EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37638902-4D93-45E0-A685-CDE9847E6215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37638902-4D93-45E0-A685-CDE9847E6215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37638902-4D93-45E0-A685-CDE9847E6215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37638902-4D93-45E0-A685-CDE9847E6215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B46DAF25-C09B-4ABA-9964-DB7DB15E8853}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B46DAF25-C09B-4ABA-9964-DB7DB15E8853}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B46DAF25-C09B-4ABA-9964-DB7DB15E8853}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B46DAF25-C09B-4ABA-9964-DB7DB15E8853}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

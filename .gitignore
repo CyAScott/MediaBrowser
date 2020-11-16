@@ -351,3 +351,8 @@ MigrationBackup/
 
 # Config Files
 /src/MediaBrowser/appsettings.Development.json
+/temp
+
+# Min Files
+*.min.css
+*.min.js
