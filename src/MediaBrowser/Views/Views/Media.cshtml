@@ -1,35 +1,23 @@
-﻿<!DOCTYPE html>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Media Browser</title>
-    <link href='https://fonts.googleapis.com/css?family=Archivo Narrow' rel='stylesheet'>
-    <style>
-        body {
-            background: rgb(231,231,232);
-            background: linear-gradient(335deg, rgba(231,231,232,1) 0%, rgba(242,242,242,1) 100%);
-            color: LightSteelBlue;
-        }
-        body, button, h1 {
-            font-family: 'Archivo Narrow';
-        }
-        button {
-            background: DodgerBlue;
-            border: 0;
-            box-sizing: border-box;
-            color: GhostWhite;
-            display: inline-block;
-            padding: 10px;
-            width: 200px;
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media Browser</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Archivo Narrow">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" href="/styles.css">
+  <base href="/Media">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <h1>Coming Soon...</h1>
+  <app-root>
+  </app-root>
 
-    <form method="post" action="/logout">
-        <button type="submit">Logout</button>
-    </form>
+  <script type="text/javascript" src="/runtime.js"></script>
+  <script type="text/javascript" src="/polyfills.js"></script>
+  <environment include="Development"><script type="text/javascript" src="/vendor.js"></script></environment>
+  <script type="text/javascript" src="/main.js"></script>
 </body>
 </html>
