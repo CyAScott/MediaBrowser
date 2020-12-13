@@ -1,0 +1,50 @@
+<div class="input-name">
+    <div class="header">
+        <div class="name">Name (Optional)</div>
+        <div (click)="save()" class="save"><i class="fas fa-save"></i></div>
+    </div>
+    <input type="text" [(ngModel)]="name" placeholder="Name" />
+</div>
+
+<div class="input-description">
+    <div class="name">Description (Optional)</div>
+    <textarea [(ngModel)]="description"></textarea>
+</div>
+
+<div class="input-file">
+    <div class="header">
+        <div class="name">File</div>
+    </div>
+    <div class="preview">
+        
+        <div class="controls">
+            <button (click)="makeThumbnail(video)" *ngIf="src && type == 'Video'" class="save"><i class="fas fa-camera"></i></button>
+        </div>
+
+        <audio [style.display]="src && type == 'Audio' ? 'block' : 'none'" src="{{src}}" controls></audio>
+        <img [style.display]="src && type == 'Photo' ? 'block' : 'none'" src="{{src}}" />
+        <video #video [style.display]="src && type == 'Video' ? 'block' : 'none'" controls></video>
+        
+    </div>
+</div>
+
+<div class="input-thumbnails">
+    <div class="header">
+        <div class="name">Thumbnails (Optional)</div>
+        <div class="save">
+            <i class="fas fa-folder-plus"></i>
+            <input (change)="addThumbnail(thumbnail)" #thumbnail accept="image/gif, image/jpeg, image/png" type="file" />
+        </div>
+    </div>
+    <div class="cards">
+        <a *ngFor="let thumbnail of thumbnails" class="card">
+            <div (click)="removeThumbnail(thumbnail)" class="img">
+                <img [src]="sanitize(thumbnail.src)" alt="{{thumbnail.name}}"/>
+                <div class="overlay"></div>
+                <i class="fas fa-times-circle open"></i>
+                <h1>{{thumbnail.name}}</h1>
+            </div>
+        </a>
+    </div>
+</div>
+

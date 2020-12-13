@@ -1,0 +1,25 @@
+<div [style.visibility]="isVisible() ? 'visible' : 'hidden'" class="modal" (click)="closeModal()">
+
+    <div [style.display]="loaderVisible ? 'block' : 'none'" class="modal-loader">
+      <div class="loader">Loading...</div>
+    </div>
+  
+    <div [style.display]="msgBoxVisible ? 'flex' : 'none'" class="modal-dialog">
+  
+      <div class="msgBoxContent">{{msgBoxText}}</div>
+  
+      <div class="buttons" *ngFor="let button of msgBoxButtons">
+        <button [style.visibility]="button.visible ? 'visible' : 'hidden'" (click)="msgBoxDone(button)">{{button.text}}</button>
+      </div>
+  
+    </div>
+  
+    <ul *ngIf="filterVisible" class="modal-filter">
+      <li (click)="filterSelectionDone(item)" *ngFor="let item of filterOptions"><i [ngClass]="{'far fa-circle': item?.value != filterSelection?.value, 'fas fa-check-circle': filterSelection && item?.value == filterSelection.value}"></i> {{item.name}}</li>
+    </ul>
+  
+    <ul *ngIf="sortVisible" class="modal-sort">
+      <li (click)="sortSelectionDone(item)" *ngFor="let item of sortOptions"><i [ngClass]="{'far fa-circle': item?.value != sortSelection?.value, 'fas fa-check-circle': sortSelection && item?.value == sortSelection.value}"></i> {{item.name}}</li>
+    </ul>
+  
+  </div>

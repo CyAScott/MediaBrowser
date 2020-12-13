@@ -1,8 +1,10 @@
-﻿using MediaBrowser.Filters;
+using MediaBrowser.Filters;
 using MediaBrowser.Models;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -22,7 +24,7 @@ namespace MediaBrowser.Controllers
         public IUsers Users { get; }
 
         [HttpGet("/"), AllowAnonymous]
-        public IActionResult Index() => User.Identity is JwtPayload ? Redirect("/Media") : Redirect("/Login");
+        public IActionResult Index() => User.Identity is JwtPayload ? Redirect("/Media/Files") : Redirect("/Login");
 
         [HttpGet("/Login"), AllowAnonymous]
         public IActionResult Login() => View("Login");
@@ -49,7 +51,7 @@ namespace MediaBrowser.Controllers
 
             Jwt.SetJwtCookie(HttpContext, jwt);
 
-            return Redirect("/Media");
+            return Redirect("/Media/Files");
         }
 
         [HttpPost("/Logout")]
@@ -61,6 +63,18 @@ namespace MediaBrowser.Controllers
         }
 
         [HttpGet("/Media/{**path}")]
-        public IActionResult Media() => View("Media");
+        public IActionResult Media()
+        {
+            var jwt = User.Identity as JwtPayload;
+
+            return View("Media", new MediaViewModel
+            {
+                FirstName = jwt?.FirstName ?? "Anonymous",
+                Id = jwt?.Id.ToString() ?? Guid.Empty.ToString(),
+                LastName = jwt?.LastName ?? "User",
+                Roles = jwt?.Roles ?? new HashSet<string>(),
+                UserName = jwt?.UserName ?? "Unknown"
+            });
+        }
     }
 }

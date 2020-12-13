@@ -1,0 +1,13 @@
+<div [style.visibility]="hasMultiplePages() ? 'visible' : 'hidden'" class="page-controls">
+
+    <i (click)="setPageSelection(1)" [style.visibility]="canGoBack() ? 'visible' : 'hidden'" class="fas fa-fast-backward"></i>
+    <i (click)="setPageSelection(pageSelection - 1)" [style.visibility]="canGoBack() ? 'visible' : 'hidden'" class="fas fa-backward"></i>
+
+    <input #pageSelectionInput [ngModel]="pageSelection" type="number"  /><!--(change)="setPageSelection(pageSelectionInput.value)"-->
+    <span>of</span>
+    <span>{{pageCount}}</span>
+
+    <i (click)="setPageSelection(pageSelection * 1 + 1)" [style.visibility]="canGoForward() ? 'visible' : 'hidden'" class="fas fa-forward"></i>
+    <i (click)="setPageSelection(pageCount * 1)" [style.visibility]="canGoForward() ? 'visible' : 'hidden'" class="fas fa-fast-forward"></i>
+
+  </div>

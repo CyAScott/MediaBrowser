@@ -1,0 +1,54 @@
+<div class="input-name">
+    <div class="header">
+        <div class="name">Name (Optional)</div>
+        <div (click)="upload()" class="add"><i class="fas fa-upload"></i></div>
+    </div>
+    <input type="text" [(ngModel)]="name" placeholder="Name" />
+</div>
+
+<div class="input-description">
+    <div class="name">Description (Optional)</div>
+    <textarea [(ngModel)]="description"></textarea>
+</div>
+
+<div class="input-file">
+    <div class="header">
+        <div class="name">File (Required)</div>
+        <div class="add">
+            <i class="fas fa-folder-plus"></i>
+            <input (change)="add(file)" #file accept="audio/mp3, audio/ogg, audio/wav, image/gif, image/jpeg, image/png, video/mp4" type="file" />
+        </div>
+    </div>
+    <div class="preview">
+        
+        <div class="controls">
+            <button (click)="makeThumbnail(video)" *ngIf="src && type == 'video'" class="add"><i class="fas fa-camera"></i></button>
+        </div>
+
+        <audio *ngIf="src && type == 'audio'" [src]="sanitize(src)" controls></audio>
+        <img *ngIf="src && type == 'photo'" [src]="sanitize(src)" />
+        <video #video [style.display]="src && type == 'video' ? 'block' : 'none'" controls></video>
+
+    </div>
+</div>
+
+<div class="input-thumbnails">
+    <div class="header">
+        <div class="name">Thumbnails (Optional)</div>
+        <div class="add">
+            <i class="fas fa-folder-plus"></i>
+            <input (change)="addThumbnail(thumbnail)" #thumbnail accept="image/gif, image/jpeg, image/png" type="file" />
+        </div>
+    </div>
+    <div class="cards">
+        <a *ngFor="let thumbnail of thumbnails" class="card">
+            <div (click)="removeThumbnail(thumbnail)" class="img">
+                <img [src]="sanitize(thumbnail.src)" alt="{{thumbnail.name}}"/>
+                <div class="overlay"></div>
+                <i class="fas fa-times-circle open"></i>
+                <h1>{{thumbnail.name}}</h1>
+            </div>
+        </a>
+    </div>
+</div>
+

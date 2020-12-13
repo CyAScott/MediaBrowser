@@ -1,23 +1,36 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model MediaBrowser.Models.MediaViewModel
+@using Newtonsoft.Json
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Media Browser</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Archivo Narrow">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
-  <link rel="stylesheet" type="text/css" href="/styles.css">
-  <base href="/Media">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/Media/">
+    <title>Media Browser</title>
+    <script>
+    var userInfo = {
+        firstName: @Html.Raw(JsonConvert.SerializeObject(Model.FirstName)),
+        id: @Html.Raw(JsonConvert.SerializeObject(Model.Id)),
+        lastName: @Html.Raw(JsonConvert.SerializeObject(Model.LastName)),
+        userName: @Html.Raw(JsonConvert.SerializeObject(Model.UserName)),
+        roles: @Html.Raw(JsonConvert.SerializeObject(Model.Roles))
+    };
+    </script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Archivo Narrow">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA==" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-  <app-root>
-  </app-root>
+    <app-root>
+    </app-root>
 
-  <script type="text/javascript" src="/runtime.js"></script>
-  <script type="text/javascript" src="/polyfills.js"></script>
-  <environment include="Development"><script type="text/javascript" src="/vendor.js"></script></environment>
-  <script type="text/javascript" src="/main.js"></script>
+    <script type="text/javascript" src="/runtime.js"></script>
+    <script type="text/javascript" src="/polyfills.js"></script>
+    <environment include="Development">
+        <script type="text/javascript" src="/vendor.js"></script>
+    </environment>
+    <script type="text/javascript" src="/main.js"></script>
 </body>
 </html>

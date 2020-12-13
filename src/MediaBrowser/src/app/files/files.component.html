@@ -1,0 +1,16 @@
+<div class="no-cards" *ngIf="!response?.results || (response?.results?.length || 0) == 0">
+    <span>no results</span>
+</div>
+<span *ngIf="response?.results && (response?.results?.length || 0) > 0">
+    <div class="cards">
+        <a [routerLink]="['/File/' + item.id + '/View']" *ngFor="let item of (response?.results || [])" class="card">
+            <div class="img">
+                <i [ngClass]="{'fas': true, 'fa-film': item?.type == 'Video', 'fa-image': item?.type == 'Photo', 'fa-music': item?.type == 'Audio', 'icon': true}"></i>
+                <img *ngIf="item?.type == 'Photo' || item.thumbnails?.length" src="{{item.thumbnails?.length ? item.thumbnails[0].url : item.url}}" alt="{{item.name}}"/>
+                <div class="overlay"></div>
+                <i class="fas fa-search-plus open"></i>
+                <h1>{{item.name}}</h1>
+            </div>
+        </a>
+    </div>
+</span>

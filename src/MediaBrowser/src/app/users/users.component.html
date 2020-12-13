@@ -1,0 +1,17 @@
+<div class="no-cards" *ngIf="!response?.results || (response?.results?.length || 0) == 0">
+    <span>no results</span>
+</div>
+<span *ngIf="response?.results && (response?.results?.length || 0) > 0">
+    <div (click)="view(item)" class="cards" *ngFor="let item of (response?.results || [])">
+        <a class="card">
+            <div class="img">
+                <i class="fas fa-user icon"></i>
+                <div class="overlay"></div>
+            </div>
+            <div class="info">
+                <h1>{{item.firstName}} {{item.lastName}}</h1>
+                <p *ngFor="let role of item.roles; let index = index"> {{index ? ', ' : ''}} {{role}} </p>
+            </div>
+        </a>
+    </div>
+</span>

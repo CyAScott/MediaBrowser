@@ -1,0 +1,137 @@
+div.modal {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.5);
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: 100%;
+  
+    div.modal-loader {
+      height: 250px;
+      width: 100%;
+  
+      .loader, .loader:before, .loader:after {
+        background:DodgerBlue;
+        -webkit-animation: load1 1s infinite ease-in-out;
+        animation: load1 1s infinite ease-in-out;
+        width: 1em;
+        height: 4em;
+      }
+      .loader {
+        height: 10em;
+        color:DodgerBlue;
+        text-indent: -9999em;
+        margin: 88px auto;
+        position: relative;
+        font-size: 11px;
+        -webkit-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-animation-delay: -0.16s;
+        animation-delay: -0.16s;
+      }
+      .loader:before, .loader:after {
+        position: absolute;
+        top: 0;
+        content: '';
+      }
+      .loader:before {
+        left: -1.5em;
+        -webkit-animation-delay: -0.32s;
+        animation-delay: -0.32s;
+      }
+      .loader:after {
+        left: 1.5em;
+      }
+      @-webkit-keyframes load1 {
+        0%,
+        80%,
+        100% {
+          box-shadow: 0 0;
+          height: 4em;
+        }
+        40% {
+          box-shadow: 0 -2em;
+          height: 5em;
+        }
+      }
+      @keyframes load1 {
+        0%,
+        80%,
+        100% {
+          box-shadow: 0 0;
+          height: 4em;
+        }
+        40% {
+          box-shadow: 0 -2em;
+          height: 5em;
+        }
+      }
+    }
+  
+    div.modal-dialog {
+  
+      background: rgb(231,231,232);
+      background: linear-gradient(335deg, rgba(231,231,232,1) 0%, rgba(242,242,242,1) 100%);
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      color: LightSlateGray;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      height: auto;
+  
+      div.msgBoxContent {
+        margin: 0.5em;
+        min-height: 4em;
+        text-align: left;
+        width: 300px;
+      }
+    
+      div.buttons {
+        height: 2.5em;
+        margin: 0.5em;
+        text-align: right;
+        width: 300px;
+  
+        button {    
+          background: DodgerBlue;
+          box-sizing: border-box;
+          color: GhostWhite;
+          display: inline-block;
+          margin: 5px;
+          padding: 5px;
+          text-align: center;
+          width: 5em;
+        }
+      }
+    }
+  
+    ul.modal-filter, ul.modal-sort {
+      background: rgb(231,231,232);
+      background: linear-gradient(335deg, rgba(231,231,232,1) 0%, rgba(242,242,242,1) 100%);
+      box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+      color: LightSlateGray;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      height: auto;
+      list-style: none;
+      margin: 0;
+      min-width: 300px;
+      padding: 1em;
+  
+      li {
+        cursor: pointer;
+        list-style-type: none;
+        margin: 0;
+        padding: 0.25em;
+      }
+      li:hover {
+        text-shadow: 0 0 3px GhostWhite;
+      }
+    }
+  }

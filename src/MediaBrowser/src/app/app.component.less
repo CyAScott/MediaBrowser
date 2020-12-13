@@ -1,0 +1,165 @@
+div.top-nav {
+  &:extend(.min-width);
+
+  background: DodgerBlue;
+  color: GhostWhite;
+  display: block;
+  height: 3em;
+  overflow: hidden;
+  position: relative;
+
+  a.icon:hover {
+    text-shadow: 0 0 3px GhostWhite;
+  }
+  a.icon {
+    color: GhostWhite;
+    display: block;
+    font-size: 1.25em;
+    left: 0;
+    padding: 0.5em;
+    position: absolute;
+    top: 0;
+  }
+}
+
+div.nav-hidden {
+  display: none;
+}
+
+// #region menu
+
+div.menu {
+  &:extend(.light-background);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  display: none;
+  left: 0;
+  max-width: 100%;
+  overflow: hidden;
+  position: absolute;
+  top: 3em;
+  z-index: 3;
+
+  a i {
+    max-width: 25%;
+    width: 2em;
+  }
+  a {
+    color: LightSlateGray;
+    padding: 0.5em;
+    text-decoration: none;
+    font-size: 1.25em;
+    padding: 1em 4em 1em 1em;
+    display: block;
+  }
+  a:hover {
+    background: LightSlateGray;
+    color: GhostWhite;
+  }
+}
+
+div.menu.hidden {
+  display: block;
+  left: -100%;
+  transition: 0.5s;
+}
+
+div.menu.visible {
+  display: block;
+  left: 0;
+  transition: 0.5s;
+}
+
+// #endregion
+
+div.router-body {
+  align-items: stretch;
+  background: rgb(215,215,215);
+  background: linear-gradient(13deg, rgba(215,215,215,1) 0%, rgba(255,255,255,1) 100%);
+  display: block;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+div.router-body-fullscreen {
+  background: black;
+}
+
+div.overlay {    
+  background: transparent;
+  bottom: 3em;
+  box-shadow: inset 1px 4px 9px -6px black, inset 1px -4px 9px -6px black;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 3em;
+}
+
+div.overlay-fullscreen {
+  bottom: 0;
+  top: 0;
+}
+
+div.bottom-nav {
+  &:extend(div.top-nav);
+
+  a.add:hover {
+    text-shadow: 0 0 3px GhostWhite;
+  }
+  a.add {
+    color: GhostWhite;
+    display: block;
+    font-size: 1.25em;
+    left: 0;
+    padding: 0.5em;
+    position: absolute;
+    top: 0;
+  }
+
+  div.page-controls {
+    background: GhostWhite;
+    border: 0;
+    border-radius: 5px;
+    color: LightSlateGray;
+    height: 1.5em;
+    min-width: 25%;
+    margin: 0;
+    max-width: 65%;
+    position: absolute;
+    right: 0.7em;
+    text-align: center;
+    top: 0.7em;
+
+    i, input, span {
+      background: transparent;
+      border: 0;
+      color: LightSlateGray;
+      font-size: 0.75em;
+      line-height: 1.5em;
+      opacity: 0.5;
+      padding: 0.25em;
+      text-align: center;
+      width: 1.5em;
+    }
+    i:hover, input:hover {
+      opacity: 1;
+      outline-width: 0;
+    }
+    
+    input {
+      font-family: 'Archivo Narrow';
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  }
+}

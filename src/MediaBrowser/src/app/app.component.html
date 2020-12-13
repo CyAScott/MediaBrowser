@@ -1,6 +1,34 @@
+<div [ngClass]="{'top-nav': true, 'nav-hidden': fullScreen}">
+  
+  <a class="icon" (click)="toggleMenu()">
+    <i class="fa fa-bars"></i>
+  </a>
 
-<h1>Coming Soon...</h1>
+  <app-search></app-search>
 
-<form method="post" action="/logout">
-  <button type="submit">Logout</button>
-</form>
+</div>
+
+<div [ngClass]="{'router-body': true, 'router-body-fullscreen': fullScreen}">
+  <router-outlet></router-outlet>
+</div>
+
+<div [ngClass]="{'overlay': true, 'overlay-fullscreen': fullScreen}"></div>
+
+<div [ngClass]="{'bottom-nav': true, 'nav-hidden': fullScreen}">
+
+  <a (click)="add()" [style.visibility]="addEnabled() ? 'visible' : 'hidden'" class="add"><i class="fas fa-plus-square"></i></a>
+
+  <app-pagination></app-pagination>
+
+</div>
+
+<div [ngClass]="{menu: true, 'light-background': true, hidden: !menuVisible || fullScreen, visible: menuVisible && !fullScreen}" (click)="toggleMenu()" (mouseleave)="toggleMenu(true)">
+  <a [routerLink]="['/Files']"><i class="fas fa-archive"></i> Files</a>
+  <a [routerLink]="['/Roles']"><i class="fas fa-user-lock"></i> Roles</a>
+  <a [routerLink]="['/Users']"><i class="fas fa-users"></i> Users</a>
+  <form id="logout" method="post" action="/logout">
+    <a href="javascript:document.getElementById('logout').submit();"><i class="fas fa-sign-out-alt"></i> Logout</a>
+  </form>
+</div>
+
+<app-modals></app-modals>

@@ -1,7 +1,28 @@
-body {
+html {
+  height: 100%;
+  width: 100%;
+}
+
+.light-background {
   background: rgb(231,231,232);
   background: linear-gradient(335deg, rgba(231,231,232,1) 0%, rgba(242,242,242,1) 100%);
-  color: LightSteelBlue;
+  color: LightSlateGray;
+}
+
+body, div.modal, .min-width {
+  min-width: 300px;
+}
+
+body, body app-root, div.modal {
+  height: 100%;
+  min-height: 400px;
+}
+
+body app-root {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
 body, button, div, h1, h2, h3, h4, h5, h6, p, span {
@@ -20,6 +41,7 @@ body, button, div, h1, h2, h3, h4, h5, h6, p, span {
   position: absolute;
   top: 50%;
   width: 400px;
+  max-width: 100%;
   -ms-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 
@@ -40,5 +62,181 @@ body, button, div, h1, h2, h3, h4, h5, h6, p, span {
     margin: 0 0 0 72.5%;
     padding: 10px;
     width: 25%;
+  }
+}
+
+div.no-cards {
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  position: absolute;
+  text-transform: uppercase;
+  width: 100%;
+  
+  span {
+    height: auto;
+  }
+}
+
+div.cards {
+  display: flex;
+  flex-wrap: wrap;
+
+  a.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(30,144,255,0.3);
+  }
+
+  a.card {
+    background: GhostWhite;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    color: LightSlateGray;
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    margin: 5px;
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+    transition: 0.3s;
+    width: 200px;
+
+    div.img {
+      display: block;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+
+      i.icon {
+        bottom: 0;
+        font-size: 8em;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+  
+      img {
+        bottom: 0;
+        height: 100%;
+        left: 0;
+        object-fit: cover;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+      }
+  
+      div.overlay {
+        background: rgb(0,0,0);
+        background: linear-gradient(145deg, rgba(255,255,255,0) 0%, rgba(0,0,0,0.5807365182401085) 100%);
+        bottom: 0;
+        left:0;
+        position: absolute;
+        right: 0;
+        top:0;
+      }
+
+      i.open {
+        bottom: 0;
+        color: GhostWhite;
+        margin: 5px;
+        opacity: 0.85;
+        position: absolute;
+        right: 0;
+      }
+
+      h1 {
+        bottom: 0;
+        color: GhostWhite;
+        font-size: 1.5em;
+        left: 0;
+        margin: 5px;
+        max-width: 75%;
+        opacity: 0.85;
+        overflow: hidden;
+        position: absolute;
+        text-overflow: ellipsis;
+        white-space: nowrap; 
+      }
+    }
+
+    div.info {
+      &:extend(.light-background);
+      display: flex;
+      flex-direction: column;
+      height: 30%;
+      overflow: hidden;
+      position: relative;
+
+      h1 {
+        font-size: 1em;
+        overflow: hidden;
+        padding: 5px;
+        text-overflow: ellipsis;
+        text-transform: uppercase;
+        white-space: nowrap; 
+      }
+      p {
+        flex: 1;
+        font-size: 0.75em;
+        overflow: hidden;
+        padding: 5px;
+        text-overflow: ellipsis;
+        white-space: nowrap; 
+      }
+    }
+  }
+}
+
+div.preview {
+  overflow: hidden;
+  width: 100%;
+
+  audio, img, video {
+    border: 0;
+    height: 100%;
+    object-fit: contain;
+    outline: none;
+    width: 100%;
+    z-index: 1;
+  }
+
+  div.controls {
+    direction: rtl;
+    overflow: hidden;
+    position: absolute;
+    width: 100%;
+    z-index: 2;
+
+    button {
+      background: DodgerBlue;
+      border-radius: 5px;
+      color: GhostWhite;
+      display: inline-block;
+      font-size: 1.5em;
+      height: 35px;
+      margin: 10px;
+      max-width: 100px;
+      outline: none;
+      width: 25%;
+
+      i {
+        height: 35px;
+        max-width: 100px;
+        text-align: center;
+        width: 25%;
+      }
+    }
+  }
+
+  div.controls-hidden {
+    display: none;
   }
 }
