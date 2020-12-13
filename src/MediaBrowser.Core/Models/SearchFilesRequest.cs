@@ -46,6 +46,11 @@ namespace MediaBrowser.Models
     public enum FileFilterOptions
     {
         /// <summary>
+        /// Only returns audio files that are html5 friendly.
+        /// </summary>
+        AudioFiles,
+
+        /// <summary>
         /// Only returns media files that are html5 friendly.
         /// </summary>
         Html5Friendly,
@@ -58,7 +63,17 @@ namespace MediaBrowser.Models
         /// <summary>
         /// Returns media files that are NOT html5 friendly.
         /// </summary>
-        NonHtml5Friendly
+        NonHtml5Friendly,
+
+        /// <summary>
+        /// Only returns photo files.
+        /// </summary>
+        Photos,
+
+        /// <summary>
+        /// Only returns video files that are html5 friendly.
+        /// </summary>
+        Videos
     }
 
     /// <summary>

@@ -68,11 +68,20 @@ namespace MediaBrowser.Services
 
             switch (request.Filter)
             {
+                case FileFilterOptions.AudioFiles:
+                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Audio.ToString()));
+                    break;
                 case FileFilterOptions.Html5Friendly:
                     query.Where.Add(Query.EQ(nameof(LiteDbFile.Html5Friendly), true));
                     break;
                 case FileFilterOptions.NonHtml5Friendly:
                     query.Where.Add(Query.EQ(nameof(LiteDbFile.Html5Friendly), false));
+                    break;
+                case FileFilterOptions.Photos:
+                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Photo.ToString()));
+                    break;
+                case FileFilterOptions.Videos:
+                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Video.ToString()));
                     break;
             }
 

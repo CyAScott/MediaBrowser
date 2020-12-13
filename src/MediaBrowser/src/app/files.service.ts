@@ -23,6 +23,10 @@ export class FilesService {
 
     params = params.append('ascending', query.ascending === false ? 'false' : 'true');
 
+    if (query.filter) {
+      params = params.append('filter', query.filter);
+    }
+
     if (query.keywords) {
       params = params.append('keywords', query.keywords);
     }
@@ -39,14 +43,18 @@ export class FilesService {
       params = params.append('take', query.take.toString());
     }
 
-    let observable = this.httpClient.get<SearchFilesResponse>('/api/files/search', { params: params } );
+    return new Observable(subscriber => {
+      let observable = this.httpClient.get<SearchFilesResponse>('/api/files/search', { params: params } );
     
-    observable.subscribe(response => {
-      this.lastSearch = query;
-      this.lastSearchResponse = response;
+      observable.subscribe({
+        next: response => {
+          this.lastSearch = query;
+          this.lastSearchResponse = response;
+          subscriber.next(response);
+        },
+        error: subscriber.error
+      });
     });
-
-    return observable;
   }
 
   public update(fileId : string, request : UploadFileRequest) : Observable<FileReadModel> {
@@ -92,9 +100,12 @@ export interface SearchFilesResponse extends SearchFilesRequest {
 }
 
 export enum FileFilterOptions {
+  AudioFiles = "audioFiles",
   html5Friendly = "html5Friendly",
   noFilter = "noFilter",
-  nonHtml5Friendly = "nonHtml5Friendly"
+  nonHtml5Friendly = "nonHtml5Friendly",
+  photos = "photos",
+  videos = "videos"
 }
 
 export enum FileSortOptions {

@@ -49,12 +49,24 @@ export class SearchComponent implements Search {
 
   public searchVisible: boolean = false;
 
-  public selectFilter() : void {
-    this.controls.modals?.getFilterSelection();
+  public async selectFilter() : Promise<void> {
+    if (!this.controls.modals) {
+      return;
+    }
+
+    await this.controls.modals.getFilterSelection();
+
+    this.controls.refresh();
   }
 
-  public selectSort() : void {
-    this.controls.modals?.getSortSelection();
+  public async selectSort() : Promise<void> {
+    if (!this.controls.modals) {
+      return;
+    }
+    
+    await this.controls.modals.getSortSelection();
+
+    this.controls.refresh();
   }
 
   public sortOptionsEnabled: boolean = false;

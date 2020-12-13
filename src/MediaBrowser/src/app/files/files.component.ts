@@ -14,8 +14,11 @@ export class FilesComponent extends PageSearchable {
 
   public static readonly filterOptions : SelectionOption[] = [
     new SelectionOption('Html5 Friendly', FileFilterOptions.html5Friendly),
+    new SelectionOption('Audio Files', FileFilterOptions.AudioFiles),
     new SelectionOption('No Filter', FileFilterOptions.noFilter),
-    new SelectionOption('Non Html5 Friendly', FileFilterOptions.nonHtml5Friendly)
+    new SelectionOption('Non Html5 Friendly', FileFilterOptions.nonHtml5Friendly),
+    new SelectionOption('Photos', FileFilterOptions.photos),
+    new SelectionOption('Videos', FileFilterOptions.videos)
   ];
   public static readonly sortOptions : SelectionOption[] = [
     new SelectionOption('Created On', FileSortOptions.createdOn),
