@@ -36,6 +36,10 @@ export class FilesComponent extends PageSearchable {
   public add() : void {
     this.controls.refresh([ 'AddFile' ]);
   }
+  
+  public addEnabled() : boolean {
+    return true;
+  }
 
   public init(): void {
     this.controls.autoPlay = false;

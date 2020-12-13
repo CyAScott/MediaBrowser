@@ -1,1 +1,35 @@
-<p>user works!</p>
+<div class="input">
+    <div class="header">
+        <div class="name">First Name</div>
+        <div (click)="update()" class="update"><i class="fas fa-save"></i></div>
+    </div>
+    <input type="text" [(ngModel)]="firstName" placeholder="First Name" />
+</div>
+
+<div class="input">
+    <div class="header">
+        <div class="name">Last Name</div>
+    </div>
+    <input type="text" [(ngModel)]="lastName" placeholder="Last Name" />
+</div>
+
+<div class="input">
+    <div class="header">
+        <div class="name">User Name</div>
+    </div>
+    <input type="text" [(ngModel)]="userName" placeholder="User Name" />
+</div>
+
+<div class="input">
+    <div class="header">
+        <div class="name">Password</div>
+    </div>
+    <input type="password" [(ngModel)]="password" placeholder="Password" />
+</div>
+
+<div class="input">
+    <div class="header">
+        <div class="name">Confirm Password</div>
+    </div>
+    <input type="password" [(ngModel)]="passwordConfirmed" placeholder="Confirm Password" />
+</div>

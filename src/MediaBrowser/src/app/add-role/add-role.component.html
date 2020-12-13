@@ -1,1 +1,12 @@
-<p>add-role works!</p>
+<div class="input-name">
+    <div class="header">
+        <div class="name">Name Required</div>
+        <div (click)="add()" class="add"><i class="fas fa-upload"></i></div>
+    </div>
+    <input type="text" [(ngModel)]="name" placeholder="Name" />
+</div>
+
+<div class="input-description">
+    <div class="name">Description (Optional)</div>
+    <textarea [(ngModel)]="description"></textarea>
+</div>

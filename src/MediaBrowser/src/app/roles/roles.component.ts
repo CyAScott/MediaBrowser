@@ -3,6 +3,7 @@ import { CommonControlsService, PageSearchable } from '../common-controls.servic
 import { LoggerService } from '../logger.service';
 import { SelectionOption } from '../modals/modals.component';
 import { RoleReadModel, RoleSortOptions, RolesService, SearchRolesRequest, SearchRolesResponse } from '../roles.service';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-roles',
@@ -20,7 +21,8 @@ export class RolesComponent extends PageSearchable {
   constructor(
     controls : CommonControlsService,
     logger : LoggerService,
-    private roles : RolesService) {
+    private roles : RolesService,
+    private users : UsersService) {
     super(controls, logger, 'Roles',
       RolesComponent.filterOptions, undefined,
       RolesComponent.sortOptions, RolesComponent.sortOptions[1])
@@ -28,6 +30,10 @@ export class RolesComponent extends PageSearchable {
 
   public add() : void {
     this.controls.refresh([ 'AddRole' ]);
+  }
+  
+  public addEnabled() : boolean {
+    return this.users.hasRole('Admin');
   }
 
   public init() : void {

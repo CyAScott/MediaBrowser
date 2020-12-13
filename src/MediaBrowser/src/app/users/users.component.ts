@@ -35,6 +35,10 @@ export class UsersComponent extends PageSearchable {
   public add() : void {
     this.controls.refresh([ 'AddUser' ]);
   }
+  
+  public addEnabled() : boolean {
+    return this.users.hasRole('Admin');
+  }
 
   public init() : void {
     this.users

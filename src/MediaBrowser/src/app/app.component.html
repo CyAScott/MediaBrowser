@@ -24,8 +24,9 @@
 
 <div [ngClass]="{menu: true, 'light-background': true, hidden: !menuVisible || fullScreen, visible: menuVisible && !fullScreen}" (click)="toggleMenu()" (mouseleave)="toggleMenu(true)">
   <a [routerLink]="['/Files']"><i class="fas fa-archive"></i> Files</a>
-  <a [routerLink]="['/Roles']"><i class="fas fa-user-lock"></i> Roles</a>
-  <a [routerLink]="['/Users']"><i class="fas fa-users"></i> Users</a>
+  <a [routerLink]="['/Roles']" [style.display]="users.hasRole('Admin') ? 'block' : 'none'"><i class="fas fa-user-lock"></i> Roles</a>
+  <a [routerLink]="['/Users']" [style.display]="users.hasRole('Admin') ? 'block' : 'none'"><i class="fas fa-users"></i> Users</a>
+  <a [routerLink]="['/User/' + users.id()]"><i class="fas fa-user"></i> My Account</a>
   <form id="logout" method="post" action="/logout">
     <a href="javascript:document.getElementById('logout').submit();"><i class="fas fa-sign-out-alt"></i> Logout</a>
   </form>

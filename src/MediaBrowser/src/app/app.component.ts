@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonControlsService, PageSearchable } from './common-controls.service';
 import { LoggerService } from './logger.service';
+import { UsersService } from './users.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class AppComponent implements AppComponent {
   }
 
   constructor(
+    public users : UsersService,
     private controls : CommonControlsService,
     private log : LoggerService) {
     controls.appComponent = this;
@@ -23,11 +25,11 @@ export class AppComponent implements AppComponent {
 
   public addEnabled() : boolean {
     let page = this.controls.page instanceof PageSearchable ? this.controls.page as PageSearchable : null;
-    return page ? true : false;
+    return page && page.addEnabled() ? true : false;
   }
   public add() : void {
     let page = this.controls.page instanceof PageSearchable ? this.controls.page as PageSearchable : null;
-    if (page) {
+    if (page && page.addEnabled()) {
       
       if (this.controls.modals?.filterSelection) {
         this.controls.modals.filterSelection = undefined;

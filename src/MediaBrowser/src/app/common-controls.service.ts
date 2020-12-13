@@ -120,6 +120,8 @@ export abstract class PageSearchable extends Page {
 
   public abstract add() : void;
 
+  public abstract addEnabled() : boolean;
+
   public getSearchRequest() : SearchRequest {
     if (!this.controls.modals) {
       this.logger.error('Modals not set');
