@@ -183,7 +183,7 @@ namespace MediaBrowser.Services
         [BsonField(nameof(Thumbnails))]
         public LiteDbThumbnail[] LiteDbThumbnails
         {
-            get => Thumbnails?.OfType<LiteDbThumbnail>().ToArray();
+            get => Thumbnails?.Select(it => it as LiteDbThumbnail ?? new LiteDbThumbnail(it)).ToArray();
             set => Thumbnails = value;
         }
 
