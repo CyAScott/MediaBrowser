@@ -19,6 +19,7 @@
     </ul>
   
     <ul *ngIf="sortVisible" class="modal-sort">
+      <li (click)="setSortOrder()"><i [ngClass]="{'far fa-circle': !sortAscending, 'fas fa-check-circle': sortAscending}"></i> Ascending Order</li>
       <li (click)="sortSelectionDone(item)" *ngFor="let item of sortOptions"><i [ngClass]="{'far fa-circle': item?.value != sortSelection?.value, 'fas fa-check-circle': sortSelection && item?.value == sortSelection.value}"></i> {{item.name}}</li>
     </ul>
   

@@ -25,6 +25,7 @@ export class CommonControlsService {
   public refresh(commands : any[] | undefined = undefined) {
     
     let query = { 
+      ascending: this.modals?.sortAscending,
       filter: this.modals?.filterSelection?.value,
       keywords: this.search?.keywords?.length ? this.search.keywords : undefined,
       sort: this.modals?.sortSelection?.value

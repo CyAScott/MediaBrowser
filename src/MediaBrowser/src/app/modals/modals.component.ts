@@ -132,6 +132,12 @@ export class ModalsComponent implements Modals {
     this.loaderVisible = !this.loaderVisible;
   }
 
+  public setSortOrder() : void {
+    if (this.sortSelectionDone) {
+      this.sortAscending = !this.sortAscending;
+      this.sortSelectionDone(this.sortSelection);
+    }
+  }
   public sortAscending : boolean = true;
   public sortOptions : SelectionOption[] = [];
   public sortSelection : SelectionOption | undefined;
