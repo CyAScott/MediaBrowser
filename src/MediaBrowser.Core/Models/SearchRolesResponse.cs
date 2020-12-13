@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace MediaBrowser.Models
@@ -7,11 +6,13 @@ namespace MediaBrowser.Models
     /// <summary>
     /// A response model for <see cref="SearchRolesRequest"/>.
     /// </summary>
-    public class SearchRolesResponse<TRole>
+    public class SearchRolesResponse<TRole> : SearchRolesRequest
     {
         /// <inheritdoc/>
-        public SearchRolesResponse(SearchRolesRequest request, IEnumerable<TRole> roles)
+        public SearchRolesResponse(SearchRolesRequest request, int count, IEnumerable<TRole> roles)
         {
+            Ascending = request.Ascending;
+            Count = count;
             Keywords = request.Keywords;
             Results = roles.ToArray();
             Skip = request.Skip;
@@ -25,30 +26,8 @@ namespace MediaBrowser.Models
         public TRole[] Results { get; }
 
         /// <summary>
-        /// The field to sort by.
-        /// </summary>
-        public RoleSortOptions Sort { get; set; } = RoleSortOptions.NameAscending;
-
-        /// <summary>
         /// The number of roles the query could return.
         /// </summary>
         public int Count { get; set; }
-
-        /// <summary>
-        /// The number of roles to skip.
-        /// </summary>
-        [Range(0, int.MaxValue)]
-        public int Skip { get; set; }
-
-        /// <summary>
-        /// The number of roles to read.
-        /// </summary>
-        [Range(1, int.MaxValue)]
-        public int Take { get; set; } = 1;
-
-        /// <summary>
-        /// Optional. Keywords to search with.
-        /// </summary>
-        public string Keywords { get; set; }
     }
 }

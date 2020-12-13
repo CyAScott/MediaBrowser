@@ -3,19 +3,19 @@
 namespace MediaBrowser.Models
 {
     /// <summary>
-    /// The search parameters for finding users.
+    /// The search parameters for finding media files.
     /// </summary>
-    public class SearchUsersRequest
+    public class SearchFilesRequest
     {
         /// <summary>
         /// Optional filter option.
         /// </summary>
-        public UserFilterOptions Filter { get; set; } = UserFilterOptions.NoFilter;
+        public FileFilterOptions Filter { get; set; } = FileFilterOptions.Html5Friendly;
 
         /// <summary>
         /// The field to sort by.
         /// </summary>
-        public UserSortOptions Sort { get; set; } = UserSortOptions.UserName;
+        public FileSortOptions Sort { get; set; } = FileSortOptions.Name;
 
         /// <summary>
         /// Sorts in ascending order when true.
@@ -23,13 +23,13 @@ namespace MediaBrowser.Models
         public bool Ascending { get; set; } = true;
 
         /// <summary>
-        /// The number of users to skip.
+        /// The number of media files to skip.
         /// </summary>
         [Range(0, int.MaxValue)]
         public int Skip { get; set; }
 
         /// <summary>
-        /// The number of users to read.
+        /// The number of media files to read.
         /// </summary>
         [Range(1, int.MaxValue)]
         public int Take { get; set; } = 1;
@@ -38,22 +38,17 @@ namespace MediaBrowser.Models
         /// Optional. Keywords to search with.
         /// </summary>
         public string Keywords { get; set; }
-
-        /// <summary>
-        /// Optional. The roles the user must have.
-        /// </summary>
-        public string[] Roles { get; set; }
     }
 
     /// <summary>
-    /// The list of things to filter users by.
+    /// The list of things to filter media files by.
     /// </summary>
-    public enum UserFilterOptions
+    public enum FileFilterOptions
     {
         /// <summary>
-        /// Only returns deleted users.
+        /// Only returns media files that are html5 friendly.
         /// </summary>
-        Deleted,
+        Html5Friendly,
 
         /// <summary>
         /// No filter will be applied.
@@ -61,34 +56,34 @@ namespace MediaBrowser.Models
         NoFilter,
 
         /// <summary>
-        /// Returns non deleted users.
+        /// Returns media files that are NOT html5 friendly.
         /// </summary>
-        NonDeleted
+        NonHtml5Friendly
     }
 
     /// <summary>
-    /// The list of things to sort users by.
+    /// The list of things to sort media files by.
     /// </summary>
-    public enum UserSortOptions
+    public enum FileSortOptions
     {
         /// <summary>
-        /// Sorts by deleted on.
+        /// When the media file was created.
         /// </summary>
-        DeletedOn,
+        CreatedOn,
 
         /// <summary>
-        /// Sorts by first name.
+        /// The time duration of the media file.
         /// </summary>
-        FirstName,
+        Duration,
 
         /// <summary>
-        /// Sorts by last name.
+        /// The name of the media file.
         /// </summary>
-        LastName,
+        Name,
 
         /// <summary>
-        /// Sorts by user name.
+        /// The type of media file.
         /// </summary>
-        UserName
+        Type
     }
 }

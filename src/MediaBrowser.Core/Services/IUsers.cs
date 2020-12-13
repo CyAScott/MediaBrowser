@@ -30,7 +30,7 @@ namespace MediaBrowser.Services
         Task<SearchUsersResponse<IUser>> Search(SearchUsersRequest request);
 
         /// <summary>
-        /// Read a user by id.
+        /// Updates a user by id.
         /// </summary>
         Task<IUser> Update(Guid userId, UpdateUserRequest request);
 

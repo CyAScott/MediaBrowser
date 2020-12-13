@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Attributes;
+using MediaBrowser.Attributes;
 using MediaBrowser.Models;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -83,7 +83,7 @@ namespace MediaBrowser.Controllers
         public async Task<SearchUsersResponse<UserReadModel>> Search([FromQuery]SearchUsersRequest query)
         {
             var response = await Users.Search(query);
-            return new SearchUsersResponse<UserReadModel>(query, response.Results.Select(it => new UserReadModel(it)));
+            return new SearchUsersResponse<UserReadModel>(query, response.Count, response.Results.Select(it => new UserReadModel(it)));
         }
 
         /// <summary>

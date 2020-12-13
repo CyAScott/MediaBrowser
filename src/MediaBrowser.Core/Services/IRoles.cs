@@ -30,7 +30,7 @@ namespace MediaBrowser.Services
         Task<SearchRolesResponse<IRole>> Search(SearchRolesRequest request);
 
         /// <summary>
-        /// Read a role by id.
+        /// Updates a role by id.
         /// </summary>
         Task<IRole> Update(Guid roleId, UpdateRoleRequest request);
     }

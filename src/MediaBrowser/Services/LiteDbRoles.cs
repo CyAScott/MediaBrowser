@@ -1,4 +1,4 @@
-﻿using LiteDB;
+using LiteDB;
 using MediaBrowser.Models;
 using System;
 using System.Collections.Generic;
@@ -67,27 +67,19 @@ namespace MediaBrowser.Services
 
             switch (request.Sort)
             {
-                case RoleSortOptions.DescriptionAscending:
+                case RoleSortOptions.Description:
                     query.OrderBy = nameof(LiteDbRole.Description);
-                    query.Order = Query.Ascending;
                     break;
-                case RoleSortOptions.DescriptionDescending:
-                    query.OrderBy = nameof(LiteDbRole.Description);
-                    query.Order = Query.Descending;
-                    break;
-                case RoleSortOptions.NameAscending:
+                case RoleSortOptions.Name:
                     query.OrderBy = nameof(LiteDbRole.Name);
-                    query.Order = Query.Ascending;
-                    break;
-                case RoleSortOptions.NameDescending:
-                    query.OrderBy = nameof(LiteDbRole.Name);
-                    query.Order = Query.Descending;
                     break;
             }
 
+            query.Order = request.Ascending ? Query.Ascending : Query.Descending;
+
             var results = Collection.Find(query).ToArray();
 
-            var response = new SearchRolesResponse<IRole>(request, results.Cast<IRole>());
+            var response = new SearchRolesResponse<IRole>(request, 0, results.Cast<IRole>());
 
             if (results.Length < request.Take)
             {

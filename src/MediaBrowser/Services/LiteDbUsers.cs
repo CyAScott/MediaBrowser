@@ -1,4 +1,4 @@
-﻿using LiteDB;
+using LiteDB;
 using MediaBrowser.Models;
 using System;
 using System.Collections.Generic;
@@ -95,59 +95,40 @@ namespace MediaBrowser.Services
                 }
             }
 
-            if (request.Filter != UserFilterOptions.Nofilter)
+            if (request.Filter != UserFilterOptions.NoFilter)
             {
                 switch (request.Filter)
                 {
                     case UserFilterOptions.Deleted:
                         query.Where.Add(Query.EQ(nameof(LiteDbUser.DeletedOn), BsonValue.Null));
                         break;
-                    case UserFilterOptions.NonDelted:
+                    case UserFilterOptions.NonDeleted:
                         query.Where.Add(Query.Not(nameof(LiteDbUser.DeletedOn), BsonValue.Null));
                         break;
                 }
             }
 
-
             switch (request.Sort)
             {
-                case UserSortOptions.DeletedOnAscending:
+                case UserSortOptions.DeletedOn:
                     query.OrderBy = nameof(LiteDbUser.DeletedOn);
-                    query.Order = Query.Ascending;
                     break;
-                case UserSortOptions.DeletedOnDescending:
-                    query.OrderBy = nameof(LiteDbUser.DeletedOn);
-                    query.Order = Query.Descending;
-                    break;
-                case UserSortOptions.FirstNameAscending:
+                case UserSortOptions.FirstName:
                     query.OrderBy = nameof(LiteDbUser.FirstName);
-                    query.Order = Query.Ascending;
                     break;
-                case UserSortOptions.FirstNameDescending:
-                    query.OrderBy = nameof(LiteDbUser.FirstName);
-                    query.Order = Query.Descending;
-                    break;
-                case UserSortOptions.LastNameAscending:
+                case UserSortOptions.LastName:
                     query.OrderBy = nameof(LiteDbUser.LastName);
-                    query.Order = Query.Ascending;
                     break;
-                case UserSortOptions.LastNameDescending:
-                    query.OrderBy = nameof(LiteDbUser.LastName);
-                    query.Order = Query.Descending;
-                    break;
-                case UserSortOptions.UserNameAscending:
+                case UserSortOptions.UserName:
                     query.OrderBy = nameof(LiteDbUser.UserName);
-                    query.Order = Query.Ascending;
-                    break;
-                case UserSortOptions.UserNameDescending:
-                    query.OrderBy = nameof(LiteDbUser.UserName);
-                    query.Order = Query.Descending;
                     break;
             }
 
+            query.Order = request.Ascending ? Query.Ascending : Query.Descending;
+
             var results = Collection.Find(query).ToArray();
 
-            var response = new SearchUsersResponse<IUser>(request, results.Cast<IUser>());
+            var response = new SearchUsersResponse<IUser>(request, 0, results.Cast<IUser>());
 
             if (results.Length < request.Take)
             {

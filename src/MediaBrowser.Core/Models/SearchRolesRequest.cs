@@ -10,7 +10,12 @@ namespace MediaBrowser.Models
         /// <summary>
         /// The field to sort by.
         /// </summary>
-        public RoleSortOptions Sort { get; set; } = RoleSortOptions.NameAscending;
+        public RoleSortOptions Sort { get; set; } = RoleSortOptions.Name;
+
+        /// <summary>
+        /// Sorts in ascending order when true.
+        /// </summary>
+        public bool Ascending { get; set; } = true;
 
         /// <summary>
         /// The number of roles to skip.
@@ -36,23 +41,13 @@ namespace MediaBrowser.Models
     public enum RoleSortOptions
     {
         /// <summary>
-        /// Sorts by description on in ascending order.
+        /// Sorts by description.
         /// </summary>
-        DescriptionAscending,
+        Description,
 
         /// <summary>
-        /// Sorts by description on in descending order.
+        /// Sorts by name.
         /// </summary>
-        DescriptionDescending,
-
-        /// <summary>
-        /// Sorts by name on in ascending order.
-        /// </summary>
-        NameAscending,
-
-        /// <summary>
-        /// Sorts by name on in descending order.
-        /// </summary>
-        NameDescending
+        Name
     }
 }

@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Attributes;
+using MediaBrowser.Attributes;
 using MediaBrowser.Models;
 using System.Threading.Tasks;
 

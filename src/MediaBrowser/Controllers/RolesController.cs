@@ -1,4 +1,4 @@
-﻿using MediaBrowser.Attributes;
+using MediaBrowser.Attributes;
 using MediaBrowser.Models;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -47,7 +47,7 @@ namespace MediaBrowser.Controllers
         public async Task<SearchRolesResponse<RoleReadModel>> Search([FromQuery]SearchRolesRequest query)
         {
             var response = await Roles.Search(query);
-            return new SearchRolesResponse<RoleReadModel>(query, response.Results.Select(it => new RoleReadModel(it)));
+            return new SearchRolesResponse<RoleReadModel>(query, response.Count, response.Results.Select(it => new RoleReadModel(it)));
         }
 
         /// <summary>

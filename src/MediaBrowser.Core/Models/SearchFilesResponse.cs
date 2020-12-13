@@ -4,31 +4,30 @@ using System.Linq;
 namespace MediaBrowser.Models
 {
     /// <summary>
-    /// A response model for <see cref="SearchUsersRequest"/>.
+    /// The search parameters for finding media files.
     /// </summary>
-    public class SearchUsersResponse<TUser> : SearchUsersRequest
+    public class SearchFilesResponse<TFile> : SearchFilesRequest
     {
         /// <inheritdoc/>
-        public SearchUsersResponse(SearchUsersRequest request, int count, IEnumerable<TUser> users)
+        public SearchFilesResponse(SearchFilesRequest request, int count, IEnumerable<TFile> files)
         {
             Ascending = request.Ascending;
             Count = count;
             Filter = request.Filter;
             Keywords = request.Keywords;
-            Results = users.ToArray();
-            Roles = request.Roles;
+            Results = files.ToArray();
             Skip = request.Skip;
             Sort = request.Sort;
             Take = request.Take;
         }
 
         /// <summary>
-        /// The found users.
+        /// The found media files.
         /// </summary>
-        public TUser[] Results { get; }
+        public TFile[] Results { get; }
 
         /// <summary>
-        /// The number of users the query could return.
+        /// The number of media files the query could return.
         /// </summary>
         public int Count { get; set; }
     }
