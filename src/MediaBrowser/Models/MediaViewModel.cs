@@ -8,6 +8,11 @@ namespace MediaBrowser.Models
     public class MediaViewModel
     {
         /// <summary>
+        /// All roles.
+        /// </summary>
+        public HashSet<string> AllRoles { get; set; }
+
+        /// <summary>
         /// The role names the user was assigned to.
         /// </summary>
         public HashSet<string> Roles { get; set; }

@@ -22,6 +22,10 @@ namespace MediaBrowser.Services
         public ILiteCollection<LiteDbRole> Collection { get; }
         public ILiteDatabase Database { get; }
 
+        public Task<IRole[]> All() => Task.FromResult(Collection.FindAll().OfType<IRole>().ToArray());
+
+        public Task<long> Count() => Task.FromResult(Collection.LongCount());
+
         public Task<IRole> Create(CreateRoleRequest request)
         {
             var role = new LiteDbRole

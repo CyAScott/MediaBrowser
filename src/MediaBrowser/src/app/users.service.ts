@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SearchRequest } from './common-controls.service';
 
-declare var userInfo : UserReadModel;
+declare var pageInfo : UserReadModel;
 
 @Injectable({
   providedIn: 'root'
@@ -14,11 +14,11 @@ export class UsersService {
   }
 
   public hasRole(role : string) : boolean {
-    return userInfo?.roles && userInfo.roles.includes(role);
+    return pageInfo?.roles && pageInfo.roles.includes(role);
   }
 
   public id() : string {
-    return userInfo?.id || '';
+    return pageInfo?.id || '';
   }
 
   public create(request : CreateUserRequest) : Observable<UserReadModel> {

@@ -3,12 +3,18 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SearchRequest } from './common-controls.service';
 
+declare var pageInfo : AllRolesReadModel;
+
 @Injectable({
   providedIn: 'root'
 })
 export class RolesService {
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {
+    this.allRoles = pageInfo.allRoles;
+  }
+
+  public allRoles : string[];
 
   public create(request : CreateRoleRequest) : Observable<RoleReadModel> {
     return this.httpClient.post<RoleReadModel>('/api/roles', request);
@@ -77,4 +83,8 @@ export interface RoleReadModel {
 
 export interface UpdateRoleRequest {
   description : string;
+}
+
+interface AllRolesReadModel {
+  allRoles : string[];
 }

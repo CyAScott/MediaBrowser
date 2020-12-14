@@ -20,6 +20,7 @@ import { ModalsComponent } from './modals/modals.component';
 import { PaginationComponent } from './pagination/pagination.component';
 import { SearchComponent } from './search/search.component';
 import { FileInfoComponent } from './file-info/file-info.component';
+import { RoleBuilderComponent } from './role-builder/role-builder.component';
 
 @NgModule({
   declarations: [
@@ -37,7 +38,8 @@ import { FileInfoComponent } from './file-info/file-info.component';
     PaginationComponent,
     SearchComponent,
     FileComponent,
-    FileInfoComponent
+    FileInfoComponent,
+    RoleBuilderComponent
   ],
   imports: [
     BrowserModule,

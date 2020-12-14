@@ -48,3 +48,16 @@
     </div>
 </div>
 
+<div *ngIf="users.hasRole('Admin')" class="input">
+    <div class="header">
+        <div class="name">Read Roles</div>
+    </div>
+    <app-role-builder [selection]="readRoles"></app-role-builder>
+</div>
+
+<div *ngIf="users.hasRole('Admin')" class="input">
+    <div class="header">
+        <div class="name">Update Roles</div>
+    </div>
+    <app-role-builder [selection]="updateRoles"></app-role-builder>
+</div>

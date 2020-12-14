@@ -10,6 +10,16 @@ namespace MediaBrowser.Services
     public interface IRoles
     {
         /// <summary>
+        /// Reads all roles.
+        /// </summary>
+        Task<IRole[]> All();
+
+        /// <summary>
+        /// Counts all roles.
+        /// </summary>
+        Task<long> Count();
+
+        /// <summary>
         /// Gets a role by name.
         /// </summary>
         Task<IRole> GetByName(string name);

@@ -5,6 +5,7 @@ import { CommonControlsService, Page } from '../common-controls.service';
 import { FileReadModel, FilesService } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-file-info',
@@ -19,7 +20,8 @@ export class FileInfoComponent extends Page {
     route : ActivatedRoute,
     private files : FilesService,
     private ref: ChangeDetectorRef,
-    private sanitizer : DomSanitizer) {
+    private sanitizer : DomSanitizer,
+    public users : UsersService) {
     super(controls, logger, 'File')
     route.params.subscribe(params => this.id = params.id);
   }
@@ -56,7 +58,9 @@ export class FileInfoComponent extends Page {
         this.description = file.description;
         this.name = file.name;
         this.type = file.type;
+        this.readRoles = file.readRoles;
         this.src = file.url;
+        this.updateRoles = file.updateRoles;
         
         if (this.video?.nativeElement) {
           this.video.nativeElement.src = this.type == 'Video' ? this.src : undefined;
@@ -111,6 +115,19 @@ export class FileInfoComponent extends Page {
 
   public name : string = '';
 
+  public readRoles : string[] = [];
+
+  public removeThumbnail(thumbnail : Thumbnail) : void {
+    let index = this.thumbnails.findIndex(it => it.id === thumbnail.id);
+    if (index >= 0) {
+      if (!thumbnail.file) {
+        this.thumbnailsToRemove.push(thumbnail.id);
+      }
+      this.thumbnails.splice(index, 1);
+      this.ref.detectChanges();
+    }
+  }
+
   public sanitize(url : string) : SafeUrl {
     return this.sanitizer.bypassSecurityTrustUrl(url);
   }
@@ -123,9 +140,9 @@ export class FileInfoComponent extends Page {
     this.files.updateWithThumbnails(this.id, {
       description: this.description,
       name: this.name,
-      readRoles: [],
+      readRoles: this.readRoles,
       thumbnailsToRemove: this.thumbnailsToRemove,
-      updateRoles: []
+      updateRoles: this.updateRoles
     }, thumbnailFiles)
     .subscribe(response => {
       this.controls.modals?.toggleLoader();
@@ -145,18 +162,9 @@ export class FileInfoComponent extends Page {
 
   public thumbnailsToRemove : string[] = [];
 
-  public removeThumbnail(thumbnail : Thumbnail) : void {
-    let index = this.thumbnails.findIndex(it => it.id === thumbnail.id);
-    if (index >= 0) {
-      if (!thumbnail.file) {
-        this.thumbnailsToRemove.push(thumbnail.id);
-      }
-      this.thumbnails.splice(index, 1);
-      this.ref.detectChanges();
-    }
-  }
-
   public type : string = '';
+
+  public updateRoles : string[] = [];
 
   @ViewChild('video')
   public video : ElementRef | undefined;

@@ -33,3 +33,10 @@
     </div>
     <input type="password" [(ngModel)]="passwordConfirmed" placeholder="Confirm Password" />
 </div>
+
+<div class="input">
+    <div class="header">
+        <div class="name">Roles</div>
+    </div>
+    <app-role-builder [selection]="roles"></app-role-builder>
+</div>

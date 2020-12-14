@@ -4,6 +4,7 @@ import { CommonControlsService, Page } from '../common-controls.service';
 import { FilesService } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-add-file',
@@ -17,7 +18,8 @@ export class AddFileComponent extends Page {
     logger : LoggerService,
     private files : FilesService,
     private ref: ChangeDetectorRef,
-    private sanitizer : DomSanitizer) {
+    private sanitizer : DomSanitizer,
+    public users : UsersService) {
     super(controls, logger, 'AddFile')
   }
 
@@ -93,6 +95,8 @@ export class AddFileComponent extends Page {
 
   public name : string = '';
 
+  public readRoles : string[] = [];
+
   public removeThumbnail(thumbnail : Thumbnail) : void {
     let index = this.thumbnails.findIndex(it => it.id === thumbnail.id);
     if (index >= 0) {
@@ -113,8 +117,7 @@ export class AddFileComponent extends Page {
 
   public type : string = '';
 
-  @ViewChild('video')
-  public video : ElementRef | undefined;
+  public updateRoles : string[] = [];
   
   public upload() : void {
     if (!this.mediaFile) {
@@ -129,8 +132,8 @@ export class AddFileComponent extends Page {
     this.files.upload({
       description: this.description,
       name: this.name,
-      readRoles: [],
-      updateRoles: []
+      readRoles: this.readRoles,
+      updateRoles: this.updateRoles
     }, this.mediaFile, thumbnailFiles)
     .subscribe(response => {
       this.controls.modals?.toggleLoader();
@@ -141,6 +144,9 @@ export class AddFileComponent extends Page {
       this.controls.modals?.getMsgBoxResult(MsgBoxType.Ok, 'Upload error.');
     });
   }
+
+  @ViewChild('video')
+  public video : ElementRef | undefined;
 }
 
 class Thumbnail {

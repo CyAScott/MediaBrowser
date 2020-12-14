@@ -9,7 +9,8 @@
     <base href="/Media/">
     <title>Media Browser</title>
     <script>
-    var userInfo = {
+    var pageInfo = {
+        allRoles: @Html.Raw(JsonConvert.SerializeObject(Model.AllRoles)),
         firstName: @Html.Raw(JsonConvert.SerializeObject(Model.FirstName)),
         id: @Html.Raw(JsonConvert.SerializeObject(Model.Id)),
         lastName: @Html.Raw(JsonConvert.SerializeObject(Model.LastName)),

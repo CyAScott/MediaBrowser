@@ -1,0 +1,84 @@
+div.input-role {
+  input {
+    border-color: LightSlateGray;
+    border-radius: 5px;
+    border-width: 1px;
+    box-sizing: border-box;
+    color: LightSlateGray;
+    display: inline-block;
+    margin: 10px 10px 0 10px;
+    max-width: calc(100% - 20px);
+    outline: none;
+    padding: 10px;
+    width: calc(100% - 20px);
+  }
+
+  input.show-options {
+    border-radius: 5px 5px 0 0;
+    border-width: 1px 1px 0 1px;
+  }
+
+  ul.options {
+    background: white;
+    border-color: LightSlateGray;
+    border-radius: 0 0 5px 5px;
+    border-style: solid;
+    border-width: 0 1px 1px 1px;
+    box-sizing: border-box;
+    color: LightSlateGray;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    height: auto;
+    list-style: none;
+    margin: 0 10px 10px 10px;
+    max-width: calc(100% - 20px);
+    position: absolute;
+    padding: 10px;
+    width: calc(100% - 20px);
+
+    li {
+      cursor: pointer;
+      list-style-type: none;
+      margin: 0;
+      padding: 0.25em;
+    }
+  }
+}
+
+ul.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  height: auto;
+  list-style: none;
+  padding: 10px;
+  width: calc(100% - 20px);
+
+  li {
+    background:DodgerBlue;
+    border-radius: 25px;
+    color: GhostWhite;
+    cursor: default;
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    height: 50px;
+    line-height: 50px;
+    margin: 0 20px 0 0;
+    text-transform: uppercase;
+
+    i {
+      border-radius: 50%;
+      float: left;
+      height: 50px;
+      line-height: 50px;
+      margin: 0;
+      text-align: center;
+      width: 50px;
+    }
+
+    i.close {
+      float: right;
+    }
+  }
+}
