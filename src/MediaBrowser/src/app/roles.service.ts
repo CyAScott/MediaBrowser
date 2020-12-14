@@ -38,11 +38,11 @@ export class RolesService {
     }
 
     if (query.skip) {
-      params.append('skip', query.skip.toString());
+      params = params.append('skip', query.skip.toString());
     }
 
     if (query.take) {
-      params.append('take', query.take.toString());
+      params = params.append('take', query.take.toString());
     }
     
     return this.httpClient.get<SearchRolesResponse>('/api/roles/search', { params: params } );

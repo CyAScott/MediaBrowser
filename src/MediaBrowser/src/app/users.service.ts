@@ -51,11 +51,11 @@ export class UsersService {
     }
 
     if (query.skip) {
-      params.append('skip', query.skip.toString());
+      params = params.append('skip', query.skip.toString());
     }
 
     if (query.take) {
-      params.append('take', query.take.toString());
+      params = params.append('take', query.take.toString());
     }
     
     return this.httpClient.get<SearchUsersResponse>('/api/users/search', { params: params } );
