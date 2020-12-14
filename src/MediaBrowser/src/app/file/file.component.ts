@@ -35,7 +35,7 @@ export class FileComponent extends Page {
 
   public id : string = '';
 
-  public waitForNext : any;
+  public infoVisible : boolean = false;
   
   public init() : void {
     if (this.controls.pagination?.pageCount) {
@@ -70,13 +70,15 @@ export class FileComponent extends Page {
 
     let query = new SearchFilesRequest(this.files.lastSearch);
 
-    query.take = 1;
+    let resultIndex = this.files.lastSearchResponse.results.findIndex(it => it.id === this.file?.id);
 
-    if (query.skip + query.take === this.files.lastSearchResponse.count) {
+    query.skip += resultIndex + 1;
+
+    if (query.skip === this.files.lastSearchResponse.count) {
       query.skip = 0;
-    } else {
-      query.skip++;
     }
+
+    query.take = 1;
     
     this.controls.modals?.toggleLoader();
 
@@ -102,13 +104,15 @@ export class FileComponent extends Page {
 
     let query = new SearchFilesRequest(this.files.lastSearch);
 
-    query.take = 1;
+    let resultIndex = this.files.lastSearchResponse.results.findIndex(it => it.id === this.file?.id);
 
-    if (query.skip === 0) {
+    query.skip += resultIndex - 1;
+
+    if (query.skip < 0) {
       query.skip = this.files.lastSearchResponse.count - 1;
-    } else {
-      query.skip--;
     }
+    
+    query.take = 1;
     
     this.controls.modals?.toggleLoader();
 
@@ -144,5 +148,8 @@ export class FileComponent extends Page {
   }
 
   public viewInfo() : void {
+    this.infoVisible = !this.infoVisible;
   }
+
+  public waitForNext : any;
 }

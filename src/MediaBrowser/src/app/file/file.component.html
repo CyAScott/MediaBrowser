@@ -1,3 +1,9 @@
+<div [style.display]="infoVisible && file ? 'block' : 'none'" class="info-dialog">
+    <ul>
+        <li *ngFor="let stream of file?.audioStreams || []">{{stream}}</li>
+        <li *ngFor="let stream of file?.videoStreams || []">{{stream}}</li>
+    </ul>
+</div>
 <div class="preview">
     
     <div [ngClass]="{'controls': true, 'controls-hidden': this.controls.appComponent?.fullScreen || false}">
