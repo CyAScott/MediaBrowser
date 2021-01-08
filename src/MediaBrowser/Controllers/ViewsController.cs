@@ -68,11 +68,11 @@ namespace MediaBrowser.Controllers
             return Redirect("/Login");
         }
 
-        [HttpGet("/Media/{**path}")]
+        [HttpGet("/Media/{**path}"), AllowAnonymous]
         public IActionResult Media() => View("Media");
 
         [HttpGet("/ViewModel")]
-        public async Task<IActionResult> PageInfo()
+        public async Task<IActionResult> ViewModel()
         {
             var jwt = User.Identity as JwtPayload;
 
@@ -84,7 +84,7 @@ namespace MediaBrowser.Controllers
                 allRoles = new HashSet<string>((await Roles.All()).Select(it => it.Name));
             }
 
-            var json = JsonConvert.SerializeObject(new MediaViewModel
+            return Content("var viewModel = " + JsonConvert.SerializeObject(new MediaViewModel
             {
                 AllRoles = allRoles,
                 FirstName = jwt?.FirstName ?? "Anonymous",
@@ -92,9 +92,7 @@ namespace MediaBrowser.Controllers
                 LastName = jwt?.LastName ?? "User",
                 Roles = jwt?.Roles ?? new HashSet<string>(),
                 UserName = jwt?.UserName ?? "Unknown"
-            });
-
-            return Content($"var pageInfo = {json};", MediaTypeHeaderValue.Parse("application/javascript"));
+            }) + ";", MediaTypeHeaderValue.Parse("application/javascript"));
         }
     }
 }

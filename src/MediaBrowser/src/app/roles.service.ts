@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SearchRequest } from './common-controls.service';
 
-declare var pageInfo : AllRolesReadModel;
+declare var viewModel : AllRolesReadModel;
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +11,7 @@ declare var pageInfo : AllRolesReadModel;
 export class RolesService {
 
   constructor(private httpClient: HttpClient) {
-    this.allRoles = pageInfo.allRoles;
+    this.allRoles = viewModel.allRoles;
   }
 
   public allRoles : string[];
