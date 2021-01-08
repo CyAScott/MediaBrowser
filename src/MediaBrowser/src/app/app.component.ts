@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonControlsService, PageSearchable } from './common-controls.service';
 import { LoggerService } from './logger.service';
 import { UsersService } from './users.service';
@@ -8,7 +8,7 @@ import { UsersService } from './users.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.less']
 })
-export class AppComponent implements AppComponent {
+export class AppComponent implements AppComponent, OnInit {
   
   private fullscreenchange() : void {
     this.fullScreen = !this.fullScreen;
@@ -19,8 +19,20 @@ export class AppComponent implements AppComponent {
     public users : UsersService,
     private controls : CommonControlsService,
     private log : LoggerService) {
+
     controls.appComponent = this;
     document.onfullscreenchange = () => this.fullscreenchange();
+  }
+
+  public ngOnInit() : void {
+    if (navigator?.serviceWorker?.register) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then((reg) => {
+          this.log.debug(`Service Worker Registered: ${JSON.stringify(reg)}`);
+        }).catch((error) => {
+          this.log.error(`Service Worker Registration Failed: ${JSON.stringify(error)}`);
+        });
+    }
   }
 
   public addEnabled() : boolean {
