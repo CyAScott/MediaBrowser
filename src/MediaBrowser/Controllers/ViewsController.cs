@@ -4,6 +4,8 @@ using MediaBrowser.Models;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,7 +69,10 @@ namespace MediaBrowser.Controllers
         }
 
         [HttpGet("/Media/{**path}")]
-        public async Task<IActionResult> Media()
+        public IActionResult Media() => View("Media");
+
+        [HttpGet("/ViewModel")]
+        public async Task<IActionResult> PageInfo()
         {
             var jwt = User.Identity as JwtPayload;
 
@@ -79,7 +84,7 @@ namespace MediaBrowser.Controllers
                 allRoles = new HashSet<string>((await Roles.All()).Select(it => it.Name));
             }
 
-            return View("Media", new MediaViewModel
+            var json = JsonConvert.SerializeObject(new MediaViewModel
             {
                 AllRoles = allRoles,
                 FirstName = jwt?.FirstName ?? "Anonymous",
@@ -88,6 +93,8 @@ namespace MediaBrowser.Controllers
                 Roles = jwt?.Roles ?? new HashSet<string>(),
                 UserName = jwt?.UserName ?? "Unknown"
             });
+
+            return Content($"var pageInfo = {json};", MediaTypeHeaderValue.Parse("application/javascript"));
         }
     }
 }

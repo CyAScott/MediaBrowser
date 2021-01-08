@@ -32,6 +32,11 @@
               "src/service-worker.js"
             ],
             "styles": [
+              "node_modules/@fortawesome/fontawesome-free/less/fontawesome.less",
+              "node_modules/@fortawesome/fontawesome-free/less/brands.less",
+              "node_modules/@fortawesome/fontawesome-free/less/regular.less",
+              "node_modules/@fortawesome/fontawesome-free/less/solid.less",
+              "node_modules/@fontsource/archivo-narrow/index.css",
               "src/styles.less"
             ],
             "scripts": [
