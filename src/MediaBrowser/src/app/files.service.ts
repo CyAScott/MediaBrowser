@@ -108,19 +108,20 @@ export interface SearchFilesResponse extends SearchFilesRequest {
 }
 
 export enum FileFilterOptions {
-  AudioFiles = "audioFiles",
-  html5Friendly = "html5Friendly",
-  noFilter = "noFilter",
-  nonHtml5Friendly = "nonHtml5Friendly",
-  photos = "photos",
-  videos = "videos"
+  audioFiles = 'audioFiles',
+  cached = 'cached',
+  html5Friendly = 'html5Friendly',
+  noFilter = 'noFilter',
+  nonHtml5Friendly = 'nonHtml5Friendly',
+  photos = 'photos',
+  videos = 'videos'
 }
 
 export enum FileSortOptions {
-  createdOn = "createdOn",
-  duration = "duration",
-  name = "name",
-  type = "type"
+  createdOn = 'createdOn',
+  duration = 'duration',
+  name = 'name',
+  type = 'type'
 }
 
 export interface FileReadModel {

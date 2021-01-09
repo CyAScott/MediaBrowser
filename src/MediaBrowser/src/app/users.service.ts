@@ -71,16 +71,16 @@ export class UsersService {
 }
 
 export enum UserFilterOptions {
-  deleted = "deleted",
-  nofilter = "nofilter",
-  nonDeleted = "nonDeleted"
+  deleted = 'deleted',
+  nofilter = 'nofilter',
+  nonDeleted = 'nonDeleted'
 }
 
 export enum UserSortOptions {
-  deletedOn = "deletedOn",
-  firstName = "firstName",
-  lastName = "lastName",
-  userName = "userName"
+  deletedOn = 'deletedOn',
+  firstName = 'firstName',
+  lastName = 'lastName',
+  userName = 'userName'
 }
 
 export interface CreateUserRequest {

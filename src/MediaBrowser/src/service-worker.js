@@ -7,6 +7,58 @@ const version = '0.0.1';
 let db = new zango.Db('cache', { files: ['id'] });
 let files = db.collection('files');
 
+async function cachedFilesSearch(request) {
+  let response = {
+    ascending: request.ascending?.toLowerCase() === 'true',
+    filter: request.filter,
+    keywords: request.keywords,
+    skip: request.skip && /\d+/.test(request.skip) ? request.skip * 1 : 0,
+    sort: request.sort,
+    take: Math.max(request.take && /\d+/.test(request.take) ? request.take * 1 : 1, 1)
+  };
+  let query = {};
+  let sort = {};
+
+  if (response.keywords && /\S/.test(response.keywords)) {
+    let keywords = response.keywords.split(/\s+/).filter(word => word.length > 0).map(escapeRegExp);
+
+    if (keywords.length) {
+      var regex = new RegExp(keywords.length === 1 ? keywords[0] : '(' + keywords.join('|') + ')');
+      query = {'$or': [ {description: {'$regex': regex, '$options': 'i'}}, {name: {'$regex': regex, '$options': 'i'}} ]};
+    }
+  }
+
+  switch (request.sort?.toLowerCase() || 'name') {
+    case 'createdon':
+      sort.uploadedOn = response.ascending ? 1 : -1;
+      break;
+    case 'duration':
+      sort.duration = response.ascending ? 1 : -1;
+      break;
+    default://name
+      sort.name = response.ascending ? 1 : -1;
+      break;
+    case 'type':
+      sort.type = response.ascending ? 1 : -1;
+      break;
+  }
+
+  response.results = await files.find(query).sort(sort).skip(response.skip).limit(response.take).toArray();
+
+  if (response.results.length < response.take) {
+    response.count = response.skip + response.results.length;
+  } else {
+    let group = await files.find(query).group({_id: 1, count: {'$sum': 1}}).toArray();
+
+    response.count = group[0].count;
+  }
+
+  return new Response(JSON.stringify(response), {
+    status: 200,
+    statusText: 'Ok'
+  });
+}
+
 async function cacheFile(fileId, base) {
   let file = await fetch(`${base}/api/files/${fileId}`);
 
@@ -64,7 +116,23 @@ async function fileSearch(request, query) {
   if (query === '?') {
     return await fetch(request);
   }
-  return await fetch(request);
+
+  let queryArgs = {};
+
+  query.substring(1).split('&').forEach(param => {
+
+    let index = param.indexOf('=');
+    
+    if (index === -1) {
+      queryArgs[decodeURIComponent(param).toLowerCase()] = '';
+      return;
+    }
+
+    queryArgs[decodeURIComponent(param.substring(0, index)).toLowerCase()] = decodeURIComponent(param.substring(index + 1));
+
+  });
+
+  return queryArgs.filter?.toLowerCase() === 'cached' ? await cachedFilesSearch(queryArgs) : await fetch(request);
 }
 
 async function flushCache(cache) {
@@ -159,6 +227,11 @@ async function uncacheFile(fileId) {
     status: 200,
     statusText: 'Ok'
   });
+}
+
+function escapeRegExp(text) {
+  //copied from: https://stackoverflow.com/questions/3115150/how-to-escape-regular-expression-special-characters-using-javascript
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
 self.addEventListener('install', event => {

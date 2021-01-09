@@ -14,7 +14,8 @@ export class FilesComponent extends PageSearchable {
 
   public static readonly filterOptions : SelectionOption[] = [
     new SelectionOption('Html5 Friendly', FileFilterOptions.html5Friendly),
-    new SelectionOption('Audio Files', FileFilterOptions.AudioFiles),
+    new SelectionOption('Cached Files', FileFilterOptions.cached),
+    new SelectionOption('Audio Files', FileFilterOptions.audioFiles),
     new SelectionOption('No Filter', FileFilterOptions.noFilter),
     new SelectionOption('Non Html5 Friendly', FileFilterOptions.nonHtml5Friendly),
     new SelectionOption('Photos', FileFilterOptions.photos),

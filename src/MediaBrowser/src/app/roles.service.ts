@@ -66,8 +66,8 @@ export interface SearchRolesResponse extends SearchRolesRequest {
 }
 
 export enum RoleSortOptions {
-  description = "description",
-  name = "name"
+  description = 'description',
+  name = 'name'
 }
 
 export interface CreateRoleRequest {
