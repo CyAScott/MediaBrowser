@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CommonControlsService, Page } from '../common-controls.service';
 import { FileReadModel, FilesService, SearchFilesRequest } from '../files.service';
 import { LoggerService } from '../logger.service';
+import { MsgBoxType } from '../modals/modals.component';
 
 @Component({
   selector: 'app-file',
@@ -18,6 +19,30 @@ export class FileComponent extends Page {
     private files : FilesService) {
     super(controls, logger, 'File')
     route.params.subscribe(params => this.id = params.id);
+  }
+
+  public cache() : void {
+    if (!this.file) {
+      return;
+    }
+
+    this.controls.modals?.toggleLoader();
+
+    var obserable = this.file.cached ? this.files.uncache(this.file) : this.files.cache(this.file);
+
+    obserable.subscribe({
+      next: file => {
+        if (this.file) {
+          this.file = file;
+        }
+        this.controls.modals?.toggleLoader();
+      },
+      error: msg => {
+        this.controls.modals?.toggleLoader();
+        this.logger.error(msg);
+        this.controls.modals?.getMsgBoxResult(MsgBoxType.Ok, `Failed to ${this.file?.cached ? 'uncache' : 'cache'} file.`);
+      }
+    });
   }
 
   public edit() : void {

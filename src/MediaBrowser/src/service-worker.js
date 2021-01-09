@@ -1,80 +1,164 @@
+self.importScripts('zangodb.min.js');
+
 const urlPattern = /^(?<protocol>https?):\/\/(?<domain>[^\/]+)\/(?<route>[^?#]*)(?<query>\?[^#]*)?(?<hash>#.*)?/i;
+const localFilePattern = /^local\/cache\/(?<fileId>[a-f\d]{8}(-[a-f\d]{4}){3}-[a-f\d]{12})$/i;
 const version = '0.0.1';
 
-function fileSearch(event, query) {
-  if (query === '?') {
-    event.respondWith(fetch(event.request));
-    return;
+let db = new zango.Db('cache', { files: ['id'] });
+let files = db.collection('files');
+
+async function cacheFile(fileId, base) {
+  let file = await fetch(`${base}/api/files/${fileId}`);
+
+  if (!file.ok) {
+    return new Response('', {
+      status: 404,
+      statusText: 'Not Found'
+    });
   }
 
-  event.respondWith(fetch(event.request));
+  let fileContents = await fetch(`${base}/api/files/${fileId}/contents`);
+  if (!fileContents.ok) {
+    return new Response('', {
+      status: 404,
+      statusText: 'Not Found'
+    });
+  }
+
+  let cache = await caches.open(version);
+  let fileInfo = JSON.parse(await file.text());
+
+  fileInfo.cached = true;
+
+  cache.put(`api/files/${fileId}`, new Response(JSON.stringify(fileInfo), {
+    headers: file.headers,
+    status: file.status,
+    statusText: file.statusText
+  }));
+  cache.put(`api/files/${fileId}/contents`, fileContents);
+
+  if (fileInfo.thumbnails) {
+    let thumbnails = fileInfo.thumbnails;
+
+    for (var index = 0; index < thumbnails.length; index++) {
+
+      let md5 = thumbnails[index].md5;
+
+      let thumbnailContents = await fetch(`${base}/api/files/${fileId}/thumbnails/${md5}/contents`);
+
+      if (thumbnailContents.ok) {
+        cache.put(`api/files/${fileId}/thumbnails/${md5}/contents`, thumbnailContents);
+      }
+    }
+  }
+
+  await files.insert(fileInfo);
+
+  return new Response(JSON.stringify(fileInfo), {
+    status: 200,
+    statusText: 'Ok'
+  });
 }
 
-function flushCache(cache) {
+async function fileSearch(request, query) {
+  if (query === '?') {
+    return await fetch(request);
+  }
+  return await fetch(request);
+}
+
+async function flushCache(cache) {
 
   //clear view model
   cache.delete('/ViewModel.json');
   cache.delete('/ViewModel');
 
   //clear cached files
-  return cache.keys().then(requests => {
-    
-    requests.forEach(request => {
-      let match = urlPattern.exec(request.url);
-      if (match?.groups?.route && /^api\/files/i.test(match?.groups?.route)) {
-        cache.delete(key);
-      }
-    });
+  let requests = await cache.keys();
 
-    return cache;
+  requests.forEach(request => {
+    let match = urlPattern.exec(request.url);
+    if (match?.groups?.route && /^api\/files/i.test(match?.groups?.route)) {
+      cache.delete(request);
+    }
   });
+
+  await files.remove({});
+
+  return cache;
 }
 
-function login(event) {
-  event.respondWith(fetch(event.request)
-    .then(loginResponse => {
+async function login(request) {
+  let loginResponse = await fetch(request);
 
-      if (loginResponse.type !== 'opaqueredirect') {
-        return loginResponse;
-      }
-      
-      return fetch('/ViewModel')
-        .then(viewModelResponse => {
-
-          if (!viewModelResponse.ok) {
-            return loginResponse;
-          }
-
-          return caches.open(version).then(flushCache).then(cache => {
-            
-            cache.put('/ViewModel', viewModelResponse.clone());
-
-            return viewModelResponse.text()
-              .then(script => {
+  if (loginResponse.type !== 'opaqueredirect') {
+    return loginResponse;
+  }
   
-                var json = script.substring(script.indexOf('{'));
-                json = json.substring(0, json.lastIndexOf('}') + 1);
+  let viewModelResponse = await fetch('/ViewModel');
 
-                let response = new Response(json, {
-                  headers: viewModelResponse.headers,
-                  status: viewModelResponse.status,
-                  statusText: viewModelResponse.statusText
-                });
+  if (!viewModelResponse.ok) {
+    return loginResponse;
+  }
 
-                cache.put('/ViewModel.json', response);
-  
-                return loginResponse;
-              });
-          });
-        });
+  let cache = await caches.open(version);
+
+  await flushCache(cache);
+
+  cache.put('/ViewModel', viewModelResponse.clone());
+
+  let script = await viewModelResponse.text();
+
+  var json = script.substring(script.indexOf('{'));
+  json = json.substring(0, json.lastIndexOf('}') + 1);
+
+  cache.put('/ViewModel.json', new Response(json, {
+    headers: viewModelResponse.headers,
+    status: viewModelResponse.status,
+    statusText: viewModelResponse.statusText
   }));
+
+  return loginResponse;
 }
 
-function logout(event) {
-  event.respondWith(fetch(event.request)
-    .then(logoutResponse => logoutResponse.type !== 'opaqueredirect' ? logoutResponse : caches.open(version)
-      .then(cache => flushCache(cache))
-      .then(() => logoutResponse)));
+async function logout(request) {
+  let logoutResponse = await fetch(request);
+
+  if (logoutResponse.type !== 'opaqueredirect') {
+    return logoutResponse;
+  }
+
+  let cache = await caches.open(version);
+
+  await flushCache(cache);
+
+  return logoutResponse;
+}
+
+async function uncacheFile(fileId) {
+  let fileInfo = await files.findOne({id: fileId});
+
+  if (!fileInfo) {
+    return new Response('', {
+      status: 404,
+      statusText: 'Not Found'
+    });
+  }
+
+  let cache = await caches.open(version);
+
+  cache.delete(`api/files/${fileId}`);
+  cache.delete(`api/files/${fileId}/contents`);
+  fileInfo.thumbnails?.forEach(thumbnail => cache.delete(`api/files/${fileId}/thumbnails/${thumbnail.md5}/contents`));
+
+  await files.remove({id: fileId});
+
+  delete fileInfo.cached;
+
+  return new Response(JSON.stringify(fileInfo), {
+    status: 200,
+    statusText: 'Ok'
+  });
 }
 
 self.addEventListener('install', event => {
@@ -131,9 +215,18 @@ self.addEventListener('fetch', event => {
 
   if (method === 'POST') {
     if (route === 'login') {
-      login(event, `${protocol}://${domain}/`);
+      event.respondWith(login(event.request));
     } else if (route === 'logout') {
-      logout(event, `${protocol}://${domain}/`);
+      event.respondWith(logout(event.request));
+    } else {
+      event.respondWith(fetch(event.request));
+    }
+  } else if (route.startsWith('local/cache/')) {
+    let fileId = localFilePattern.exec(route)?.groups?.fileId;
+    if (fileId && method === 'GET') {
+      event.respondWith(cacheFile(fileId, `${protocol}://${domain}`));
+    } else if (fileId && method === 'DELETE') {
+      event.respondWith(uncacheFile(fileId));
     } else {
       event.respondWith(fetch(event.request));
     }
@@ -141,7 +234,7 @@ self.addEventListener('fetch', event => {
     if (route.startsWith('media')) {
       event.respondWith(caches.match(route === 'media/favicon.ico' ? `${protocol}://${domain}/favicon.ico` : `${protocol}://${domain}/Media`));
     } else if (route === 'api/files/search') {
-      fileSearch(event, query);
+      event.respondWith(fileSearch(event.request, query));
     } else {
       event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
     }

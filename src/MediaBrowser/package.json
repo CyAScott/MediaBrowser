@@ -23,6 +23,7 @@
     "@fortawesome/fontawesome-free": "^5.15.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
+    "zangodb": "^1.0.8",
     "zone.js": "~0.10.2"
   },
   "devDependencies": {

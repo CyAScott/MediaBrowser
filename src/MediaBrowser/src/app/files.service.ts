@@ -10,6 +10,10 @@ export class FilesService {
 
   constructor(private httpClient: HttpClient) { }
 
+  public cache(file : FileReadModel) : Observable<FileReadModel> {
+    return this.httpClient.get<FileReadModel>(`/local/cache/${file.id}`);
+  }
+
   public get(fileId : string) : Observable<FileReadModel> {
     return this.httpClient.get<FileReadModel>(`/api/files/${fileId}`);
   }
@@ -55,6 +59,10 @@ export class FilesService {
         error: subscriber.error
       });
     });
+  }
+
+  public uncache(file : FileReadModel) : Observable<FileReadModel> {
+    return this.httpClient.delete<FileReadModel>(`/local/cache/${file.id}`);
   }
 
   public update(fileId : string, request : UploadFileRequest) : Observable<FileReadModel> {
@@ -117,6 +125,7 @@ export enum FileSortOptions {
 
 export interface FileReadModel {
   audioStreams : string[];
+  cached : boolean;
   contentLength : number;
   contentType : string;
   description : string;
