@@ -46,9 +46,6 @@ namespace MediaBrowser.Models
         public ThumbnailReadModel[] Thumbnails { get; }
 
         /// <inheritdoc/>
-        public bool Html5Friendly => file.Html5Friendly;
-
-        /// <inheritdoc/>
         public double? Fps => file.Fps;
 
         /// <inheritdoc/>

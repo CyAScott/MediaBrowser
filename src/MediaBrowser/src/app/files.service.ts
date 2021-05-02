@@ -110,9 +110,7 @@ export interface SearchFilesResponse extends SearchFilesRequest {
 export enum FileFilterOptions {
   audioFiles = 'audioFiles',
   cached = 'cached',
-  html5Friendly = 'html5Friendly',
   noFilter = 'noFilter',
-  nonHtml5Friendly = 'nonHtml5Friendly',
   photos = 'photos',
   videos = 'videos'
 }
@@ -133,7 +131,6 @@ export interface FileReadModel {
   duration : number;
   fps : number;
   height : number;
-  html5Friendly : boolean;
   id : string;
   md5 : string;
   name : string;

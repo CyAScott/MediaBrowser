@@ -408,22 +408,14 @@ namespace MediaBrowser.Services
 
             if (ffmpegInfo.mime.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
             {
-                returnValue.Html5Friendly =
-                    string.Equals(ffmpegInfo.mime, "audio/mp3", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(ffmpegInfo.mime, "audio/ogg", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(ffmpegInfo.mime, "audio/wav", StringComparison.OrdinalIgnoreCase);
                 returnValue.Type = FileType.Audio;
             }
             else if (ffmpegInfo.mime.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             {
-                returnValue.Html5Friendly = true;
                 returnValue.Type = FileType.Photo;
             }
             else if (ffmpegInfo.mime.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
             {
-                returnValue.Html5Friendly =
-                    string.Equals(ffmpegInfo.mime, "video/mp4", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(ffmpegInfo.mime, "video/webm", StringComparison.OrdinalIgnoreCase);
                 returnValue.Type = FileType.Video;
             }
 

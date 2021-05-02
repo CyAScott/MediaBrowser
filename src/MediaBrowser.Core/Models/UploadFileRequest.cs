@@ -65,11 +65,6 @@ namespace MediaBrowser.Models
         public Guid UploadedBy { get; set; }
 
         /// <summary>
-        /// If the file can be read by a html 5 browser.
-        /// </summary>
-        public bool Html5Friendly { get; set; }
-
-        /// <summary>
         /// The file's FPS.
         /// </summary>
         public double? Fps { get; set; }

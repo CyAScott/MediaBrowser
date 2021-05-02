@@ -71,12 +71,6 @@ namespace MediaBrowser.Services
                 case FileFilterOptions.AudioFiles:
                     query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Audio.ToString()));
                     break;
-                case FileFilterOptions.Html5Friendly:
-                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Html5Friendly), true));
-                    break;
-                case FileFilterOptions.NonHtml5Friendly:
-                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Html5Friendly), false));
-                    break;
                 case FileFilterOptions.Photos:
                     query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Photo.ToString()));
                     break;
@@ -152,7 +146,6 @@ namespace MediaBrowser.Services
                 Duration = file.Duration,
                 Fps = file.Fps,
                 Height = file.Height,
-                Html5Friendly = file.Html5Friendly,
                 Id = file.Id,
                 Name = request.Name ?? "",
                 LiteDbThumbnails = file.Thumbnails?.Select(it => new LiteDbThumbnail(it)).ToArray(),
@@ -198,8 +191,6 @@ namespace MediaBrowser.Services
 
         [BsonIgnore]
         public IThumbnail[] Thumbnails { get; set; }
-
-        public bool Html5Friendly { get; set; }
 
         public double? Fps { get; set; }
 

@@ -49,11 +49,6 @@ namespace MediaBrowser.Models
         IThumbnail[] Thumbnails { get; }
 
         /// <summary>
-        /// If the file can be read by a html 5 browser.
-        /// </summary>
-        bool Html5Friendly { get; }
-
-        /// <summary>
         /// The file's FPS.
         /// </summary>
         double? Fps { get; }

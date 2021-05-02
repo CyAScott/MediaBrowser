@@ -10,7 +10,7 @@ namespace MediaBrowser.Models
         /// <summary>
         /// Optional filter option.
         /// </summary>
-        public FileFilterOptions Filter { get; set; } = FileFilterOptions.Html5Friendly;
+        public FileFilterOptions Filter { get; set; } = FileFilterOptions.NoFilter;
 
         /// <summary>
         /// The field to sort by.
@@ -51,19 +51,9 @@ namespace MediaBrowser.Models
         AudioFiles,
 
         /// <summary>
-        /// Only returns media files that are html5 friendly.
-        /// </summary>
-        Html5Friendly,
-
-        /// <summary>
         /// No filter will be applied.
         /// </summary>
         NoFilter,
-
-        /// <summary>
-        /// Returns media files that are NOT html5 friendly.
-        /// </summary>
-        NonHtml5Friendly,
 
         /// <summary>
         /// Only returns photo files.

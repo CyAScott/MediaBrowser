@@ -40,13 +40,7 @@ namespace MediaBrowser.Services
             { "image/png", "png" },
             { "image/bmp", "bmp" },
             { "image/tiff", "tif" },
-            { "video/mp4", "mp4" },
-            { "video/webm", "webm" },
-            { "video/mpeg", "mpeg" },
-            { "video/divx", "avi" },
-            { "video/x-flv", "flv" },
-            { "video/x-msVideo", "avi" },
-            { "video/x-ms-wmv", "wmv" }
+            { "video/mp4", "mp4" }
         };
 
         /// <inheritdoc/>
@@ -138,7 +132,7 @@ namespace MediaBrowser.Services
                     }
                 }
 
-                return await Files.Update(file.Id,  request, updatedThumbnails.ToArray());
+                return await Files.Update(file.Id, request, updatedThumbnails.ToArray());
             }
             catch (Exception)
             {

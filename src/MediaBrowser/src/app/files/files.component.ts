@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Observable } from 'rxjs';
 import { CommonControlsService, PageSearchable } from '../common-controls.service';
 import { FileFilterOptions, FileSortOptions, FilesService, SearchFilesRequest, SearchFilesResponse } from '../files.service';
 import { LoggerService } from '../logger.service';
@@ -13,11 +12,9 @@ import { SelectionOption } from '../modals/modals.component';
 export class FilesComponent extends PageSearchable {
 
   public static readonly filterOptions : SelectionOption[] = [
-    new SelectionOption('Html5 Friendly', FileFilterOptions.html5Friendly),
+    new SelectionOption('No Filter', FileFilterOptions.noFilter),
     new SelectionOption('Cached Files', FileFilterOptions.cached),
     new SelectionOption('Audio Files', FileFilterOptions.audioFiles),
-    new SelectionOption('No Filter', FileFilterOptions.noFilter),
-    new SelectionOption('Non Html5 Friendly', FileFilterOptions.nonHtml5Friendly),
     new SelectionOption('Photos', FileFilterOptions.photos),
     new SelectionOption('Videos', FileFilterOptions.videos)
   ];
