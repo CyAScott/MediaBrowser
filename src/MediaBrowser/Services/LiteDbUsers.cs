@@ -165,6 +165,7 @@ namespace MediaBrowser.Services
 
     public class LiteDbUser : IUser
     {
+        [BsonId]
         public Guid Id { get; set; }
 
         public DateTime? DeletedOn { get; set; }

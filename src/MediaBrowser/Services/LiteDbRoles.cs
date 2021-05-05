@@ -118,6 +118,7 @@ namespace MediaBrowser.Services
 
     public class LiteDbRole : IRole
     {
+        [BsonId]
         public Guid Id { get; set; }
 
         public string Description { get; set; }

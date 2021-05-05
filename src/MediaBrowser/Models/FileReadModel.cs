@@ -16,7 +16,8 @@ namespace MediaBrowser.Models
         {
             this.file = file ?? throw new ArgumentNullException(nameof(file));
 
-            Thumbnails = file.Thumbnails?.Select(it => new ThumbnailReadModel(file, it)).ToArray();
+            PlaylistReferences = file.PlaylistReferences?.Select(it => new PlaylistReferenceReadModel(it)).ToArray();
+            Thumbnails = file.Thumbnails?.Select(it => new FileThumbnailReadModel(file, it)).ToArray();
         }
 
         /// <summary>
@@ -43,7 +44,10 @@ namespace MediaBrowser.Models
         public Guid Md5 => file.Md5;
 
         /// <inheritdoc/>
-        public ThumbnailReadModel[] Thumbnails { get; }
+        public FileThumbnailReadModel[] Thumbnails { get; }
+
+        /// <inheritdoc/>
+        public PlaylistReferenceReadModel[] PlaylistReferences { get; }
 
         /// <inheritdoc/>
         public double? Fps => file.Fps;
@@ -82,15 +86,41 @@ namespace MediaBrowser.Models
     }
 
     /// <summary>
+    /// A reference to a playlist for a media file.
+    /// </summary>
+    public class PlaylistReferenceReadModel
+    {
+        private readonly IPlaylistReference playlistReference;
+
+        /// <inheritdoc/>
+        public PlaylistReferenceReadModel(IPlaylistReference playlistReference) => this.playlistReference = playlistReference ?? throw new ArgumentNullException(nameof(playlistReference));
+
+        /// <summary>
+        /// When this media file was added to the playlist.
+        /// </summary>
+        public DateTime AddedOn => playlistReference.AddedOn;
+
+        /// <summary>
+        /// The playlist id.
+        /// </summary>
+        public Guid Id => playlistReference.Id;
+
+        /// <summary>
+        /// The index for this media file in the playlist.
+        /// </summary>
+        public int Index => playlistReference.Index;
+    }
+
+    /// <summary>
     /// A thumbnail for a media file.
     /// </summary>
-    public class ThumbnailReadModel
+    public class FileThumbnailReadModel
     {
         private readonly IFile file;
         private readonly IThumbnail thumbnail;
 
         /// <inheritdoc/>
-        public ThumbnailReadModel(IFile file, IThumbnail thumbnail)
+        public FileThumbnailReadModel(IFile file, IThumbnail thumbnail)
         {
             this.file = file ?? throw new ArgumentNullException(nameof(file));
             this.thumbnail = thumbnail ?? throw new ArgumentNullException(nameof(thumbnail));

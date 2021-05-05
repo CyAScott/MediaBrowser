@@ -23,6 +23,16 @@ namespace MediaBrowser.Services
         /// Processes an upload media file request.
         /// </summary>
         Task<IFile> Process(Guid userId, UploadFileRequest request, List<FormFile> files);
+
+        /// <summary>
+        /// Processes a create playlist request.
+        /// </summary>
+        Task<IPlaylist> Process(Guid userId, CreatePlaylistRequest request, List<FormFile> thumbnails = null);
+
+        /// <summary>
+        /// Processes an update playlist request.
+        /// </summary>
+        Task<IPlaylist> Process(Guid userId, IPlaylist playlist, UpdatePlaylistRequest request, List<FormFile> thumbnails = null);
     }
 
     /// <summary>
@@ -44,11 +54,12 @@ namespace MediaBrowser.Services
         };
 
         /// <inheritdoc/>
-        public UploadRequestProcessor(DiskLocations locations, IFfmpeg ffmpeg, IFiles files)
+        public UploadRequestProcessor(DiskLocations locations, IFfmpeg ffmpeg, IFiles files, IPlaylists playlists)
         {
             Ffmpeg = ffmpeg;
             Files = files;
             Locations = locations;
+            Playlists = playlists;
         }
 
         /// <summary>
@@ -60,6 +71,11 @@ namespace MediaBrowser.Services
         /// The collection of media files.
         /// </summary>
         public IFiles Files { get; }
+
+        /// <summary>
+        /// The collection of playlists.
+        /// </summary>
+        public IPlaylists Playlists { get; }
 
         /// <summary>
         /// Location info for storage.
@@ -231,6 +247,150 @@ namespace MediaBrowser.Services
                 mediaFileInfo.Thumbnails = thumbnailInfo.Select(it => (IThumbnail)new Thumbnail(it)).ToArray();
 
                 return await Files.Upload(request, mediaFileInfo);
+            }
+            catch (Exception)
+            {
+                foreach (var location in tempLocations)
+                {
+                    if (!string.IsNullOrEmpty(location) && File.Exists(location))
+                    {
+                        File.Delete(location);
+                    }
+                }
+
+                throw new UploadException(HttpStatusCode.InternalServerError, "Unknown Error");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IPlaylist> Process(Guid userId, CreatePlaylistRequest request, List<FormFile> thumbnails = null)
+        {
+            var now = DateTime.UtcNow;
+            var playlistId = Guid.NewGuid();
+            var tempLocations = new List<string>();
+            var thumbnailInfo = new List<UploadedFileInfo>();
+
+            try
+            {
+                foreach (var uploadedFile in thumbnails ?? Enumerable.Empty<FormFile>())
+                {
+                    var tempLocation = Path.Combine(Locations.Temp, Guid.NewGuid().ToString());
+                    tempLocations.Add(tempLocation);
+
+                    using (var fileStream = File.Create(tempLocation))
+                    {
+                        await uploadedFile.CopyToAsync(fileStream, CancellationToken.None);
+                    }
+
+                    var fileInfo = await Ffmpeg.GetFileInfo(tempLocation);
+                    fileInfo.UploadedBy = userId;
+                    fileInfo.UploadedOn = now;
+
+                    if (fileInfo.Type != FileType.Photo || !fileExtensions.ContainsKey(fileInfo.ContentType))
+                    {
+                        throw new UploadException(HttpStatusCode.ExpectationFailed, "Invalid Thumbnail File");
+                    }
+
+                    thumbnailInfo.Add(fileInfo);
+                }
+
+                var updatedThumbnails = new List<IThumbnail>();
+
+                for (var index = 0; index < thumbnailInfo.Count; index++)
+                {
+                    var thumbnail = thumbnailInfo[index];
+
+                    var newLocation = Path.Combine(Locations.MediaFiles, $"playlist.{playlistId}.{thumbnail.Md5}.{fileExtensions[thumbnail.ContentType]}");
+                    tempLocations.Add(newLocation);
+                    File.Move(thumbnail.Location, newLocation);
+                    thumbnail.Location = newLocation;
+
+                    updatedThumbnails.Add(new Thumbnail(thumbnail));
+                }
+
+                return await Playlists.Create(request, playlistId, userId, updatedThumbnails.ToArray());
+            }
+            catch (Exception)
+            {
+                foreach (var location in tempLocations)
+                {
+                    if (!string.IsNullOrEmpty(location) && File.Exists(location))
+                    {
+                        File.Delete(location);
+                    }
+                }
+
+                throw new UploadException(HttpStatusCode.InternalServerError, "Unknown Error");
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IPlaylist> Process(Guid userId, IPlaylist playlist, UpdatePlaylistRequest request, List<FormFile> thumbnails = null)
+        {
+            var now = DateTime.UtcNow;
+            var tempLocations = new List<string>();
+            var thumbnailInfo = new List<UploadedFileInfo>();
+
+            try
+            {
+                foreach (var uploadedFile in thumbnails ?? Enumerable.Empty<FormFile>())
+                {
+                    var tempLocation = Path.Combine(Locations.Temp, Guid.NewGuid().ToString());
+                    tempLocations.Add(tempLocation);
+
+                    using (var fileStream = File.Create(tempLocation))
+                    {
+                        await uploadedFile.CopyToAsync(fileStream, CancellationToken.None);
+                    }
+
+                    var fileInfo = await Ffmpeg.GetFileInfo(tempLocation);
+                    fileInfo.UploadedBy = userId;
+                    fileInfo.UploadedOn = now;
+
+                    if (fileInfo.Type != FileType.Photo || !fileExtensions.ContainsKey(fileInfo.ContentType))
+                    {
+                        throw new UploadException(HttpStatusCode.ExpectationFailed, "Invalid Thumbnail File");
+                    }
+
+                    thumbnailInfo.Add(fileInfo);
+                }
+
+                var updatedThumbnails = new List<IThumbnail>();
+
+                for (var index = 0; index < thumbnailInfo.Count; index++)
+                {
+                    var thumbnail = thumbnailInfo[index];
+
+                    var newLocation = Path.Combine(Locations.MediaFiles, $"playlist.{playlist.Id}.{thumbnail.Md5}.{fileExtensions[thumbnail.ContentType]}");
+                    tempLocations.Add(newLocation);
+                    File.Move(thumbnail.Location, newLocation);
+                    thumbnail.Location = newLocation;
+
+                    updatedThumbnails.Add(new Thumbnail(thumbnail));
+                }
+
+                if (playlist.Thumbnails != null && playlist.Thumbnails.Length > 0)
+                {
+                    if (request.ThumbnailsToRemove != null)
+                    {
+                        foreach (var md5 in request.ThumbnailsToRemove)
+                        {
+                            var location = playlist.Thumbnails.FirstOrDefault(it => it.Md5 == md5)?.Location;
+                            if (!string.IsNullOrEmpty(location) && File.Exists(location))
+                            {
+                                File.Delete(location);
+                            }
+                        }
+
+                        updatedThumbnails.InsertRange(0, playlist.Thumbnails.Where(it => !request.ThumbnailsToRemove.Contains(it.Md5)));
+                    }
+                    else
+                    {
+                        updatedThumbnails.InsertRange(0, playlist.Thumbnails);
+                    }
+                }
+
+                return await Playlists.Update(playlist.Id, request, updatedThumbnails.ToArray());
             }
             catch (Exception)
             {

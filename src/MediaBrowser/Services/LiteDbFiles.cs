@@ -15,10 +15,12 @@ namespace MediaBrowser.Services
     {
         public LiteDbFiles(ILiteDatabase db)
         {
+            BsonCollection = db.GetCollection<BsonDocument>("files");
             Collection = db.GetCollection<LiteDbFile>("files");
             Database = db;
         }
 
+        public ILiteCollection<BsonDocument> BsonCollection { get; }
         public ILiteCollection<LiteDbFile> Collection { get; }
         public ILiteDatabase Database { get; }
 
@@ -26,9 +28,9 @@ namespace MediaBrowser.Services
             Task.FromResult((IFile)Collection.FindById(fileId));
 
         public Task<IFile> GetByName(string name) =>
-            Task.FromResult((IFile)Collection.FindOne(Query.EQ(nameof(LiteDbFile.Name), name)));
+            Task.FromResult((IFile)Collection.FindOne(Query.EQ(nameof(IFile.Name), name)));
 
-        public Task<SearchFilesResponse<IFile>> Search(SearchFilesRequest request, Guid userId, HashSet<string> userRoles)
+        public Task<SearchFilesResponse<IFile>> Search(SearchFilesRequest request, Guid userId, HashSet<string> userRoles, Guid? playlistId = null)
         {
             var query = Query.All();
 
@@ -39,12 +41,12 @@ namespace MediaBrowser.Services
             {
                 var accessFilter = new List<BsonExpression>
                 {
-                    Query.EQ(nameof(LiteDbFile.UploadedBy), userId)
+                    Query.EQ(nameof(IFile.UploadedBy), userId)
                 };
 
                 foreach (var role in userRoles)
                 {
-                    accessFilter.Add(Query.Contains(nameof(LiteDbFile.ReadRoles), role));
+                    accessFilter.Add(Query.EQ($"{nameof(IFile.ReadRoles)}[*] ANY", role));
                 }
 
                 query.Where.Add(Query.Or(accessFilter.ToArray()));
@@ -56,8 +58,8 @@ namespace MediaBrowser.Services
 
                 foreach (var term in Regex.Split(request.Keywords, @"\s+"))
                 {
-                    keywordQuery.Add(Query.Contains(nameof(LiteDbFile.Description), term));
-                    keywordQuery.Add(Query.Contains(nameof(LiteDbFile.Name), term));
+                    keywordQuery.Add(Query.Contains(nameof(IFile.Description), term));
+                    keywordQuery.Add(Query.Contains(nameof(IFile.Name), term));
                 }
 
                 if (keywordQuery.Count > 0)
@@ -69,30 +71,38 @@ namespace MediaBrowser.Services
             switch (request.Filter)
             {
                 case FileFilterOptions.AudioFiles:
-                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Audio.ToString()));
+                    query.Where.Add(Query.EQ(nameof(IFile.Type), FileType.Audio.ToString()));
                     break;
                 case FileFilterOptions.Photos:
-                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Photo.ToString()));
+                    query.Where.Add(Query.EQ(nameof(IFile.Type), FileType.Photo.ToString()));
                     break;
                 case FileFilterOptions.Videos:
-                    query.Where.Add(Query.EQ(nameof(LiteDbFile.Type), FileType.Video.ToString()));
+                    query.Where.Add(Query.EQ(nameof(IFile.Type), FileType.Video.ToString()));
                     break;
             }
 
-            switch (request.Sort)
+            if (playlistId != null)
             {
-                case FileSortOptions.CreatedOn:
-                    query.OrderBy = nameof(LiteDbFile.UploadedOn);
-                    break;
-                case FileSortOptions.Duration:
-                    query.OrderBy = nameof(LiteDbFile.Duration);
-                    break;
-                case FileSortOptions.Name:
-                    query.OrderBy = nameof(LiteDbFile.Name);
-                    break;
-                case FileSortOptions.Type:
-                    query.OrderBy = nameof(LiteDbFile.Type);
-                    break;
+                query.Where.Add(Query.EQ($"{nameof(IFile.PlaylistReferences)}.Ids[*] ANY", playlistId.Value));
+                query.OrderBy = $"{nameof(IFile.PlaylistReferences)}.Values.PL_{playlistId.Value.ToString().Replace('-', '_')}.{nameof(IPlaylistReference.Index)}";
+            }
+            else
+            {
+                switch (request.Sort)
+                {
+                    case FileSortOptions.CreatedOn:
+                        query.OrderBy = nameof(IFile.UploadedOn);
+                        break;
+                    case FileSortOptions.Duration:
+                        query.OrderBy = nameof(IFile.Duration);
+                        break;
+                    case FileSortOptions.Name:
+                        query.OrderBy = nameof(IFile.Name);
+                        break;
+                    case FileSortOptions.Type:
+                        query.OrderBy = nameof(IFile.Type);
+                        break;
+                }
             }
 
             query.Order = request.Ascending ? Query.Ascending : Query.Descending;
@@ -115,6 +125,145 @@ namespace MediaBrowser.Services
             return Task.FromResult(response);
         }
 
+        public Task<IFile> SetPlaylistReference(Guid fileId, IPlaylist playlist, int? index = null)
+        {
+            var idPath = $"{nameof(IFile.PlaylistReferences)}.Ids[*] ANY";
+            var successful = true;
+
+            void update(int oldIndex, int newIndex)
+            {
+                var plFieldName = $"PL_{playlist.Id.ToString().Replace('-', '_')}";
+
+                IEnumerable<BsonDocument> transformDocs()
+                {
+                    var moveUp = newIndex > oldIndex;
+
+                    using (var reader = Collection
+                        .Query()
+                        .Where(Query.And(
+                            Query.Not("_id", fileId),
+                            Query.EQ(idPath, playlist.Id),
+                            Query.Between($"$.{nameof(IFile.PlaylistReferences)}.Values.{plFieldName}.{nameof(IPlaylistReference.Index)}",
+                                Math.Min(oldIndex, newIndex),
+                                Math.Max(oldIndex, newIndex))))
+                        .ForUpdate()
+                        .ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var doc = reader.Current.AsDocument;
+
+                            var playlistReference = doc[nameof(IFile.PlaylistReferences)]["Values"][plFieldName];
+
+                            var indexValue = playlistReference["Index"].AsInt32;
+
+                            if (moveUp)
+                            {
+                                indexValue--;
+                            }
+                            else
+                            {
+                                indexValue++;
+                            }
+
+                            playlistReference["Index"] = indexValue;
+
+                            yield return doc;
+                        }
+                    }
+                };
+
+                BsonCollection.Update(transformDocs());
+            }
+
+            Database.BeginTrans();
+
+            try
+            {
+                var file = Collection.FindById(fileId);
+
+                if (file == null)
+                {
+                    return Task.FromResult((IFile)null);
+                }
+
+                var playlistRefernces = new List<IPlaylistReference>();
+                if (file.PlaylistReferences != null)
+                {
+                    playlistRefernces.AddRange(file.PlaylistReferences);
+                }
+
+                var queryForPlaylist = Query.EQ(idPath, playlist.Id);
+                var reference = (LiteDbPlaylistReference)playlistRefernces.FirstOrDefault(it => it.Id == playlist.Id);
+
+                if (index == null)
+                {
+                    if (reference == null)
+                    {
+                        return Task.FromResult((IFile)file);
+                    }
+
+                    update(reference.Index, int.MaxValue);
+
+                    playlistRefernces.Remove(reference);
+                    file.PlaylistReferences = playlistRefernces.ToArray();
+                }
+                else
+                {
+                    var count = Collection.Count(queryForPlaylist);
+
+                    if (reference == null)
+                    {
+                        count++;
+                    }
+
+                    if (index < 0 || index > count)
+                    {
+                        index = count - 1;
+                    }
+
+                    if (reference != null)
+                    {
+                        if (reference.Index == index.Value)
+                        {
+                            return Task.FromResult((IFile)file);
+                        }
+
+                        update(reference.Index, index.Value);
+
+                        reference.Index = index.Value;
+                    }
+                    else
+                    {
+                        playlistRefernces.Add(new LiteDbPlaylistReference
+                        {
+                            AddedOn = DateTime.UtcNow,
+                            Id = playlist.Id,
+                            Index = index.Value
+                        });
+                        file.PlaylistReferences = playlistRefernces.ToArray();
+                    }
+                }
+
+                Collection.Update(file);
+
+                return Task.FromResult((IFile)file);
+            }
+            catch
+            {
+                successful = false;
+                Database.Rollback();
+                throw;
+            }
+            finally
+            {
+                if (successful)
+                {
+                    Database.Commit();
+                }
+            }
+        }
+
         public Task<IFile> Update(Guid fileId, UpdateFileRequest request, IThumbnail[] thumbnails = null)
         {
             var file = Collection.FindById(fileId);
@@ -124,8 +273,8 @@ namespace MediaBrowser.Services
                 return Task.FromResult((IFile)null);
             }
 
-            file.Name = request.Name ?? file.Name;
             file.Description = request.Description ?? file.Description;
+            file.Name = request.Name ?? file.Name;
             file.ReadRoles = request.ReadRoles ?? file.ReadRoles;
             file.Thumbnails = thumbnails ?? file.Thumbnails;
             file.UpdateRoles = request.UpdateRoles ?? file.UpdateRoles;
@@ -148,10 +297,10 @@ namespace MediaBrowser.Services
                 Height = file.Height,
                 Id = file.Id,
                 Name = request.Name ?? "",
-                LiteDbThumbnails = file.Thumbnails?.Select(it => new LiteDbThumbnail(it)).ToArray(),
                 Location = file.Location,
                 Md5 = file.Md5,
                 ReadRoles = request.ReadRoles ?? new HashSet<string>(),
+                Thumbnails = file.Thumbnails?.Select(it => new LiteDbThumbnail(it)).ToArray(),
                 Type = file.Type,
                 UpdateRoles = request.UpdateRoles ?? new HashSet<string>(),
                 UploadedBy = file.UploadedBy,
@@ -172,6 +321,7 @@ namespace MediaBrowser.Services
 
         public FileType Type { get; set; }
 
+        [BsonId]
         public Guid Id { get; set; }
 
         public Guid Md5 { get; set; }
@@ -182,14 +332,8 @@ namespace MediaBrowser.Services
 
         public HashSet<string> UpdateRoles { get; set; }
 
-        [BsonField(nameof(Thumbnails))]
-        public LiteDbThumbnail[] LiteDbThumbnails
-        {
-            get => Thumbnails?.Select(it => it as LiteDbThumbnail ?? new LiteDbThumbnail(it)).ToArray();
-            set => Thumbnails = value;
-        }
+        public IPlaylistReference[] PlaylistReferences { get; set; }
 
-        [BsonIgnore]
         public IThumbnail[] Thumbnails { get; set; }
 
         public double? Fps { get; set; }
@@ -215,34 +359,22 @@ namespace MediaBrowser.Services
         public string[] VideoStreams { get; set; }
     }
 
-    public class LiteDbThumbnail : IThumbnail
+    public class LiteDbPlaylistReference : IPlaylistReference
     {
-        public LiteDbThumbnail()
+        public LiteDbPlaylistReference()
         {
         }
-        public LiteDbThumbnail(IThumbnail thumbnail)
+        public LiteDbPlaylistReference(IPlaylistReference playlistReference)
         {
-            ContentLength = thumbnail.ContentLength;
-            ContentType = thumbnail.ContentType;
-            CreatedOn = thumbnail.CreatedOn;
-            Height = thumbnail.Height;
-            Location = thumbnail.Location;
-            Md5 = thumbnail.Md5;
-            Width = thumbnail.Width;
+            AddedOn = playlistReference.AddedOn;
+            Id = playlistReference.Id;
+            Index = playlistReference.Index;
         }
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime AddedOn { get; set; }
 
-        public Guid Md5 { get; set; }
+        public Guid Id { get; set; }
 
-        public int Height { get; set; }
-
-        public int Width { get; set; }
-
-        public long ContentLength { get; set; }
-
-        public string Location { get; set; }
-
-        public string ContentType { get; set; }
+        public int Index { get; set; }
     }
 }

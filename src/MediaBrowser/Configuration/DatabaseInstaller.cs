@@ -47,6 +47,7 @@ namespace MediaBrowser.Configuration
             container.Register(
                 Component.For<ILiteDatabase>().Instance(connection).LifestyleSingleton(),
                 Component.For<IFiles>().ImplementedBy<LiteDbFiles>().LifestyleSingleton(),
+                Component.For<IPlaylists>().ImplementedBy<LiteDbPlaylists>().LifestyleSingleton(),
                 Component.For<IRoles>().ImplementedBy<LiteDbRoles>().LifestyleSingleton(),
                 Component.For<IUsers>().ImplementedBy<LiteDbUsers>().LifestyleSingleton());
         }

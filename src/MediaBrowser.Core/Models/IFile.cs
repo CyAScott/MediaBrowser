@@ -49,6 +49,11 @@ namespace MediaBrowser.Models
         IThumbnail[] Thumbnails { get; }
 
         /// <summary>
+        /// References to playlists this media file is a part of.
+        /// </summary>
+        IPlaylistReference[] PlaylistReferences { get; }
+
+        /// <summary>
         /// The file's FPS.
         /// </summary>
         double? Fps { get; }
