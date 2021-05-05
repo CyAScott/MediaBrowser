@@ -1,0 +1,19 @@
+<div class="input-thumbnails">
+    <div class="header">
+        <div class="name">Thumbnails (Optional)</div>
+        <div class="save">
+            <i class="fas fa-folder-plus"></i>
+            <input (change)="addThumbnail(thumbnail)" #thumbnail accept="image/gif, image/jpeg, image/png" type="file" />
+        </div>
+    </div>
+    <div class="cards">
+        <a *ngFor="let thumbnail of thumbnails" class="card">
+            <div (click)="removeThumbnail(thumbnail)" class="img">
+                <img [src]="sanitize(thumbnail.src)" alt="{{thumbnail.name}}"/>
+                <div class="overlay"></div>
+                <i class="fas fa-times-circle open"></i>
+                <h1>{{thumbnail.name}}</h1>
+            </div>
+        </a>
+    </div>
+</div>

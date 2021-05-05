@@ -21,7 +21,7 @@ export class FilesService {
   public lastSearch : SearchFilesRequest | undefined;
   public lastSearchResponse : SearchFilesResponse | undefined;
 
-  public search(query : SearchFilesRequest) : Observable<SearchFilesResponse> {
+  public search(query : SearchFilesRequest, playlistId? : string) : Observable<SearchFilesResponse> {
 
     var params = new HttpParams();
 
@@ -48,7 +48,8 @@ export class FilesService {
     }
 
     return new Observable(subscriber => {
-      let observable = this.httpClient.get<SearchFilesResponse>('/api/files/search', { params: params } );
+      let observable = this.httpClient.get<SearchFilesResponse>(playlistId === undefined ? 
+        '/api/files/search' : `/api/playlists/${playlistId}/files/search`, { params: params } );
     
       observable.subscribe({
         next: response => {
@@ -135,7 +136,7 @@ export interface FileReadModel {
   md5 : string;
   name : string;
   readRoles : string[];
-  thumbnails : Thumbnail[];
+  thumbnails : FileThumbnail[];
   type : string;
   updateRoles : string[];
   uploadedBy : string;
@@ -145,7 +146,7 @@ export interface FileReadModel {
   width : number;
 }
 
-export interface Thumbnail {
+export interface FileThumbnail {
   contentLength : number;
   contentType : string;
   createdOn : Date;

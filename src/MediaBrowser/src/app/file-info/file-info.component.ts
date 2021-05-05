@@ -1,10 +1,10 @@
 import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { CommonControlsService, Page } from '../common-controls.service';
 import { FileReadModel, FilesService } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
+import { Thumbnail, ThumbnailBuilderComponent } from '../thumbnail-builder/thumbnail-builder.component';
 import { UsersService } from '../users.service';
 
 @Component({
@@ -20,23 +20,9 @@ export class FileInfoComponent extends Page {
     route : ActivatedRoute,
     private files : FilesService,
     private ref: ChangeDetectorRef,
-    private sanitizer : DomSanitizer,
     public users : UsersService) {
     super(controls, logger, 'File')
     route.params.subscribe(params => this.id = params.id);
-  }
-
-  public addThumbnail(input : any) : void {
-    this.thumbnailIdCounts++;
-
-    let thumbnail = new Thumbnail();
-
-    thumbnail.id = this.thumbnailIdCounts + '';
-    thumbnail.file = input.files[0];
-    thumbnail.name = input.files[0].name;
-    thumbnail.src = URL.createObjectURL(input.files[0]);
-
-    this.thumbnails.push(thumbnail);
   }
 
   public description : string = '';
@@ -93,20 +79,16 @@ export class FileInfoComponent extends Page {
       ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
   
       canvas.toBlob(blob => {
-
-        this.thumbnailIdCounts++;
-
         let thumbnail = new Thumbnail();
   
-        thumbnail.id = this.thumbnailIdCounts + '';
         thumbnail.file = blob;
         thumbnail.name = '';
         thumbnail.src = URL.createObjectURL(blob);
 
-        this.thumbnails.push(thumbnail);
+        this.thumbnailBuilder?.add(thumbnail);
 
         this.ref.detectChanges();
-      });
+      }, 'image/jpeg', 0.75);
 
     } catch (error) {
       this.controls.modals?.getMsgBoxResult(MsgBoxType.Ok, error);
@@ -116,21 +98,6 @@ export class FileInfoComponent extends Page {
   public name : string = '';
 
   public readRoles : string[] = [];
-
-  public removeThumbnail(thumbnail : Thumbnail) : void {
-    let index = this.thumbnails.findIndex(it => it.id === thumbnail.id);
-    if (index >= 0) {
-      if (!thumbnail.file) {
-        this.thumbnailsToRemove.push(thumbnail.id);
-      }
-      this.thumbnails.splice(index, 1);
-      this.ref.detectChanges();
-    }
-  }
-
-  public sanitize(url : string) : SafeUrl {
-    return this.sanitizer.bypassSecurityTrustUrl(url);
-  }
 
   public save() : void {
     this.controls.modals?.toggleLoader();
@@ -156,7 +123,8 @@ export class FileInfoComponent extends Page {
 
   public src : string = '';
 
-  public thumbnailIdCounts : number = 0;
+  @ViewChild('thumbnailBuilder')
+  public thumbnailBuilder : ThumbnailBuilderComponent | undefined;
 
   public thumbnails : Thumbnail[] = [];
 
@@ -168,12 +136,4 @@ export class FileInfoComponent extends Page {
 
   @ViewChild('video')
   public video : ElementRef | undefined;
-}
-
-class Thumbnail {
-  public unsaved : boolean = true;
-  public id : string = '';
-  public file : any;
-  public name : string = '';
-  public src : string = '';
 }

@@ -21,6 +21,10 @@ import { PaginationComponent } from './pagination/pagination.component';
 import { SearchComponent } from './search/search.component';
 import { FileInfoComponent } from './file-info/file-info.component';
 import { RoleBuilderComponent } from './role-builder/role-builder.component';
+import { AddPlaylistComponent } from './add-playlist/add-playlist.component';
+import { PlaylistComponent } from './playlist/playlist.component';
+import { PlaylistsComponent } from './playlists/playlists.component';
+import { ThumbnailBuilderComponent } from './thumbnail-builder/thumbnail-builder.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +43,11 @@ import { RoleBuilderComponent } from './role-builder/role-builder.component';
     SearchComponent,
     FileComponent,
     FileInfoComponent,
-    RoleBuilderComponent
+    RoleBuilderComponent,
+    AddPlaylistComponent,
+    PlaylistComponent,
+    PlaylistsComponent,
+    ThumbnailBuilderComponent
   ],
   imports: [
     BrowserModule,

@@ -24,6 +24,7 @@
 
 <div [ngClass]="{menu: true, 'light-background': true, hidden: !menuVisible || fullScreen, visible: menuVisible && !fullScreen}" (click)="toggleMenu()" (mouseleave)="toggleMenu(true)">
   <a [routerLink]="['/Files']"><i class="fas fa-archive"></i> Files</a>
+  <a [routerLink]="['/Playlists']"><i class="fas fa-list-ol"></i> Playlists</a>
   <a [routerLink]="['/Roles']" [style.display]="users.hasRole('Admin') ? 'block' : 'none'"><i class="fas fa-user-lock"></i> Roles</a>
   <a [routerLink]="['/Users']" [style.display]="users.hasRole('Admin') ? 'block' : 'none'"><i class="fas fa-users"></i> Users</a>
   <a [routerLink]="['/User/' + users.id()]"><i class="fas fa-user"></i> My Account</a>

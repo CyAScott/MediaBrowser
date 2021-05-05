@@ -254,7 +254,6 @@ namespace MediaBrowser.Controllers
             return new ActionResult<FileReadModel>(new FileReadModel(file));
         }
 
-
         /// <summary>
         /// Search files.
         /// </summary>
@@ -275,7 +274,7 @@ namespace MediaBrowser.Controllers
         /// <summary>
         /// Updates playlist.
         /// </summary>
-        [HttpPut("api/playlists/{playlistId:guid}/thumbnails"), Authorize, ApiExplorerSettings(IgnoreApi = true), DisableRequestSizeLimit]
+        [HttpPut("api/playlists/{playlistId:guid}"), Authorize, ApiExplorerSettings(IgnoreApi = true), Consumes("multipart/form-data"), DisableRequestSizeLimit]
         public async Task<ActionResult<PlaylistReadModel>> Update(Guid playlistId)
         {
             if (string.IsNullOrEmpty(Request.ContentType) || Request.ContentType.IndexOf("multipart/", StringComparison.OrdinalIgnoreCase) == -1)
@@ -385,7 +384,7 @@ namespace MediaBrowser.Controllers
         /// <summary>
         /// Updates a playlist by id.
         /// </summary>
-        [HttpPut("api/playlists/{playlistId:guid}"), Authorize]
+        [HttpPut("api/playlists/{playlistId:guid}"), Authorize, Consumes("application/json")]
         public async Task<ActionResult<PlaylistReadModel>> Update(Guid playlistId, [FromBody]UpdatePlaylistRequest request)
         {
             var jwt = User.Identity as JwtPayload;

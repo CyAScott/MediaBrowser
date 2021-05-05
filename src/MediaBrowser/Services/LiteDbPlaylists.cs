@@ -130,6 +130,8 @@ namespace MediaBrowser.Services
             liteDbPlaylist.Thumbnails = thumbnails ?? liteDbPlaylist.Thumbnails;
             liteDbPlaylist.UpdateRoles = request.UpdateRoles ?? liteDbPlaylist.UpdateRoles;
 
+            Collection.Update(liteDbPlaylist.Id, liteDbPlaylist);
+
             return Task.FromResult((IPlaylist)liteDbPlaylist);
         }
     }
@@ -147,7 +149,6 @@ namespace MediaBrowser.Services
 
         public HashSet<string> UpdateRoles { get; set; }
 
-        [BsonIgnore]
         public IThumbnail[] Thumbnails { get; set; }
 
         public string Description { get; set; }

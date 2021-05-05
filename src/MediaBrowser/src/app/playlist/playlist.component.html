@@ -1,0 +1,28 @@
+<div class="input-name">
+    <div class="header">
+        <div class="name">Name Required</div>
+        <div (click)="update()" class="update"><i class="fas fa-save"></i></div>
+    </div>
+    <input type="text" [(ngModel)]="name" placeholder="Name" />
+</div>
+
+<div class="input-description">
+    <div class="name">Description (Optional)</div>
+    <textarea [(ngModel)]="description"></textarea>
+</div>
+
+<div *ngIf="users.hasRole('Admin')" class="input">
+    <div class="header">
+        <div class="name">Read Roles</div>
+    </div>
+    <app-role-builder [selection]="readRoles"></app-role-builder>
+</div>
+
+<div *ngIf="users.hasRole('Admin')" class="input">
+    <div class="header">
+        <div class="name">Update Roles</div>
+    </div>
+    <app-role-builder [selection]="updateRoles"></app-role-builder>
+</div>
+
+<app-thumbnail-builder [thumbnails]="thumbnails" [thumbnailsToRemove]="thumbnailsToRemove"></app-thumbnail-builder>

@@ -4,6 +4,7 @@ import { CommonControlsService, Page } from '../common-controls.service';
 import { FilesService } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
+import { Thumbnail, ThumbnailBuilderComponent } from '../thumbnail-builder/thumbnail-builder.component';
 import { UsersService } from '../users.service';
 
 @Component({
@@ -43,19 +44,6 @@ export class AddFileComponent extends Page {
     }
   }
 
-  public addThumbnail(input : any) : void {
-    this.thumbnailIdCounts++;
-
-    let thumbnail = new Thumbnail();
-
-    thumbnail.id = this.thumbnailIdCounts + '';
-    thumbnail.file = input.files[0];
-    thumbnail.name = input.files[0].name;
-    thumbnail.src = URL.createObjectURL(input.files[0]);
-
-    this.thumbnails.push(thumbnail);
-  }
-
   public description : string = '';
 
   public makeThumbnail(video : any) : void {
@@ -70,25 +58,19 @@ export class AddFileComponent extends Page {
       ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
   
       canvas.toBlob(blob => {
-
-        this.thumbnailIdCounts++;
-
         let thumbnail = new Thumbnail();
   
-        thumbnail.id = this.thumbnailIdCounts + '';
         thumbnail.file = blob;
         thumbnail.name = '';
         thumbnail.src = URL.createObjectURL(blob);
 
-        this.thumbnails.push(thumbnail);
-
+        this.thumbnailBuilder?.add(thumbnail);
         this.ref.detectChanges();
-      });
+      }, 'image/jpeg', 0.75);
 
     } catch (error) {
       this.controls.modals?.getMsgBoxResult(MsgBoxType.Ok, error);
     }
-
   }
 
   public mediaFile : any;
@@ -97,21 +79,14 @@ export class AddFileComponent extends Page {
 
   public readRoles : string[] = [];
 
-  public removeThumbnail(thumbnail : Thumbnail) : void {
-    let index = this.thumbnails.findIndex(it => it.id === thumbnail.id);
-    if (index >= 0) {
-      this.thumbnails.splice(index, 1);
-      this.ref.detectChanges();
-    }
-  }
-
   public sanitize(url : string) : SafeUrl {
     return this.sanitizer.bypassSecurityTrustUrl(url);
   }
   
   public src : string = '';
 
-  public thumbnailIdCounts : number = 0;
+  @ViewChild('thumbnailBuilder')
+  public thumbnailBuilder : ThumbnailBuilderComponent | undefined;
 
   public thumbnails : Thumbnail[] = [];
 
@@ -147,11 +122,4 @@ export class AddFileComponent extends Page {
 
   @ViewChild('video')
   public video : ElementRef | undefined;
-}
-
-class Thumbnail {
-  public id : string = '';
-  public file : any;
-  public name : string = '';
-  public src : string = '';
 }
