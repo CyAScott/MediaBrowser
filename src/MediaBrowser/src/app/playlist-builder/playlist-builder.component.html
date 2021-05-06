@@ -1,0 +1,22 @@
+<div class="header">
+    <div class="name">Playlists</div>
+</div>
+<div class="input-thumbnails preview">
+    <div class="input-playlist">
+        <input [ngClass]="{'show-playlistMatches': playlistMatches.length}" #playlistInput type="text" placeholder="Type Playlist Name Here" (keyup)="updatePlaylistMatches($event)" />
+        <ul [style.display]="playlistMatches.length ? 'flex' : 'none'" class="options">
+            <li (click)="addToPlaylist(playlistMatch)" *ngFor="let playlistMatch of playlistMatches">{{playlistMatch.name}}</li>
+        </ul>
+    </div>    
+    <div class="cards">
+        <a *ngFor="let playlist of (playlistsForFile || [])" (click)="removeFromPlaylist(playlist)" class="card">
+            <div class="img">
+                <i class="fas fa-list-ol icon"></i>
+                <img *ngIf="playlist.thumbnails?.length" src="{{playlist.thumbnails[0].url}}" alt="{{playlist.name}}"/>
+                <div class="overlay"></div>
+                <i class="fas fa-times-circle open"></i>
+                <h1>{{playlist.name}}</h1>
+            </div>
+        </a>
+    </div>
+</div>

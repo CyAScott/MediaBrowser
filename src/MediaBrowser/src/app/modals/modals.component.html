@@ -8,8 +8,8 @@
   
       <div class="msgBoxContent">{{msgBoxText}}</div>
   
-      <div class="buttons" *ngFor="let button of msgBoxButtons">
-        <button [style.visibility]="button.visible ? 'visible' : 'hidden'" (click)="msgBoxDone(button)">{{button.text}}</button>
+      <div class="buttons">
+        <button *ngFor="let button of msgBoxButtons" [style.visibility]="button.visible ? 'visible' : 'hidden'" (click)="msgBoxDone(button)" class="modal-button">{{button.text}}</button>
       </div>
   
     </div>

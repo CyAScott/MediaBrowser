@@ -135,6 +135,7 @@ export interface FileReadModel {
   id : string;
   md5 : string;
   name : string;
+  playlistReferences: PlaylistReference[];
   readRoles : string[];
   thumbnails : FileThumbnail[];
   type : string;
@@ -154,6 +155,12 @@ export interface FileThumbnail {
   md5 : string;
   url : string;
   width : number;
+}
+
+export interface PlaylistReference {
+  addedOn : Date;
+  id : string;
+  index : number;
 }
 
 export interface UpdateFileRequest {

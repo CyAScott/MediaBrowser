@@ -1,7 +1,7 @@
 <div class="input">
     <div class="header">
         <div class="name">First Name</div>
-        <div (click)="add()" class="add"><i class="fas fa-user-plus"></i></div>
+        <div (click)="add()" class="button"><i class="fas fa-user-plus"></i></div>
     </div>
     <input type="text" [(ngModel)]="firstName" placeholder="First Name" />
 </div>
@@ -34,9 +34,4 @@
     <input type="password" [(ngModel)]="passwordConfirmed" placeholder="Confirm Password" />
 </div>
 
-<div class="input">
-    <div class="header">
-        <div class="name">Roles</div>
-    </div>
-    <app-role-builder [selection]="roles"></app-role-builder>
-</div>
+<app-role-builder header="Roles" [selection]="roles"></app-role-builder>

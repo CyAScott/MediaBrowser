@@ -4,6 +4,7 @@ import { CommonControlsService, Page } from '../common-controls.service';
 import { FileReadModel, FilesService } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
+import { PlaylistReadModel, PlaylistsService } from '../playlists.service';
 import { Thumbnail, ThumbnailBuilderComponent } from '../thumbnail-builder/thumbnail-builder.component';
 import { UsersService } from '../users.service';
 
@@ -20,6 +21,7 @@ export class FileInfoComponent extends Page {
     route : ActivatedRoute,
     private files : FilesService,
     private ref: ChangeDetectorRef,
+    private playlists : PlaylistsService,
     public users : UsersService) {
     super(controls, logger, 'File')
     route.params.subscribe(params => this.id = params.id);
@@ -35,10 +37,14 @@ export class FileInfoComponent extends Page {
     if (this.controls.pagination?.pageCount) {
       this.controls.pagination.pageCount = 1;
     }
+
     this.files
       .get(this.id)
       .subscribe(file => {
-        this.controls.modals?.toggleLoader();
+        if (!file.playlistReferences?.length) {
+          this.controls.modals?.toggleLoader();
+        }
+        
         this.file = file;
 
         this.description = file.description;
@@ -63,6 +69,15 @@ export class FileInfoComponent extends Page {
 
             return thumbnail;
           });
+        }
+
+        if (file.playlistReferences?.length) {
+          this.playlists
+            .getByFile(this.id)
+            .subscribe(playlistsForFile => {
+              this.controls.modals?.toggleLoader();
+              this.playlistsForFile = playlistsForFile;
+            });
         }
       });
   }
@@ -96,6 +111,8 @@ export class FileInfoComponent extends Page {
   }
 
   public name : string = '';
+
+  public playlistsForFile : PlaylistReadModel[] = [];
 
   public readRoles : string[] = [];
 
@@ -137,3 +154,4 @@ export class FileInfoComponent extends Page {
   @ViewChild('video')
   public video : ElementRef | undefined;
 }
+

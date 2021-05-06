@@ -26,6 +26,7 @@ const routes: Routes = [
   { path: 'Playlists', component: PlaylistsComponent },
   { path: 'Playlists/:pageSelection', component: PlaylistsComponent },
   { path: 'Playlist/:id', component: PlaylistComponent },
+  { path: 'Playlist/:playlistId/Files', component: FilesComponent },
 
   { path: 'AddRole', component: AddRoleComponent },
   { path: 'Roles', component: RolesComponent },

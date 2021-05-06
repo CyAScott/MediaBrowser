@@ -44,6 +44,9 @@ namespace MediaBrowser.Services
         public Task<IPlaylist> Get(Guid playlistId) =>
             Task.FromResult((IPlaylist)Collection.FindById(playlistId));
 
+        public Task<IPlaylist[]> Get(IEnumerable<Guid> playlistIds) =>
+            Task.FromResult(Collection.Find(Query.In("_id", new BsonArray(playlistIds.Select(it => new BsonValue(it))))).Cast<IPlaylist>().ToArray());
+
         public Task<IPlaylist> GetByName(string name) =>
             Task.FromResult((IPlaylist)Collection.FindOne(Query.EQ(nameof(LiteDbPlaylist.Name), name)));
 

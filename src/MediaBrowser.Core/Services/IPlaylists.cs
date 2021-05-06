@@ -26,6 +26,11 @@ namespace MediaBrowser.Services
         Task<IPlaylist> Get(Guid playlistId);
 
         /// <summary>
+        /// Read a playlist by ids.
+        /// </summary>
+        Task<IPlaylist[]> Get(IEnumerable<Guid> playlistIds);
+
+        /// <summary>
         /// Search playlists.
         /// </summary>
         Task<SearchPlaylistsResponse<IPlaylist>> Search(SearchPlaylistsRequest request, Guid userId, HashSet<string> userRoles);

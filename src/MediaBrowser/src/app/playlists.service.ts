@@ -34,6 +34,10 @@ export class PlaylistsService {
   public get(playlistId : string) : Observable<PlaylistReadModel> {
     return this.httpClient.get<PlaylistReadModel>(`/api/playlists/${playlistId}`);
   }
+  
+  public getByFile(fileId : string) : Observable<PlaylistReadModel[]> {
+    return this.httpClient.get<PlaylistReadModel[]>(`/api/files/${fileId}/playlists`);
+  }
 
   public lastSearch : SearchPlaylistsRequest | undefined;
   public lastSearchResponse : SearchPlaylistsResponse | undefined;

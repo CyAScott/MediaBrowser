@@ -14,7 +14,7 @@
 <div class="input-file">
     <div class="header">
         <div class="name">File (Required)</div>
-        <div class="add">
+        <div class="button">
             <i class="fas fa-folder-plus"></i>
             <input (change)="add(file)" #file accept="audio/mp3, audio/ogg, audio/wav, image/gif, image/jpeg, image/png, video/mp4" type="file" />
         </div>
@@ -32,18 +32,8 @@
     </div>
 </div>
 
+<app-role-builder *ngIf="users.hasRole('Admin')" header="Read Roles" [selection]="readRoles"></app-role-builder>
+
+<app-role-builder *ngIf="users.hasRole('Admin')" header="Update Roles" [selection]="updateRoles"></app-role-builder>
+
 <app-thumbnail-builder #thumbnailBuilder [thumbnails]="thumbnails"></app-thumbnail-builder>
-
-<div *ngIf="users.hasRole('Admin')" class="input">
-    <div class="header">
-        <div class="name">Read Roles</div>
-    </div>
-    <app-role-builder [selection]="readRoles"></app-role-builder>
-</div>
-
-<div *ngIf="users.hasRole('Admin')" class="input">
-    <div class="header">
-        <div class="name">Update Roles</div>
-    </div>
-    <app-role-builder [selection]="updateRoles"></app-role-builder>
-</div>

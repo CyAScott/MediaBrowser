@@ -1,7 +1,7 @@
 <div class="input-name">
     <div class="header">
         <div class="name">Name (Optional)</div>
-        <div (click)="save()" class="save"><i class="fas fa-save"></i></div>
+        <div (click)="save()" class="button"><i class="fas fa-save"></i></div>
     </div>
     <input type="text" [(ngModel)]="name" placeholder="Name" />
 </div>
@@ -28,18 +28,10 @@
     </div>
 </div>
 
+<app-role-builder *ngIf="users.hasRole('Admin')" header="Read Roles" [selection]="readRoles"></app-role-builder>
+
+<app-role-builder *ngIf="users.hasRole('Admin')" header="Update Roles" [selection]="updateRoles"></app-role-builder>
+
+<app-playlist-builder [fileid]="id" [playlistsForFile]="playlistsForFile"></app-playlist-builder>
+
 <app-thumbnail-builder #thumbnailBuilder [thumbnails]="thumbnails" [thumbnailsToRemove]="thumbnailsToRemove"></app-thumbnail-builder>
-
-<div *ngIf="users.hasRole('Admin')" class="input">
-    <div class="header">
-        <div class="name">Read Roles</div>
-    </div>
-    <app-role-builder [selection]="readRoles"></app-role-builder>
-</div>
-
-<div *ngIf="users.hasRole('Admin')" class="input">
-    <div class="header">
-        <div class="name">Update Roles</div>
-    </div>
-    <app-role-builder [selection]="updateRoles"></app-role-builder>
-</div>

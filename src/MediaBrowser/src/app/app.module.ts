@@ -25,6 +25,7 @@ import { AddPlaylistComponent } from './add-playlist/add-playlist.component';
 import { PlaylistComponent } from './playlist/playlist.component';
 import { PlaylistsComponent } from './playlists/playlists.component';
 import { ThumbnailBuilderComponent } from './thumbnail-builder/thumbnail-builder.component';
+import { PlaylistBuilderComponent } from './playlist-builder/playlist-builder.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { ThumbnailBuilderComponent } from './thumbnail-builder/thumbnail-builder
     AddPlaylistComponent,
     PlaylistComponent,
     PlaylistsComponent,
-    ThumbnailBuilderComponent
+    ThumbnailBuilderComponent,
+    PlaylistBuilderComponent
   ],
   imports: [
     BrowserModule,

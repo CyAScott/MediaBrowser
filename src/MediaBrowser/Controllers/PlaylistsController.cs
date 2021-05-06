@@ -205,6 +205,38 @@ namespace MediaBrowser.Controllers
         }
 
         /// <summary>
+        /// Read all playlists for a file.
+        /// </summary>
+        [HttpGet("api/files/{fileId:guid}/playlists"), Authorize]
+        public async Task<ActionResult<PlaylistReadModel[]>> GetByFile(Guid fileId)
+        {
+            var jwt = User.Identity as JwtPayload;
+            var file = await Files.Get(fileId);
+
+            if (jwt == null || file == null)
+            {
+                return NotFound();
+            }
+
+            if (!file.CanRead(jwt.Id, jwt.Roles))
+            {
+                return Unauthorized();
+            }
+
+            if (file.PlaylistReferences == null || file.PlaylistReferences.Length == 0)
+            {
+                return new ActionResult<PlaylistReadModel[]>(new PlaylistReadModel[0]);
+            }
+
+            var playlists = await Playlists.Get(file.PlaylistReferences.Select(it => it.Id));
+
+            return new ActionResult<PlaylistReadModel[]>(playlists
+                .Where(it => it.CanRead(jwt.Id, jwt.Roles))
+                .Select(it => new PlaylistReadModel(it))
+                .ToArray());
+        }
+
+        /// <summary>
         /// Removes a file from a playlist.
         /// </summary>
         [HttpDelete("api/playlists/{playlistId:guid}/files/{fileId:guid}"), Authorize]

@@ -1,7 +1,8 @@
 <div class="input-name">
     <div class="header">
         <div class="name">Name Required</div>
-        <div (click)="update()" class="update"><i class="fas fa-save"></i></div>
+        <a [routerLink]="['/Playlist/' + id + '/Files']" class="button"><i class="fas fa-play-circle"></i></a>
+        <div (click)="update()" class="button"><i class="fas fa-save"></i></div>
     </div>
     <input type="text" [(ngModel)]="name" placeholder="Name" />
 </div>
@@ -11,18 +12,8 @@
     <textarea [(ngModel)]="description"></textarea>
 </div>
 
-<div *ngIf="users.hasRole('Admin')" class="input">
-    <div class="header">
-        <div class="name">Read Roles</div>
-    </div>
-    <app-role-builder [selection]="readRoles"></app-role-builder>
-</div>
+<app-role-builder *ngIf="users.hasRole('Admin')" header="Read Roles" [selection]="readRoles"></app-role-builder>
 
-<div *ngIf="users.hasRole('Admin')" class="input">
-    <div class="header">
-        <div class="name">Update Roles</div>
-    </div>
-    <app-role-builder [selection]="updateRoles"></app-role-builder>
-</div>
+<app-role-builder *ngIf="users.hasRole('Admin')" header="Update Roles" [selection]="updateRoles"></app-role-builder>
 
 <app-thumbnail-builder [thumbnails]="thumbnails" [thumbnailsToRemove]="thumbnailsToRemove"></app-thumbnail-builder>

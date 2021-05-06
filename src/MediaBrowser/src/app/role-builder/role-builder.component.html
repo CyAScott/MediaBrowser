@@ -1,13 +1,18 @@
-<div class="input-role">
-    <input [ngClass]="{'show-options': options.length}" #roleInput type="text" placeholder="Role" (keyup)="updateOptions($event)" />
-    <ul [style.display]="options.length ? 'flex' : 'none'" class="options">
-        <li (click)="add(option)" *ngFor="let option of options">{{option}}</li>
+<div class="header">
+    <div class="name">{{header}}</div>
+</div>
+<div class="preview">
+    <div class="input-role">
+        <input [ngClass]="{'show-options': options.length}" #roleInput type="text" placeholder="Type Role Name Here" (keyup)="updateOptions($event)" />
+        <ul [style.display]="options.length ? 'flex' : 'none'" class="options">
+            <li (click)="add(option)" *ngFor="let option of options">{{option}}</li>
+        </ul>
+    </div>
+    <ul [style.display]="selection.length ? 'flex' : 'none'" class="role-chips">
+        <li (click)="remove(role)" *ngFor="let role of selection">
+            <i class="fas fa-user-lock"></i>
+            {{role}}
+            <i class="close fas fa-times"></i>
+        </li>
     </ul>
 </div>
-<ul [style.display]="selection.length ? 'flex' : 'none'" class="role-chips">
-    <li (click)="remove(role)" *ngFor="let role of selection">
-        <i class="fas fa-user-lock"></i>
-        {{role}}
-        <i class="close fas fa-times"></i>
-    </li>
-</ul>

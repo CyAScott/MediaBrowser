@@ -16,8 +16,8 @@ export class RoleBuilderComponent {
     
   public allRoles : string[];
 
-  @ViewChild('roleInput')
-  public roleInput : ElementRef | undefined;
+  @Input()
+  public header : string = 'Roles';
 
   public add(role : string) : void {
     if (this.roleInput?.nativeElement) {
@@ -34,7 +34,7 @@ export class RoleBuilderComponent {
 
     role = this.allRoles.find(it => role == it.toUpperCase()) as string;
 
-    if (role && !this.selection.some(it => it === role)) {
+    if (role && !this.selection.some(it => it.toUpperCase() === role.toUpperCase())) {
       this.selection.push(role);
     }
 
@@ -52,6 +52,9 @@ export class RoleBuilderComponent {
       this.ref.detectChanges();
     }
   }
+
+  @ViewChild('roleInput')
+  public roleInput : ElementRef | undefined;
 
   @Input()
   public selection : string[] = [];

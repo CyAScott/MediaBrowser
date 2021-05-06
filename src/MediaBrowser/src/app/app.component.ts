@@ -54,6 +54,9 @@ export class AppComponent implements AppComponent, OnInit {
       page.add();
     }
   }
+  public pagesEnabled() : boolean {
+    return this.controls.pagination?.pageCount !== undefined && this.controls.pagination.pageCount > 1;
+  }
   
   public fullScreen : boolean = false;
   public menuVisible : boolean = false;
