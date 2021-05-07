@@ -16,6 +16,8 @@
 
     <audio *ngIf="id.length && file && file.type == 'Audio'" src="/api/files/{{id}}/contents" autoplay controls (ended)="endOfFile()"></audio>
     <img *ngIf="id.length && file && file.type == 'Photo'" src="/api/files/{{id}}/contents" />
-    <video *ngIf="id.length && file && file.type == 'Video'" src="/api/files/{{id}}/contents" autoplay controls (ended)="endOfFile()"></video>
+    <video *ngIf="id.length && file && file.type == 'Video'" autoplay controls (ended)="endOfFile()">
+        <source src="/api/files/{{id}}/contents" type="{{file.contentType}}">
+    </video>
 
 </div>
