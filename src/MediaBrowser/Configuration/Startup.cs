@@ -2,7 +2,9 @@ using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -12,11 +14,20 @@ namespace MediaBrowser.Configuration
 {
     public partial class Startup
     {
+        public Startup(IConfiguration configuration) => Configuration = configuration;
+
+        public IConfiguration Configuration { get; }
         public IServiceCollection Services { get; private set; }
         public StartupConfigureServices StartupConfigureServices { get; set; }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var hosts = Configuration["AllowedHosts"]?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (hosts?.Length > 0)
+            {
+                services.Configure<HostFilteringOptions>(options => options.AllowedHosts = hosts);
+            }
+
             Services = services;
 
             Services

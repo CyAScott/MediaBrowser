@@ -27,6 +27,9 @@ namespace MediaBrowser.Services
         public Task<IFile> Get(Guid fileId) =>
             Task.FromResult((IFile)Collection.FindById(fileId));
 
+        public Task<IFile[]> GetByMd5(Guid md5) =>
+            Task.FromResult(Collection.Find(Query.EQ(nameof(IFile.Md5), md5)).Cast<IFile>().ToArray());
+
         public Task<IFile> GetByName(string name) =>
             Task.FromResult((IFile)Collection.FindOne(Query.EQ(nameof(IFile.Name), name)));
 

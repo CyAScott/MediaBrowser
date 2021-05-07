@@ -16,6 +16,11 @@ namespace MediaBrowser.Services
         Task<IFile> GetByName(string name);
 
         /// <summary>
+        /// Gets files by the MD5 hash.
+        /// </summary>
+        Task<IFile[]> GetByMd5(Guid md5);
+
+        /// <summary>
         /// Read a file by id.
         /// </summary>
         Task<IFile> Get(Guid fileId);

@@ -17,6 +17,7 @@
   
   <ItemGroup>
     <PackageReference Include="Castle.Windsor" Version="5.0.1" />
+    <PackageReference Include="NLog" Version="4.7.9" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 

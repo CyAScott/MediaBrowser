@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -18,6 +19,11 @@ namespace MediaBrowser.Services
     /// </summary>
     public interface IFfmpeg
     {
+        /// <summary>
+        /// Generates a thumbnails from a video file.
+        /// </summary>
+        Task<UploadedFileInfo> GenerateThumbnail(string location, TimeSpan offset, string thumbnailLocation);
+
         /// <summary>
         /// Reads the file meta data using ffmpeg.
         /// </summary>
@@ -420,6 +426,26 @@ namespace MediaBrowser.Services
             }
 
             return returnValue;
+        }
+
+        /// <summary>
+        /// Generates a thumbnails from a video file.
+        /// </summary>
+        public async Task<UploadedFileInfo> GenerateThumbnail(string location, TimeSpan offset, string thumbnailLocation)
+        {
+            if (File.Exists(thumbnailLocation))
+            {
+                throw new DuplicateNameException();
+            }
+
+            await readLines($"-ss {Convert.ToInt32(Math.Floor(offset.TotalHours))}:{offset.Minutes:00}:{offset.Seconds:00}.{offset.Milliseconds:000} -i \"{location}\" -f mjpeg -vframes 1 \"{thumbnailLocation}\"");
+
+            if (!File.Exists(thumbnailLocation))
+            {
+                throw new FileNotFoundException("The thumbnail is missing.");
+            }
+
+            return await GetFileInfo(thumbnailLocation);
         }
     }
 }
