@@ -26,6 +26,7 @@ import { PlaylistComponent } from './playlist/playlist.component';
 import { PlaylistsComponent } from './playlists/playlists.component';
 import { ThumbnailBuilderComponent } from './thumbnail-builder/thumbnail-builder.component';
 import { PlaylistBuilderComponent } from './playlist-builder/playlist-builder.component';
+import { FormatMillisecondsPipe } from './format-milliseconds.pipe';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,8 @@ import { PlaylistBuilderComponent } from './playlist-builder/playlist-builder.co
     PlaylistComponent,
     PlaylistsComponent,
     ThumbnailBuilderComponent,
-    PlaylistBuilderComponent
+    PlaylistBuilderComponent,
+    FormatMillisecondsPipe
   ],
   imports: [
     BrowserModule,

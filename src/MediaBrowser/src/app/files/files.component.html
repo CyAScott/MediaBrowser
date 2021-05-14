@@ -9,7 +9,7 @@
                 <img *ngIf="item?.type == 'Photo' || item.thumbnails?.length" src="{{item.thumbnails?.length ? item.thumbnails[0].url : item.url}}" alt="{{item.name}}"/>
                 <div class="overlay"></div>
                 <i class="fas fa-search-plus open"></i>
-                <h1>{{item.name}}</h1>
+                <h1>{{item.duration | formatMilliseconds: 'H:mm:ss' }} {{item.name}}</h1>
             </div>
         </a>
     </div>

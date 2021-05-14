@@ -110,6 +110,7 @@ namespace MediaBrowser.CommandLine
                             AudioStreams = uploadedFileInfo.AudioStreams,
                             ContentLength = fileInfo.Length,
                             ContentType = uploadedFileInfo.ContentType,
+                            Duration = uploadedFileInfo.Duration,
                             Fps = uploadedFileInfo.Fps,
                             Height = uploadedFileInfo.Height,
                             Id = fileId,
