@@ -1,5 +1,5 @@
 <div [style.visibility]="searchVisible ? 'visible' : 'hidden'" class="search">
-  <input #keywordsInput type="text" [ngModel]="keywords" (keyup.enter)="refresh(keywordsInput.value)" />
+  <input #keywordsInput autocapitalize="none" type="text" [ngModel]="keywords" (keyup.enter)="refresh(keywordsInput.value)" />
   <div>
     <i class="fas fa-search" (click)="refresh(keywordsInput.value)"></i>
     <i *ngIf="filterOptionsEnabled" class="fas fa-filter" (click)="selectFilter()"></i>
