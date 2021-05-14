@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { NavigationEnd, Router, Scroll } from '@angular/router';
 import { CommonControlsService, PageSearchable } from './common-controls.service';
 import { LoggerService } from './logger.service';
 import { UsersService } from './users.service';
@@ -18,7 +19,8 @@ export class AppComponent implements AppComponent, OnInit {
   constructor(
     public users : UsersService,
     private controls : CommonControlsService,
-    private log : LoggerService) {
+    private log : LoggerService,
+    private router : Router) {
 
     controls.appComponent = this;
     document.onfullscreenchange = () => this.fullscreenchange();
@@ -33,6 +35,11 @@ export class AppComponent implements AppComponent, OnInit {
           this.log.error(`Service Worker Registration Failed: ${JSON.stringify(error)}`);
         });
     }
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.scrollToTop();
+      }
+    });
   }
 
   public addEnabled() : boolean {
@@ -56,6 +63,15 @@ export class AppComponent implements AppComponent, OnInit {
   }
   public pagesEnabled() : boolean {
     return this.controls.pagination?.pageCount !== undefined && this.controls.pagination.pageCount > 1;
+  }
+
+  @ViewChild('routerBody')
+  public routerBody : any;
+  public scrollToTop() : void {
+    if (this.routerBody?.nativeElement) {
+      this.routerBody.nativeElement.scrollLeft  = 0;
+      this.routerBody.nativeElement.scrollTop  = 0;
+    }
   }
   
   public fullScreen : boolean = false;
@@ -82,5 +98,6 @@ export class AppComponent implements AppComponent, OnInit {
 export interface AppComponent {
   fullScreen : boolean;
   menuVisible : boolean;
+  scrollToTop() : void;
   toggleFullScreen() : Promise<void>;
 }
