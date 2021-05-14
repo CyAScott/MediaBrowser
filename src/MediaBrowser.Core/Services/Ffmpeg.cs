@@ -8,6 +8,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace MediaBrowser.Services
         /// <summary>
         /// Generates a thumbnails from a video file.
         /// </summary>
-        Task<UploadedFileInfo> GenerateThumbnail(string location, TimeSpan offset, string thumbnailLocation);
+        Task<GeneratedThumbnail> GenerateThumbnail(string location, TimeSpan offset, Size size, string thumbnailLocation);
 
         /// <summary>
         /// Reads the file meta data using ffmpeg.
@@ -374,6 +375,46 @@ namespace MediaBrowser.Services
         public string Location { get; private set; }
 
         /// <summary>
+        /// Generates a thumbnails from a video file.
+        /// </summary>
+        public async Task<GeneratedThumbnail> GenerateThumbnail(string location, TimeSpan offset, Size size, string thumbnailLocation)
+        {
+            if (File.Exists(thumbnailLocation))
+            {
+                throw new DuplicateNameException();
+            }
+
+            var command = new StringBuilder();
+
+            if (offset.Ticks > 0)
+            {
+                command.Append($"-ss {Convert.ToInt32(Math.Floor(offset.TotalHours))}:{offset.Minutes:00}:{offset.Seconds:00}.{offset.Milliseconds:000} ");
+            }
+
+            command.Append($"-i \"{location}\" -f mjpeg -vframes 1 -filter:v scale=\"{size.Width}:{size.Height}\" \"{thumbnailLocation}\"");
+
+            await readLines(command.ToString());
+
+            if (!File.Exists(thumbnailLocation))
+            {
+                throw new FileNotFoundException("The thumbnail is missing.");
+            }
+
+            var fileInfo = await GetFileInfo(thumbnailLocation);
+
+            return new GeneratedThumbnail
+            {
+                ContentLength = fileInfo.ContentLength,
+                ContentType = fileInfo.ContentType,
+                CreatedOn = DateTime.Now,
+                Height = fileInfo.Height ?? 0,
+                Location = fileInfo.Location,
+                Md5 = fileInfo.Md5,
+                Width = fileInfo.Width ?? 0
+            };
+        }
+
+        /// <summary>
         /// Reads a file.
         /// </summary>
         public async Task<UploadedFileInfo> GetFileInfo(string location)
@@ -427,25 +468,32 @@ namespace MediaBrowser.Services
 
             return returnValue;
         }
+    }
 
-        /// <summary>
-        /// Generates a thumbnails from a video file.
-        /// </summary>
-        public async Task<UploadedFileInfo> GenerateThumbnail(string location, TimeSpan offset, string thumbnailLocation)
-        {
-            if (File.Exists(thumbnailLocation))
-            {
-                throw new DuplicateNameException();
-            }
+    /// <summary>
+    /// A generated thumbnail from a media file.
+    /// </summary>
+    public class GeneratedThumbnail : IThumbnail
+    {
+        /// <inheritdoc/>
+        public DateTime CreatedOn { get; set; }
 
-            await readLines($"-ss {Convert.ToInt32(Math.Floor(offset.TotalHours))}:{offset.Minutes:00}:{offset.Seconds:00}.{offset.Milliseconds:000} -i \"{location}\" -f mjpeg -vframes 1 \"{thumbnailLocation}\"");
+        /// <inheritdoc/>
+        public Guid Md5 { get; set; }
 
-            if (!File.Exists(thumbnailLocation))
-            {
-                throw new FileNotFoundException("The thumbnail is missing.");
-            }
+        /// <inheritdoc/>
+        public int Height { get; set; }
 
-            return await GetFileInfo(thumbnailLocation);
-        }
+        /// <inheritdoc/>
+        public int Width { get; set; }
+
+        /// <inheritdoc/>
+        public long ContentLength { get; set; }
+
+        /// <inheritdoc/>
+        public string Location { get; set; }
+
+        /// <inheritdoc/>
+        public string ContentType { get; set; }
     }
 }
