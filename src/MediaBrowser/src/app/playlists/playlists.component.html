@@ -1,4 +1,4 @@
-<div class="no-cards" *ngIf="!response?.results || (response?.results?.length || 0) == 0">
+<div class="no-cards" *ngIf="response && (!response.results || (response.results.length || 0) == 0)">
     <span>no results</span>
 </div>
 <div *ngIf="response?.results && (response?.results?.length || 0) > 0" class="cards">
