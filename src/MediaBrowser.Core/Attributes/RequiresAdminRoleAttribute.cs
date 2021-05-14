@@ -12,7 +12,7 @@ namespace MediaBrowser.Attributes
         /// <summary>
         /// The admin roles grants the user full CRUD access for users and roles.
         /// </summary>
-        public const string AdminRole = "Admin";
+        public const string AdminRole = "ADMIN";
 
         /// <inheritdoc/>
         public override bool MeetsRequirements(IUser user) => user?.Roles != null && user.Roles.Contains(AdminRole, StringComparer.OrdinalIgnoreCase);

@@ -2,9 +2,7 @@ using MediaBrowser.Extensions;
 using MediaBrowser.Models;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,49 +19,6 @@ namespace MediaBrowser.Controllers
     [ApiController]
     public class PlaylistsController : Controller
     {
-        private bool isCached(DateTime lastModified)
-        {
-            var requestHeaders = Request.GetTypedHeaders();
-
-            if (requestHeaders.IfModifiedSince.HasValue &&
-                requestHeaders.IfModifiedSince.Value.AddMinutes(1) >= lastModified)
-            {
-                return true;
-            }
-
-            var responseHeaders = Response.GetTypedHeaders();
-
-            responseHeaders.CacheControl = new CacheControlHeaderValue
-            {
-                MaxAge = TimeSpan.FromDays(14)
-            };
-            responseHeaders.LastModified = lastModified;
-
-            return false;
-        }
-        private async Task<bool> doRolesExists(HashSet<string> readRoles, HashSet<string> updateRoles)
-        {
-            var roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            if (readRoles != null)
-            {
-                roles.UnionWith(readRoles);
-            }
-
-            if (updateRoles != null)
-            {
-                roles.UnionWith(updateRoles);
-            }
-
-            if (roles.Count == 0)
-            {
-                return true;
-            }
-
-            var matchedRoles = (await Task.WhenAll(roles.Select(Roles.GetByName))).Select(it => it.Name).ToArray();
-
-            return roles.Count == matchedRoles.Length;
-        }
         private static readonly HashSet<string> acceptedMimeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "image/gif",
@@ -112,7 +67,7 @@ namespace MediaBrowser.Controllers
                 return Unauthorized();
             }
 
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }
@@ -154,7 +109,7 @@ namespace MediaBrowser.Controllers
             }
 
             var request = JsonConvert.DeserializeObject<CreatePlaylistRequest>(json.First());
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }
@@ -335,7 +290,7 @@ namespace MediaBrowser.Controllers
             }
 
             var request = JsonConvert.DeserializeObject<UpdatePlaylistRequest>(json.First());
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }
@@ -388,7 +343,7 @@ namespace MediaBrowser.Controllers
                 return NotFound();
             }
 
-            if (isCached(thumbnail.CreatedOn))
+            if (this.IsCached(thumbnail.CreatedOn))
             {
                 return StatusCode(304);
             }
@@ -432,7 +387,7 @@ namespace MediaBrowser.Controllers
                 return Unauthorized();
             }
 
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }

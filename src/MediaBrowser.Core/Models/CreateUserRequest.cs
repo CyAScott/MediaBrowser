@@ -34,6 +34,6 @@ namespace MediaBrowser.Models
         /// <summary>
         /// The roles to assign the user.
         /// </summary>
-        public string[] Roles { get; set; }
+        public RoleSet Roles { get; set; }
     }
 }

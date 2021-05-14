@@ -16,12 +16,12 @@ namespace MediaBrowser.Models
         /// <summary>
         /// Optional. If provided changes the required roles for reading the file.
         /// </summary>
-        public HashSet<string> ReadRoles { get; set; }
+        public RoleSet ReadRoles { get; set; }
 
         /// <summary>
         /// Optional. If provided changes the required roles for updating the file.
         /// </summary>
-        public HashSet<string> UpdateRoles { get; set; }
+        public RoleSet UpdateRoles { get; set; }
 
         /// <summary>
         /// Optional. If provided changes the file name.

@@ -33,7 +33,7 @@ namespace MediaBrowser.Services
         public Task<IFile> GetByName(string name) =>
             Task.FromResult((IFile)Collection.FindOne(Query.EQ(nameof(IFile.Name), name)));
 
-        public Task<SearchFilesResponse<IFile>> Search(SearchFilesRequest request, Guid userId, HashSet<string> userRoles, Guid? playlistId = null)
+        public Task<SearchFilesResponse<IFile>> Search(SearchFilesRequest request, Guid userId, RoleSet userRoles, Guid? playlistId = null)
         {
             var query = Query.All();
 
@@ -302,10 +302,10 @@ namespace MediaBrowser.Services
                 Name = request.Name ?? "",
                 Location = file.Location,
                 Md5 = file.Md5,
-                ReadRoles = request.ReadRoles ?? new HashSet<string>(),
+                ReadRoles = request.ReadRoles ?? new RoleSet(),
                 Thumbnails = file.Thumbnails?.Select(it => new LiteDbThumbnail(it)).ToArray(),
                 Type = file.Type,
-                UpdateRoles = request.UpdateRoles ?? new HashSet<string>(),
+                UpdateRoles = request.UpdateRoles ?? new RoleSet(),
                 UploadedBy = file.UploadedBy,
                 UploadedOn = file.UploadedOn,
                 VideoStreams = file.VideoStreams,
@@ -331,9 +331,9 @@ namespace MediaBrowser.Services
 
         public Guid UploadedBy { get; set; }
 
-        public HashSet<string> ReadRoles { get; set; }
+        public RoleSet ReadRoles { get; set; }
 
-        public HashSet<string> UpdateRoles { get; set; }
+        public RoleSet UpdateRoles { get; set; }
 
         public IPlaylistReference[] PlaylistReferences { get; set; }
 

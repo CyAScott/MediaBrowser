@@ -102,9 +102,15 @@ namespace MediaBrowser
                     ConfigureContainer(null, container);
 
                     var init = container.ResolveAll<IHaveInit>();
-                    foreach (var service in init)
+                    foreach (var serviceInfo in init
+                        .Select(service => new
+                        {
+                            attribute = service.GetType().GetCustomAttribute<InitAttribute>() ?? new InitAttribute(),
+                            service
+                        })
+                        .OrderBy(serviceInfo => serviceInfo.attribute.Priority))
                     {
-                        await service.Init();
+                        await serviceInfo.service.Init();
                     }
 
                     var commandService = (IAmACommand)container.Resolve(commandServiceType);

@@ -1,6 +1,4 @@
 ﻿using MediaBrowser.Models;
-using System;
-using System.Collections.Generic;
 
 namespace MediaBrowser.Attributes
 {
@@ -10,12 +8,12 @@ namespace MediaBrowser.Attributes
     public class RequiredRoleAttribute : BaseRoleRequirementAttribute
     {
         /// <inheritdoc/>
-        public RequiredRoleAttribute(params string[] roles) => Roles = new HashSet<string>(roles, StringComparer.OrdinalIgnoreCase);
+        public RequiredRoleAttribute(params string[] roles) => Roles = new RoleSet(roles);
 
         /// <summary>
         /// The required roles.
         /// </summary>
-        public HashSet<string> Roles { get; }
+        public RoleSet Roles { get; }
 
         /// <inheritdoc/>
         public override bool MeetsRequirements(IUser user) => user?.Roles != null && Roles.IsSubsetOf(user.Roles);

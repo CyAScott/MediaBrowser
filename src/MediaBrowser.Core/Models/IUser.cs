@@ -18,6 +18,11 @@ namespace MediaBrowser.Models
         Guid Id { get; }
 
         /// <summary>
+        /// The role names the user was assigned to.
+        /// </summary>
+        RoleSet Roles { get; }
+
+        /// <summary>
         /// Checks if a password is valid.
         /// </summary>
         bool IsPasswordValid(string password);
@@ -36,10 +41,5 @@ namespace MediaBrowser.Models
         /// The user name for the user.
         /// </summary>
         string UserName { get; }
-
-        /// <summary>
-        /// The role names the user was assigned to.
-        /// </summary>
-        string[] Roles { get; }
     }
 }

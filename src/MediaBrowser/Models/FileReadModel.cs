@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MediaBrowser.Models
@@ -35,10 +34,10 @@ namespace MediaBrowser.Models
         public Guid UploadedBy => file.UploadedBy;
 
         /// <inheritdoc/>
-        public HashSet<string> ReadRoles => file.ReadRoles;
+        public RoleSet ReadRoles => file.ReadRoles;
 
         /// <inheritdoc/>
-        public HashSet<string> UpdateRoles => file.UpdateRoles;
+        public RoleSet UpdateRoles => file.UpdateRoles;
 
         /// <inheritdoc/>
         public Guid Md5 => file.Md5;

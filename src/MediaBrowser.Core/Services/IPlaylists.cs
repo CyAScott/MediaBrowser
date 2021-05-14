@@ -33,7 +33,7 @@ namespace MediaBrowser.Services
         /// <summary>
         /// Search playlists.
         /// </summary>
-        Task<SearchPlaylistsResponse<IPlaylist>> Search(SearchPlaylistsRequest request, Guid userId, HashSet<string> userRoles);
+        Task<SearchPlaylistsResponse<IPlaylist>> Search(SearchPlaylistsRequest request, Guid userId, RoleSet userRoles);
 
         /// <summary>
         /// Updates a playlist by id.

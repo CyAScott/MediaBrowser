@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MediaBrowser.Models
@@ -29,10 +28,10 @@ namespace MediaBrowser.Models
         public Guid CreatedBy => playlist.CreatedBy;
 
         /// <inheritdoc/>
-        public HashSet<string> ReadRoles => playlist.ReadRoles;
+        public RoleSet ReadRoles => playlist.ReadRoles;
 
         /// <inheritdoc/>
-        public HashSet<string> UpdateRoles => playlist.UpdateRoles;
+        public RoleSet UpdateRoles => playlist.UpdateRoles;
 
         /// <inheritdoc/>
         public PlaylistThumbnailReadModel[] Thumbnails { get; }

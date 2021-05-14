@@ -1,6 +1,5 @@
 ﻿using MediaBrowser.Models;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MediaBrowser.Services
@@ -28,7 +27,7 @@ namespace MediaBrowser.Services
         /// <summary>
         /// Search files.
         /// </summary>
-        Task<SearchFilesResponse<IFile>> Search(SearchFilesRequest request, Guid userId, HashSet<string> userRoles, Guid? playlistId = null);
+        Task<SearchFilesResponse<IFile>> Search(SearchFilesRequest request, Guid userId, RoleSet userRoles, Guid? playlistId = null);
 
         /// <summary>
         /// Sets the playlist reference for a media file.

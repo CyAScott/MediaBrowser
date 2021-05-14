@@ -23,30 +23,6 @@ namespace MediaBrowser.CommandLine
     [CommandInfo("Imports media files into the DB.")]
     public class Import : CommandLineArgs, IAmACommand
     {
-        private async Task<bool> doRolesExists(HashSet<string> readRoles, HashSet<string> updateRoles)
-        {
-            var roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            if (readRoles != null)
-            {
-                roles.UnionWith(readRoles);
-            }
-
-            if (updateRoles != null)
-            {
-                roles.UnionWith(updateRoles);
-            }
-
-            if (roles.Count == 0)
-            {
-                return true;
-            }
-
-            var matchedRoles = (await Task.WhenAll(roles.Select(Roles.GetByName))).Select(it => it.Name).ToArray();
-
-            return roles.Count == matchedRoles.Length;
-        }
-
         private async Task scanDirectory(Guid userId, DateTime now, string directory, HashSet<string> fileExtensions, Dictionary<string, IPlaylist> playlists)
         {
             foreach (var subDirectory in Directory.GetDirectories(directory).OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
@@ -126,8 +102,8 @@ namespace MediaBrowser.CommandLine
                         {
                             Description = Format(DescriptionFormat, now, location),
                             Name = Format(NameFormat, now, location),
-                            ReadRoles = new HashSet<string>(ReadRoles ?? new string[0], StringComparer.OrdinalIgnoreCase),
-                            UpdateRoles = new HashSet<string>(UpdateRoles ?? new string[0], StringComparer.OrdinalIgnoreCase)
+                            ReadRoles = new RoleSet(ReadRoles ?? new string[0]),
+                            UpdateRoles = new RoleSet(UpdateRoles ?? new string[0])
                         },
                         new UploadedFileInfo
                         {
@@ -207,8 +183,8 @@ namespace MediaBrowser.CommandLine
                                 {
                                     Description = Format(PlaylistDescriptionFormat, now, directory),
                                     Name = playlistName,
-                                    ReadRoles = new HashSet<string>(ReadRoles ?? new string[0], StringComparer.OrdinalIgnoreCase),
-                                    UpdateRoles = new HashSet<string>(UpdateRoles ?? new string[0], StringComparer.OrdinalIgnoreCase)
+                                    ReadRoles = new RoleSet(ReadRoles ?? new string[0]),
+                                    UpdateRoles = new RoleSet(UpdateRoles ?? new string[0])
                                 },
                                 playlistId,
                                 userId,
@@ -348,7 +324,7 @@ namespace MediaBrowser.CommandLine
                 userId = user.Id;
             }
 
-            if (!await doRolesExists(new HashSet<string>(ReadRoles ?? new string[0]), new HashSet<string>(UpdateRoles ?? new string[0])))
+            if (!await Roles.DoRolesExists(new RoleSet(ReadRoles ?? new string[0]), new RoleSet(UpdateRoles ?? new string[0])))
             {
                 throw new ArgumentException("Roles not found.");
             }

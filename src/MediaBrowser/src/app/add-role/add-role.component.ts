@@ -28,7 +28,7 @@ export class AddRoleComponent extends Page {
 
     this.roles.create({
       description: this.description,
-      name: this.name
+      name: this.name.toUpperCase()
     })
     .subscribe(response => {
       this.controls.modals?.toggleLoader();

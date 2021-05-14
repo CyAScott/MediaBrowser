@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace MediaBrowser.Models
 {
@@ -16,6 +16,11 @@ namespace MediaBrowser.Models
         /// When the user was soft deleted.
         /// </summary>
         public DateTime? DeletedOn => user.DeletedOn;
+
+        /// <summary>
+        /// The role names the user was assigned to.
+        /// </summary>
+        public RoleSet Roles => user.Roles;
 
         /// <summary>
         /// The id for this user.
@@ -36,10 +41,5 @@ namespace MediaBrowser.Models
         /// The user name for the user.
         /// </summary>
         public string UserName => user.UserName;
-
-        /// <summary>
-        /// The role names the user was assigned to.
-        /// </summary>
-        public string[] Roles => user.Roles;
     }
 }

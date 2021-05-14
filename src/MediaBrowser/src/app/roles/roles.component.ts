@@ -33,7 +33,7 @@ export class RolesComponent extends PageSearchable {
   }
   
   public addEnabled() : boolean {
-    return this.users.hasRole('Admin');
+    return this.users.hasRole('ADMIN');
   }
 
   public init() : void {

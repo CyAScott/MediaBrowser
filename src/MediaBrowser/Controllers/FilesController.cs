@@ -2,9 +2,7 @@ using MediaBrowser.Extensions;
 using MediaBrowser.Models;
 using MediaBrowser.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,49 +19,6 @@ namespace MediaBrowser.Controllers
     [ApiController]
     public class FilesController : Controller
     {
-        private bool isCached(DateTime lastModified)
-        {
-            var requestHeaders = Request.GetTypedHeaders();
-
-            if (requestHeaders.IfModifiedSince.HasValue &&
-                requestHeaders.IfModifiedSince.Value.AddMinutes(1) >= lastModified)
-            {
-                return true;
-            }
-
-            var responseHeaders = Response.GetTypedHeaders();
-
-            responseHeaders.CacheControl = new CacheControlHeaderValue
-            {
-                MaxAge = TimeSpan.FromDays(14)
-            };
-            responseHeaders.LastModified = lastModified;
-
-            return false;
-        }
-        private async Task<bool> doRolesExists(HashSet<string> readRoles, HashSet<string> updateRoles)
-        {
-            var roles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            if (readRoles != null)
-            {
-                roles.UnionWith(readRoles);
-            }
-
-            if (updateRoles != null)
-            {
-                roles.UnionWith(updateRoles);
-            }
-
-            if (roles.Count == 0)
-            {
-                return true;
-            }
-
-            var matchedRoles = (await Task.WhenAll(roles.Select(Roles.GetByName))).Select(it => it.Name).ToArray();
-
-            return roles.Count == matchedRoles.Length;
-        }
         private static readonly HashSet<string> acceptedMimeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "audio/mp3",
@@ -123,7 +78,7 @@ namespace MediaBrowser.Controllers
             }
 
             var request = JsonConvert.DeserializeObject<UploadFileRequest>(json.First());
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }
@@ -203,7 +158,7 @@ namespace MediaBrowser.Controllers
                 return Unauthorized();
             }
 
-            if (isCached(file.UploadedOn))
+            if (this.IsCached(file.UploadedOn))
             {
                 return StatusCode(304);
             }
@@ -243,7 +198,7 @@ namespace MediaBrowser.Controllers
             }
 
             var request = JsonConvert.DeserializeObject<UpdateFileRequest>(json.First());
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }
@@ -300,7 +255,7 @@ namespace MediaBrowser.Controllers
                 return NotFound();
             }
 
-            if (isCached(thumbnail.CreatedOn))
+            if (this.IsCached(thumbnail.CreatedOn))
             {
                 return StatusCode(304);
             }
@@ -312,17 +267,17 @@ namespace MediaBrowser.Controllers
         /// Search files.
         /// </summary>
         [HttpGet("api/files/search"), Authorize]
-        public async Task<SearchFilesResponse<FileReadModel>> Search([FromQuery]SearchFilesRequest query)
+        public async Task<ActionResult<SearchFilesResponse<FileReadModel>>> Search([FromQuery]SearchFilesRequest query)
         {
             var jwt = User.Identity as JwtPayload;
             if (jwt == null)
             {
-                return null;
+                return Unauthorized();
             }
 
             var response = await Files.Search(query, jwt.Id, jwt.Roles);
 
-            return new SearchFilesResponse<FileReadModel>(query, response.Count, response.Results.Select(it => new FileReadModel(it)));
+            return new ActionResult<SearchFilesResponse<FileReadModel>>(new SearchFilesResponse<FileReadModel>(query, response.Count, response.Results.Select(it => new FileReadModel(it))));
         }
 
         /// <summary>
@@ -344,7 +299,7 @@ namespace MediaBrowser.Controllers
                 return Unauthorized();
             }
 
-            if (!await doRolesExists(request.ReadRoles, request.UpdateRoles))
+            if (!await Roles.DoRolesExists(request.ReadRoles, request.UpdateRoles))
             {
                 return NotFound();
             }

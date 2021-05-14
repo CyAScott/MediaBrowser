@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -53,7 +52,7 @@ namespace MediaBrowser.Controllers
                 UserName = user.UserName
             };
 
-            jwt.Roles.UnionWith(user.Roles ?? new string[0]);
+            jwt.Roles.UnionWith(user.Roles ?? new RoleSet());
 
             Jwt.SetJwtCookie(HttpContext, jwt);
 
@@ -76,12 +75,12 @@ namespace MediaBrowser.Controllers
         {
             var jwt = User.Identity as JwtPayload;
 
-            HashSet<string> allRoles = null;
+            RoleSet allRoles = null;
 
             if (jwt.Roles.Contains(RequiresAdminRoleAttribute.AdminRole) &&
                 await Roles.Count() < 1000)
             {
-                allRoles = new HashSet<string>((await Roles.All()).Select(it => it.Name));
+                allRoles = new RoleSet((await Roles.All()).Select(it => it.Name));
             }
 
             return Content("var viewModel = " + JsonConvert.SerializeObject(new MediaViewModel
@@ -90,7 +89,7 @@ namespace MediaBrowser.Controllers
                 FirstName = jwt?.FirstName ?? "Anonymous",
                 Id = jwt?.Id.ToString() ?? Guid.Empty.ToString(),
                 LastName = jwt?.LastName ?? "User",
-                Roles = jwt?.Roles ?? new HashSet<string>(),
+                Roles = jwt?.Roles ?? new RoleSet(),
                 UserName = jwt?.UserName ?? "Unknown"
             }) + ";", MediaTypeHeaderValue.Parse("application/javascript"));
         }

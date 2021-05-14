@@ -1,7 +1,6 @@
 ﻿using MediaBrowser.Attributes;
 using MediaBrowser.Models;
 using System;
-using System.Collections.Generic;
 
 namespace MediaBrowser.Extensions
 {
@@ -13,7 +12,7 @@ namespace MediaBrowser.Extensions
         /// <summary>
         /// Checks if a user has read access to a file.
         /// </summary>
-        public static bool CanRead(this IFile file, Guid userId, HashSet<string> userRoles) =>
+        public static bool CanRead(this IFile file, Guid userId, RoleSet userRoles) =>
             userId == file.UploadedBy ||
             userRoles.Contains(RequiresAdminRoleAttribute.AdminRole) ||
             userRoles.Overlaps(file.ReadRoles);
@@ -21,7 +20,7 @@ namespace MediaBrowser.Extensions
         /// <summary>
         /// Checks if a user has read access to a file.
         /// </summary>
-        public static bool CanUpdate(this IFile file, Guid userId, HashSet<string> userRoles) =>
+        public static bool CanUpdate(this IFile file, Guid userId, RoleSet userRoles) =>
             userId == file.UploadedBy ||
             userRoles.Contains(RequiresAdminRoleAttribute.AdminRole) ||
             userRoles.Overlaps(file.UpdateRoles);

@@ -31,9 +31,9 @@ namespace MediaBrowser.Services
                 Description = request.Description ?? "",
                 Id = playlistId,
                 Name = request.Name ?? "",
-                ReadRoles = request.ReadRoles ?? new HashSet<string>(),
+                ReadRoles = request.ReadRoles ?? new RoleSet(),
                 Thumbnails = thumbnails?.Select(it => new LiteDbThumbnail(it)).ToArray(),
-                UpdateRoles = request.UpdateRoles ?? new HashSet<string>()
+                UpdateRoles = request.UpdateRoles ?? new RoleSet()
             };
 
             Collection.Insert(liteDbPlaylist);
@@ -50,7 +50,7 @@ namespace MediaBrowser.Services
         public Task<IPlaylist> GetByName(string name) =>
             Task.FromResult((IPlaylist)Collection.FindOne(Query.EQ(nameof(LiteDbPlaylist.Name), name)));
 
-        public Task<SearchPlaylistsResponse<IPlaylist>> Search(SearchPlaylistsRequest request, Guid userId, HashSet<string> userRoles)
+        public Task<SearchPlaylistsResponse<IPlaylist>> Search(SearchPlaylistsRequest request, Guid userId, RoleSet userRoles)
         {
             var query = Query.All();
 
@@ -148,9 +148,9 @@ namespace MediaBrowser.Services
 
         public Guid CreatedBy { get; set; }
 
-        public HashSet<string> ReadRoles { get; set; }
+        public RoleSet ReadRoles { get; set; }
 
-        public HashSet<string> UpdateRoles { get; set; }
+        public RoleSet UpdateRoles { get; set; }
 
         public IThumbnail[] Thumbnails { get; set; }
 

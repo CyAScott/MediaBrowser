@@ -32,8 +32,8 @@
     </div>
 </div>
 
-<app-role-builder *ngIf="users.hasRole('Admin')" header="Read Roles" [selection]="readRoles"></app-role-builder>
+<app-role-builder *ngIf="users.hasRole('ADMIN')" header="Read Roles" [selection]="readRoles"></app-role-builder>
 
-<app-role-builder *ngIf="users.hasRole('Admin')" header="Update Roles" [selection]="updateRoles"></app-role-builder>
+<app-role-builder *ngIf="users.hasRole('ADMIN')" header="Update Roles" [selection]="updateRoles"></app-role-builder>
 
 <app-thumbnail-builder #thumbnailBuilder [thumbnails]="thumbnails"></app-thumbnail-builder>

@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+
 namespace MediaBrowser.Models
 {
     /// <summary>
@@ -25,12 +25,12 @@ namespace MediaBrowser.Models
         /// <summary>
         /// The required roles for reading the playlist.
         /// </summary>
-        HashSet<string> ReadRoles { get; }
+        RoleSet ReadRoles { get; }
 
         /// <summary>
         /// The required roles for updating the playlist.
         /// </summary>
-        HashSet<string> UpdateRoles { get; }
+        RoleSet UpdateRoles { get; }
 
         /// <summary>
         /// The thumbnails for the playlist.

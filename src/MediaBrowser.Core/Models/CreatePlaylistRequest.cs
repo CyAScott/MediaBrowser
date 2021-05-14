@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace MediaBrowser.Models
+﻿namespace MediaBrowser.Models
 {
     /// <summary>
     /// A request to create a playlist.
@@ -10,12 +8,12 @@ namespace MediaBrowser.Models
         /// <summary>
         /// The required roles for reading the playlist.
         /// </summary>
-        public HashSet<string> ReadRoles { get; set; }
+        public RoleSet ReadRoles { get; set; }
 
         /// <summary>
         /// The required roles for updating the playlist.
         /// </summary>
-        public HashSet<string> UpdateRoles { get; set; }
+        public RoleSet UpdateRoles { get; set; }
 
         /// <summary>
         /// A friendly description for the playlist.

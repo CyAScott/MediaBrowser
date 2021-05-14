@@ -39,7 +39,7 @@ namespace MediaBrowser.Controllers
         [HttpPost("api/users"), Authorize, RequiresAdminRole]
         public async Task<ActionResult<UserReadModel>> Create([FromBody]CreateUserRequest request)
         {
-            var roles = request.Roles == null ? null : (await Task.WhenAll(request.Roles.Select(Roles.GetByName))).Select(it => it.Name).ToArray();
+            var roles = request.Roles == null ? null : new RoleSet((await Task.WhenAll(request.Roles.Select(Roles.GetByName))).Select(it => it.Name));
 
             if (roles != null)
             {

@@ -32,7 +32,7 @@ namespace MediaBrowser.Services
                 Id = Guid.NewGuid(),
                 LastName = request.LastName,
                 Password = BCryptCs.HashPassword(request.Password),
-                Roles = request.Roles ?? new string[0],
+                Roles = request.Roles ?? new RoleSet(),
                 UserName = request.UserName.ToLower()
             };
 
@@ -170,6 +170,8 @@ namespace MediaBrowser.Services
 
         public DateTime? DeletedOn { get; set; }
 
+        public RoleSet Roles { get; set; }
+
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
@@ -177,8 +179,6 @@ namespace MediaBrowser.Services
         public string Password { get; set; }
 
         public string UserName { get; set; }
-
-        public string[] Roles { get; set; }
 
         public bool IsPasswordValid(string password) => BCryptCs.Verify(password, Password);
     }

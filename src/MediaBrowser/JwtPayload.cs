@@ -1,8 +1,7 @@
-﻿using JWT;
+using JWT;
 using MediaBrowser.Models;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
 
@@ -15,7 +14,6 @@ namespace MediaBrowser
     {
         DateTime? IUser.DeletedOn => null;
         bool IUser.IsPasswordValid(string password) => false;
-        string[] IUser.Roles => Roles.ToArray();
 
         /// <inheritdoc/>
         public JwtPayload(JObject obj = null)
@@ -73,7 +71,7 @@ namespace MediaBrowser
         /// <summary>
         /// The role names the user was assigned to.
         /// </summary>
-        public HashSet<string> Roles { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        public RoleSet Roles { get; } = new RoleSet();
 
         /// <inheritdoc/>
         public bool IsAuthenticated => true;

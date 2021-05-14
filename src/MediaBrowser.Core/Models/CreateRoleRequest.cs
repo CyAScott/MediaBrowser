@@ -15,7 +15,7 @@ namespace MediaBrowser.Models
         /// <summary>
         /// The role name.
         /// </summary>
-        [Required, RegularExpression(@"[\w-]{1,255}")]
+        [Required, RegularExpression(@"[A-Z\d_-]{1,255}")]
         public string Name { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MediaBrowser.Models
 {
@@ -36,12 +35,12 @@ namespace MediaBrowser.Models
         /// <summary>
         /// The required roles for reading the file.
         /// </summary>
-        HashSet<string> ReadRoles { get; }
+        RoleSet ReadRoles { get; }
 
         /// <summary>
         /// The required roles for updating the file.
         /// </summary>
-        HashSet<string> UpdateRoles { get; }
+        RoleSet UpdateRoles { get; }
 
         /// <summary>
         /// The thumbnails for the file.
