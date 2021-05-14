@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonControlsService } from '../common-controls.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
@@ -8,7 +8,7 @@ import { MsgBoxType } from '../modals/modals.component';
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.less']
 })
-export class PaginationComponent implements Pagination {
+export class PaginationComponent implements OnInit, Pagination {
 
   constructor(
     private controls : CommonControlsService,
@@ -34,6 +34,17 @@ export class PaginationComponent implements Pagination {
         this.pageSelectionInput.value = this.pageSelection;
       }
     });
+
+
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.ngOnInit();
+  }
+  
+  ngOnInit() : void {
+    this.countPerPage = Math.ceil((window.innerWidth / 210) * (window.innerHeight / 210) * 2);
   }
 
   public countPerPage : number = 20;
