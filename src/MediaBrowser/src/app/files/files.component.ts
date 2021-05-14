@@ -42,7 +42,7 @@ export class FilesComponent extends PageSearchable {
   }
   
   public addEnabled() : boolean {
-    return true;
+    return !this.playlistId;
   }
 
   public init(): void {
