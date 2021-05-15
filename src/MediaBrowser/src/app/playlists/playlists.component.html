@@ -2,12 +2,12 @@
     <span>no results</span>
 </div>
 <div *ngIf="response?.results && (response?.results?.length || 0) > 0" class="cards">
-    <a [routerLink]="['/Playlist/' + item.id]" *ngFor="let item of (response?.results || [])" class="card">
+    <a [routerLink]="['/Playlist/' + item.id + '/Files']" *ngFor="let item of (response?.results || [])" class="card">
         <div class="img">
             <i class="fas fa-list-ol icon"></i>
             <img *ngIf="item.thumbnails?.length" src="{{item.thumbnails[0].url}}" alt="{{item.name}}"/>
             <div class="overlay"></div>
-            <i class="fas fa-edit open"></i>
+            <i class="fas fa-search-plus open"></i>
             <h1>{{item.name}}</h1>
         </div>
     </a>

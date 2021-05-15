@@ -1,7 +1,6 @@
 <div class="input-name">
     <div class="header">
         <div class="name">Name Required</div>
-        <a [routerLink]="['/Playlist/' + id + '/Files']" class="button"><i class="fas fa-play-circle"></i></a>
         <div (click)="update()" class="button"><i class="fas fa-save"></i></div>
     </div>
     <input type="text" [(ngModel)]="name" placeholder="Name" />

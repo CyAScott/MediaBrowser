@@ -1,14 +1,25 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SearchRequest } from './common-controls.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class FilesService {
+export class FilesService implements OnInit {
 
   constructor(private httpClient: HttpClient) { }
+
+  ngOnInit() : void {
+    let lastSearch = localStorage.getItem('files.lastSearch');
+    this.lastSearch = lastSearch ? JSON.parse(lastSearch) : undefined;
+
+    let lastSearchPlaylistId = localStorage.getItem('files.playlistId');
+    this.lastSearchPlaylistId = lastSearchPlaylistId ? lastSearchPlaylistId : undefined;
+
+    let lastSearchResponse = localStorage.getItem('files.lastSearchResponse');
+    this.lastSearchResponse = lastSearchResponse ? JSON.parse(lastSearchResponse) : undefined;
+  }
 
   public cache(file : FileReadModel) : Observable<FileReadModel> {
     return this.httpClient.get<FileReadModel>(`/local/cache/${file.id}`);
@@ -19,6 +30,7 @@ export class FilesService {
   }
 
   public lastSearch : SearchFilesRequest | undefined;
+  public lastSearchPlaylistId? : string;
   public lastSearchResponse : SearchFilesResponse | undefined;
 
   public search(query : SearchFilesRequest, playlistId? : string) : Observable<SearchFilesResponse> {
@@ -54,7 +66,18 @@ export class FilesService {
       observable.subscribe({
         next: response => {
           this.lastSearch = query;
+          localStorage.setItem('files.lastSearch', JSON.stringify(query));
+
+          this.lastSearchPlaylistId = playlistId;
+          if (playlistId) {
+            localStorage.setItem('files.playlistId', playlistId);
+          } else {
+            localStorage.removeItem('files.playlistId');
+          }
+
           this.lastSearchResponse = response;
+          localStorage.setItem('files.lastSearchResponse', JSON.stringify(response));
+
           subscriber.next(response);
         },
         error: subscriber.error

@@ -107,7 +107,7 @@ export class FileComponent extends Page {
     
     this.controls.modals?.toggleLoader();
 
-    this.files.search(query).subscribe(response => {
+    this.files.search(query, this.files.lastSearchPlaylistId).subscribe(response => {
       this.controls.modals?.toggleLoader();
 
       if (response.results && response.results.length) {
@@ -141,7 +141,7 @@ export class FileComponent extends Page {
     
     this.controls.modals?.toggleLoader();
 
-    this.files.search(query).subscribe(response => {
+    this.files.search(query, this.files.lastSearchPlaylistId).subscribe(response => {
       this.controls.modals?.toggleLoader();
 
       if (response.results && response.results.length) {

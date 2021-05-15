@@ -4,6 +4,7 @@ import { CommonControlsService, PageSearchable } from '../common-controls.servic
 import { FileFilterOptions, FileSortOptions, FilesService, SearchFilesRequest, SearchFilesResponse } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { SelectionOption } from '../modals/modals.component';
+import { PlaylistReadModel, PlaylistsService } from '../playlists.service';
 
 @Component({
   selector: 'app-files',
@@ -30,7 +31,8 @@ export class FilesComponent extends PageSearchable {
     controls : CommonControlsService,
     logger : LoggerService,
     route : ActivatedRoute,
-    private files : FilesService) {
+    private files : FilesService,
+    private playlists : PlaylistsService) {
     super(controls, logger, 'Files',
       FilesComponent.filterOptions, FilesComponent.filterOptions[0],
       FilesComponent.sortOptions, FilesComponent.sortOptions[0])
@@ -45,20 +47,42 @@ export class FilesComponent extends PageSearchable {
     return !this.playlistId;
   }
 
+  public editPlaylist() : void {
+    this.controls.refresh([ '/Playlist/' + this.playlistId ]);
+  }
+
   public init(): void {
     this.controls.autoPlay = false;
+
+
+
     this.files
       .search(new SearchFilesRequest(this.getSearchRequest()), this.playlistId && this.playlistId.length ? this.playlistId : undefined)
-      .subscribe(response => {
-        this.controls.modals?.toggleLoader();
-        if (this.controls.pagination) {
-          this.controls.pagination.pageCount = Math.ceil(response.count / this.controls.pagination.countPerPage);
+      .subscribe(filesResponse => {
+        if (this.playlistId) {
+          this.playlists.get(this.playlistId).subscribe(playlistResponse => {
+            this.setResponse(filesResponse, playlistResponse);
+          });
+        } else  {
+          this.setResponse(filesResponse);
         }
-        this.response = response;
       });
   }
+
+  public playlist : PlaylistReadModel | undefined;
 
   public playlistId : string = '';
 
   public response : SearchFilesResponse | undefined;
+
+  public setResponse(filesResponse : SearchFilesResponse, playlistResponse? : PlaylistReadModel) : void {
+    this.controls.modals?.toggleLoader();
+    if (this.controls.pagination) {
+      this.controls.pagination.pageCount = Math.ceil(filesResponse.count / this.controls.pagination.countPerPage);
+    }
+    this.response = filesResponse;
+    if (playlistResponse) {
+      this.playlist = playlistResponse;
+    }
+  }
 }

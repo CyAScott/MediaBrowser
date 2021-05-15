@@ -1,6 +1,10 @@
 <div class="no-cards" *ngIf="response && (!response.results || (response.results.length || 0) == 0)">
     <span>no results</span>
 </div>
+<div *ngIf="response?.results && playlistId" class="header header-tab">
+    <span><i class="fas fa-list-ul"></i> {{playlist?.name}}</span>
+    <div class="button" (click)="editPlaylist()"><i class="fas fa-edit"></i></div>
+</div>
 <span *ngIf="response?.results && (response?.results?.length || 0) > 0">
     <div class="cards">
         <a [routerLink]="['/File/' + item.id + '/View']" *ngFor="let item of (response?.results || [])" class="card">

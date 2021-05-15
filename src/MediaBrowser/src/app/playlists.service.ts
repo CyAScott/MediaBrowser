@@ -39,9 +39,6 @@ export class PlaylistsService {
     return this.httpClient.get<PlaylistReadModel[]>(`/api/files/${fileId}/playlists`);
   }
 
-  public lastSearch : SearchPlaylistsRequest | undefined;
-  public lastSearchResponse : SearchPlaylistsResponse | undefined;
-
   public search(query : SearchPlaylistsRequest) : Observable<SearchPlaylistsResponse> {
     var params = new HttpParams();
 
@@ -70,14 +67,7 @@ export class PlaylistsService {
     return new Observable(subscriber => {
       let observable = this.httpClient.get<SearchPlaylistsResponse>('/api/playlists/search', { params: params } );
     
-      observable.subscribe({
-        next: response => {
-          this.lastSearch = query;
-          this.lastSearchResponse = response;
-          subscriber.next(response);
-        },
-        error: subscriber.error
-      });
+      observable.subscribe(subscriber);
     });
   }
 

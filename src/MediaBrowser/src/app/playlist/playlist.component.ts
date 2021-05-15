@@ -80,7 +80,7 @@ export class PlaylistComponent extends Page {
     }, thumbnailFiles)
     .subscribe(response => {
       this.controls.modals?.toggleLoader();
-      this.controls.refresh([ 'Playlists' ]);
+      this.controls.refresh([ '/Playlist/' + this.id + '/Files' ]);
     },
     error => {
       this.controls.modals?.toggleLoader();
