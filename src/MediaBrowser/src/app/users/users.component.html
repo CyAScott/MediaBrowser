@@ -1,6 +1,10 @@
 <div class="no-cards" *ngIf="response && (!response.results || (response.results.length || 0) == 0)">
     <span>no results</span>
 </div>
+<div *ngIf="response?.results" class="header header-tab">
+    <h1 class="tab"><i class="fas fa-users"></i> Users</h1>
+    <div class="tab"><button *ngIf="users.hasRole('ADMIN')" (click)="add()"><i class="fas fa-user-plus"></i></button></div>
+</div>
 <div *ngIf="response?.results && (response?.results?.length || 0) > 0" class="cards">
     <a *ngFor="let item of (response?.results || [])" (click)="view(item)" class="card">
         <div class="img">

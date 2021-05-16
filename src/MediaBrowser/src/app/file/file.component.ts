@@ -4,6 +4,7 @@ import { CommonControlsService, Page } from '../common-controls.service';
 import { FileReadModel, FilesService, SearchFilesRequest } from '../files.service';
 import { LoggerService } from '../logger.service';
 import { MsgBoxType } from '../modals/modals.component';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-file',
@@ -16,7 +17,8 @@ export class FileComponent extends Page {
     controls: CommonControlsService,
     logger : LoggerService,
     route : ActivatedRoute,
-    public files : FilesService) {
+    public files : FilesService,
+    public users : UsersService) {
     super(controls, logger, 'File')
     route.params.subscribe(params => this.id = params.id);
   }

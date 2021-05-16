@@ -1,10 +1,12 @@
 <div class="no-cards" *ngIf="response && (!response.results || (response.results.length || 0) == 0)">
     <span>no results</span>
 </div>
-<div *ngIf="response?.results && playlistId" class="header header-tab">
-    <span><i class="fas fa-list-ul"></i> {{playlist?.name}}</span>
-    <div>
-        <button (click)="editPlaylist()"><i class="fas fa-edit"></i></button>
+<div *ngIf="response?.results" class="header header-tab">
+    <h1 *ngIf="playlistId" class="tab"><i class="fas fa-list-ul"></i> {{playlist?.name}}</h1>
+    <h1 *ngIf="!playlistId" class="tab"><i class="fas fa-archive"></i> Files</h1>
+    <div class="tab">
+        <button *ngIf="!playlistId || playlist && users.canUpdate(playlist?.updateRoles)" (click)="add()"><i class="fas fa-upload"></i></button>
+        <button *ngIf="playlist && users.canUpdate(playlist?.updateRoles)" (click)="editPlaylist()"><i class="fas fa-edit"></i></button>
     </div>
 </div>
 <span *ngIf="response?.results && (response?.results?.length || 0) > 0">

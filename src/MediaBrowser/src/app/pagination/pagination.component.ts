@@ -34,8 +34,6 @@ export class PaginationComponent implements OnInit, Pagination {
         this.pageSelectionInput.value = this.pageSelection;
       }
     });
-
-
   }
 
   @HostListener('window:resize', ['$event'])

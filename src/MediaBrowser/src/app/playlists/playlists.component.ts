@@ -32,10 +32,6 @@ export class PlaylistsComponent extends PageSearchable {
     this.controls.refresh([ 'AddPlaylist' ]);
   }
 
-  public addEnabled() : boolean {
-    return true;
-  }
-
   public init(): void {
     this.controls.autoPlay = false;
     this.playlists

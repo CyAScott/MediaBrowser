@@ -1,12 +1,12 @@
 <div class="box">
     <div *ngIf="file && !this.controls.appComponent?.fullScreen" class="header header-tab">
-        <span>
-            <div *ngIf="file?.name"><i [ngClass]="{'fas': true, 'fa-film': file?.type == 'Video', 'fa-image': file?.type == 'Photo', 'fa-music': file?.type == 'Audio', 'icon': true}"></i> {{file?.name}}</div>
-        </span>
-        <div>
+        <h1 class="tab">
+            <span *ngIf="file?.name"><i [ngClass]="{'fas': true, 'fa-film': file?.type == 'Video', 'fa-image': file?.type == 'Photo', 'fa-music': file?.type == 'Audio', 'icon': true}"></i> {{file?.name}}</span>
+        </h1>
+        <div class="tab">
             <button *ngIf="files.lastSearchPlaylistId" (click)="backToPlaylist()"><i class="fas fa-list-ul"></i></button>
             <button (click)="toggleAutoplay()"><i [ngClass]="{'fas': true, 'fa-play-circle': !this.controls.autoPlay, 'fa-pause-circle': this.controls.autoPlay}"></i></button>
-            <button (click)="edit()"><i class="fas fa-edit"></i></button>
+            <button *ngIf="users.canUpdate(file?.updateRoles)" (click)="edit()"><i class="fas fa-edit"></i></button>
             <button (click)="viewInfo()"><i class="fas fa-info-circle"></i></button>
             <button (click)="toggleFullScreen()"><i class="fas fa-expand"></i></button>
             <button (click)="cache()"><i [ngClass]="{'fas fa-save': !this.file?.cached, 'far fa-trash-alt': this.file?.cached}"></i></button>

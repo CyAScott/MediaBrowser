@@ -5,6 +5,7 @@ import { FileFilterOptions, FileSortOptions, FilesService, SearchFilesRequest, S
 import { LoggerService } from '../logger.service';
 import { SelectionOption } from '../modals/modals.component';
 import { PlaylistReadModel, PlaylistsService } from '../playlists.service';
+import { UsersService } from '../users.service';
 
 @Component({
   selector: 'app-files',
@@ -32,7 +33,8 @@ export class FilesComponent extends PageSearchable {
     logger : LoggerService,
     route : ActivatedRoute,
     private files : FilesService,
-    private playlists : PlaylistsService) {
+    private playlists : PlaylistsService,
+    public users : UsersService) {
     super(controls, logger, 'Files',
       FilesComponent.filterOptions, FilesComponent.filterOptions[0],
       FilesComponent.sortOptions, FilesComponent.sortOptions[0])
@@ -42,10 +44,6 @@ export class FilesComponent extends PageSearchable {
   public add() : void {
     this.controls.refresh([ 'AddFile' ]);
   }
-  
-  public addEnabled() : boolean {
-    return !this.playlistId;
-  }
 
   public editPlaylist() : void {
     this.controls.refresh([ '/Playlist/' + this.playlistId ]);
@@ -53,8 +51,6 @@ export class FilesComponent extends PageSearchable {
 
   public init(): void {
     this.controls.autoPlay = false;
-
-
 
     this.files
       .search(new SearchFilesRequest(this.getSearchRequest()), this.playlistId && this.playlistId.length ? this.playlistId : undefined)

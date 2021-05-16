@@ -22,7 +22,7 @@ export class RolesComponent extends PageSearchable {
     controls : CommonControlsService,
     logger : LoggerService,
     private roles : RolesService,
-    private users : UsersService) {
+    public users : UsersService) {
     super(controls, logger, 'Roles',
       RolesComponent.filterOptions, undefined,
       RolesComponent.sortOptions, RolesComponent.sortOptions[1])
@@ -30,10 +30,6 @@ export class RolesComponent extends PageSearchable {
 
   public add() : void {
     this.controls.refresh([ 'AddRole' ]);
-  }
-  
-  public addEnabled() : boolean {
-    return this.users.hasRole('ADMIN');
   }
 
   public init() : void {

@@ -96,6 +96,7 @@ export abstract class Page {
     public readonly name : string) {
     controls.page = this;
   }
+
   public init() : void {
     if (this.controls.pagination?.pageCount) {
       this.controls.pagination.pageCount = 1;
@@ -118,10 +119,6 @@ export abstract class PageSearchable extends Page {
     public readonly defaultSort : SelectionOption | undefined) {
     super(controls, logger, name);
   }
-
-  public abstract add() : void;
-
-  public abstract addEnabled() : boolean;
 
   public getSearchRequest() : SearchRequest {
     if (!this.controls.modals) {

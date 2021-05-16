@@ -12,11 +12,9 @@
   <router-outlet></router-outlet>
 </div>
 
-<div [ngClass]="{'overlay': true, 'overlay-fullscreen': fullScreen || (!addEnabled() && !pagesEnabled())}"></div>
+<div [ngClass]="{'overlay': true, 'overlay-fullscreen': fullScreen || !pagesEnabled()}"></div>
 
-<div [ngClass]="{'bottom-nav': true, 'nav-hidden': fullScreen || (!addEnabled() && !pagesEnabled())}">
-
-  <a (click)="add()" [style.visibility]="addEnabled() ? 'visible' : 'hidden'" class="add"><i class="fas fa-plus-square"></i></a>
+<div [ngClass]="{'bottom-nav': true, 'nav-hidden': fullScreen || !pagesEnabled()}">
 
   <app-pagination></app-pagination>
 

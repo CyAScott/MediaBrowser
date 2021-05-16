@@ -26,7 +26,7 @@ export class UsersComponent extends PageSearchable {
   constructor(
     controls : CommonControlsService,
     logger : LoggerService,
-    private users : UsersService) {
+    public users : UsersService) {
     super(controls, logger, 'Users',
       UsersComponent.filterOptions, UsersComponent.filterOptions[0],
       UsersComponent.sortOptions, UsersComponent.sortOptions[0])
@@ -34,10 +34,6 @@ export class UsersComponent extends PageSearchable {
 
   public add() : void {
     this.controls.refresh([ 'AddUser' ]);
-  }
-  
-  public addEnabled() : boolean {
-    return this.users.hasRole('ADMIN');
   }
 
   public init() : void {

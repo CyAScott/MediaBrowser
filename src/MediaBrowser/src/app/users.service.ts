@@ -13,6 +13,10 @@ export class UsersService {
   constructor(private httpClient: HttpClient) {
   }
 
+  public canUpdate(roles? : string[]) : boolean {
+    return roles !== undefined && viewModel?.roles && (roles.length === 0 || roles.some(role => viewModel.roles.includes(role)));
+  }
+
   public hasRole(role : string) : boolean {
     return viewModel?.roles && viewModel.roles.includes(role);
   }

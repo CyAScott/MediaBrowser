@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { NavigationEnd, Router, Scroll } from '@angular/router';
-import { CommonControlsService, PageSearchable } from './common-controls.service';
+import { NavigationEnd, Router } from '@angular/router';
+import { CommonControlsService } from './common-controls.service';
 import { LoggerService } from './logger.service';
 import { UsersService } from './users.service';
 
@@ -42,25 +42,6 @@ export class AppComponent implements AppComponent, OnInit {
     });
   }
 
-  public addEnabled() : boolean {
-    let page = this.controls.page instanceof PageSearchable ? this.controls.page as PageSearchable : null;
-    return page && page.addEnabled() ? true : false;
-  }
-  public add() : void {
-    let page = this.controls.page instanceof PageSearchable ? this.controls.page as PageSearchable : null;
-    if (page && page.addEnabled()) {
-      
-      if (this.controls.modals?.filterSelection) {
-        this.controls.modals.filterSelection = undefined;
-      }
-
-      if (this.controls.modals?.sortSelection) {
-        this.controls.modals.sortSelection = undefined;
-      }
-
-      page.add();
-    }
-  }
   public pagesEnabled() : boolean {
     return this.controls.pagination?.pageCount !== undefined && this.controls.pagination.pageCount > 1;
   }
