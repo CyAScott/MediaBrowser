@@ -163,6 +163,7 @@ export class FileComponent extends Page {
 
   public toggleFullScreen() : void {
     if (this.controls.appComponent) {
+      this.infoVisible = false;
       this.controls.appComponent.toggleFullScreen();
     }
   }
