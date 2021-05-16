@@ -44,7 +44,9 @@ export class PaginationComponent implements OnInit, Pagination {
   }
   
   ngOnInit() : void {
-    this.countPerPage = Math.ceil((window.innerWidth / 210) * (window.innerHeight / 210) * 2);
+    let cardCountWidth = Math.floor(window.innerWidth / 210);
+    let cardCountHeight = Math.ceil(window.innerHeight / 210) * 2;
+    this.countPerPage = cardCountWidth * cardCountHeight;
   }
 
   public countPerPage : number = 20;
