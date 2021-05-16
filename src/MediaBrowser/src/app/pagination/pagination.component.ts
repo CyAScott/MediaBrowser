@@ -65,7 +65,7 @@ export class PaginationComponent implements OnInit, Pagination {
     let pageCount = this.pageCount * 1;
 
     if (value >= 1 && value <= pageCount) {
-      this.controls.refresh([ this.controls.page.name, value.toString() ]);
+      this.controls.refresh([ this.controls.page.baseRoute(), value.toString() ]);
     }
     else {
       this.logger.error('Invalid Page Selected');

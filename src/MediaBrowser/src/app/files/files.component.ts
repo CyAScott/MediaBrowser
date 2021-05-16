@@ -45,6 +45,10 @@ export class FilesComponent extends PageSearchable {
     this.controls.refresh([ 'AddFile' ]);
   }
 
+  public baseRoute() : string {
+    return this.files.lastSearchPlaylistId ? '/Playlist/' + this.files.lastSearchPlaylistId + '/' + this.name : '/' + this.name;
+  }
+
   public editPlaylist() : void {
     this.controls.refresh([ '/Playlist/' + this.playlistId ]);
   }

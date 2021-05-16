@@ -97,6 +97,10 @@ export abstract class Page {
     controls.page = this;
   }
 
+  public baseRoute() : string {
+    return this.name;
+  }
+
   public init() : void {
     if (this.controls.pagination?.pageCount) {
       this.controls.pagination.pageCount = 1;
