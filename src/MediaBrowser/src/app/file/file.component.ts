@@ -16,7 +16,7 @@ export class FileComponent extends Page {
     controls: CommonControlsService,
     logger : LoggerService,
     route : ActivatedRoute,
-    private files : FilesService) {
+    public files : FilesService) {
     super(controls, logger, 'File')
     route.params.subscribe(params => this.id = params.id);
   }
