@@ -21,6 +21,10 @@ export class FileComponent extends Page {
     route.params.subscribe(params => this.id = params.id);
   }
 
+  public backToPlaylist() : void {
+    this.controls.refresh([ '/Playlist/' + this.files.lastSearchPlaylistId + '/Files' ]);
+  }
+
   public cache() : void {
     if (!this.file) {
       return;

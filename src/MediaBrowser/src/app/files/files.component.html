@@ -3,7 +3,9 @@
 </div>
 <div *ngIf="response?.results && playlistId" class="header header-tab">
     <span><i class="fas fa-list-ul"></i> {{playlist?.name}}</span>
-    <div class="button" (click)="editPlaylist()"><i class="fas fa-edit"></i></div>
+    <div>
+        <button (click)="editPlaylist()"><i class="fas fa-edit"></i></button>
+    </div>
 </div>
 <span *ngIf="response?.results && (response?.results?.length || 0) > 0">
     <div class="cards">

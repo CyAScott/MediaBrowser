@@ -1,7 +1,10 @@
 <div class="box">
     <div *ngIf="file && !this.controls.appComponent?.fullScreen" class="header header-tab">
-        <span><i class="fas fa-list-ul"></i> {{file?.name}}</span>
+        <span>
+            <div *ngIf="file?.name"><i [ngClass]="{'fas': true, 'fa-film': file?.type == 'Video', 'fa-image': file?.type == 'Photo', 'fa-music': file?.type == 'Audio', 'icon': true}"></i> {{file?.name}}</div>
+        </span>
         <div>
+            <button *ngIf="files.lastSearchPlaylistId" (click)="backToPlaylist()"><i class="fas fa-list-ul"></i></button>
             <button (click)="toggleAutoplay()"><i [ngClass]="{'fas': true, 'fa-play-circle': !this.controls.autoPlay, 'fa-pause-circle': this.controls.autoPlay}"></i></button>
             <button (click)="edit()"><i class="fas fa-edit"></i></button>
             <button (click)="viewInfo()"><i class="fas fa-info-circle"></i></button>
