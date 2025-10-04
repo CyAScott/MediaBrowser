@@ -1,9 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace MediaBrowser.Users;
 
-public class User
+public class UserEntity
 {
     [Column("id"), Key]
     public Guid Id { get; init; }
@@ -19,6 +16,18 @@ public class User
         Id = Id,
         UserName = UserName
     };
+}
+
+public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
+{
+    public void Configure(EntityTypeBuilder<UserEntity> builder)
+    {
+        builder.ToTable("users");
+        
+        builder
+            .HasIndex(u => u.UserName)
+            .IsUnique();
+    }
 }
 
 public class UserReadModel

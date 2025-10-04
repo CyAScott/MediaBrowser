@@ -10,6 +10,9 @@ builder.Configuration
     .AddEnvironmentVariables()
     .AddCommandLine(args);
 
+var mediaConfig = new MediaConfig(builder.Configuration);
+builder.Services.AddSingleton(mediaConfig);
+
 // Add services to the container
 builder.Services.AddControllers();
 // Add global filter for DataAnnotations validation failure
@@ -26,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
 
 // Configure SQLite database
 var dbConfig = new DbConfig(builder.Configuration);
-builder.Services.AddDbContext<UserDbContext>(options =>
+builder.Services.AddDbContext<MediaDbContext>(options =>
     options.UseSqlite(dbConfig.ConnectionString));
 
 // Configure JWT authentication
@@ -68,13 +71,13 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
-if (dbConfig.MigrateOnBoot)
-{
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-    await db.Database.MigrateAsync();
-    await db.SaveChangesAsync();
-}
+// if (dbConfig.MigrateOnBoot)
+// {
+//     using var scope = app.Services.CreateScope();
+//     var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+//     await db.Database.MigrateAsync();
+//     await db.SaveChangesAsync();
+// }
 await app.RunAsync();
 
 // Custom filter to return 417 on DataAnnotations validation failure

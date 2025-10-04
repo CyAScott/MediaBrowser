@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MediaBrowser.Users;
 
 public class UserRegisterRequest

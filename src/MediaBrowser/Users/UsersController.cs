@@ -1,7 +1,7 @@
 namespace MediaBrowser.Users;
 
 [ApiController, Route("api/[controller]")]
-public class UsersController(UserConfig userConfig, UserDbContext context) : ControllerBase
+public class UsersController(UserConfig userConfig, MediaDbContext context) : ControllerBase
 {
     [HttpPost("login")]
     public async Task<ActionResult<UserReadModel>> Login([FromBody] UserLoginRequest request)
@@ -62,7 +62,7 @@ public class UsersController(UserConfig userConfig, UserDbContext context) : Con
             return StatusCode(StatusCodes.Status409Conflict);
         }
 
-        var user = new User
+        var user = new UserEntity
         {
             Id = Guid.NewGuid(),
             UserName = request.UserName,
