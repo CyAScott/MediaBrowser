@@ -4,7 +4,7 @@ namespace MediaBrowser.Users;
 
 public class UserRegisterRequest
 {
-    [Required, RegularExpression(@"^a-z[\w\-\._]{0,48}[a-z\d]$")]
+    [Required, RegularExpression(@"^[a-z][\w\-\._]{0,48}[a-z\d]$")]
     public required string UserName { get; init; }
 
     [Required, Password]
@@ -13,10 +13,10 @@ public class UserRegisterRequest
 
 public class UserLoginRequest
 {
-    [Required]
+    [Required, RegularExpression(@"^[a-z][\w\-\._]{0,48}[a-z\d]$")]
     public required string UserName { get; init; }
 
-    [Required]
+    [Required, MinLength(6), MaxLength(50)]
     public required string Password { get; init; }
 }
 

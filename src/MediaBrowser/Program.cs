@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,11 @@ builder.Configuration
 
 // Add services to the container
 builder.Services.AddControllers();
+// Add global filter for DataAnnotations validation failure
+builder.Services.Configure<MvcOptions>(options =>
+{
+    options.Filters.Add(new ValidationStatus417Filter());
+});
 // Add Swagger services
 const string version = "v1";
 builder.Services.AddSwaggerGen(c =>
@@ -63,3 +69,20 @@ app.UseEndpoints(endpoints =>
 });
 
 app.Run();
+
+// Custom filter to return 417 on DataAnnotations validation failure
+public class ValidationStatus417Filter : IActionFilter
+{
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+        if (!context.ModelState.IsValid)
+        {
+            context.Result = new ObjectResult(context.ModelState)
+            {
+                StatusCode = 417
+            };
+        }
+    }
+
+    public void OnActionExecuted(ActionExecutedContext context) { }
+}
