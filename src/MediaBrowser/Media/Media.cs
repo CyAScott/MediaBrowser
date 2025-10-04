@@ -20,6 +20,8 @@ public class MediaEntity
 	[Column("mime")]
 	public required string Mime { get; init; }
 
+	public string Extension() => "mp4";
+
 	[Column("size")]
 	public required long? Size { get; init; }
 
@@ -58,6 +60,39 @@ public class MediaEntity
 
 	[Column("ffprobe")]
 	public required string Ffprobe { get; init; }
+
+	public MediaReadModel ToReadModel(
+		string[] cast,
+		string[] directors,
+		string[] genres,
+		string[] producers,
+		string[] writers) => new()
+	{
+		Id = Id,
+		Path = Path,
+		Title = Title,
+		OriginalTitle = OriginalTitle,
+		Description = Description,
+		Mime = Mime,
+		Size = Size,
+		Width = Width,
+		Height = Height,
+		Duration = Duration,
+		Md5 = Md5,
+		Rating = Rating,
+		UserStarRating = UserStarRating,
+		Published = Published,
+		CtimeMs = CtimeMs,
+		MtimeMs = MtimeMs,
+		CreatedOn = CreatedOn,
+		UpdatedOn = UpdatedOn,
+		Ffprobe = JsonSerializer.Deserialize<FfprobeResponse>(Ffprobe)!,
+		Cast = cast,
+		Directors = directors,
+		Genres = genres,
+		Producers = producers,
+		Writers = writers
+	};
 }
 
 public class MediaEntityConfiguration : IEntityTypeConfiguration<MediaEntity>
