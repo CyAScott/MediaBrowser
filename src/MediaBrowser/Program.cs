@@ -68,7 +68,14 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers();
 });
 
-app.Run();
+if (dbConfig.MigrateOnBoot)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
+    await db.Database.MigrateAsync();
+    await db.SaveChangesAsync();
+}
+await app.RunAsync();
 
 // Custom filter to return 417 on DataAnnotations validation failure
 public class ValidationStatus417Filter : IActionFilter
