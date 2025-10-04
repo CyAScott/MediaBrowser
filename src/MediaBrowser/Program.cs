@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,12 @@ builder.Configuration
 
 // Add services to the container
 builder.Services.AddControllers();
+// Add Swagger services
+const string version = "v1";
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc(version, new OpenApiInfo { Title = "MediaBrowser API", Version = version });
+});
 
 // Configure SQLite database
 var dbConfig = new DbConfig(builder.Configuration);
@@ -38,12 +45,21 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline
 app.UseStaticFiles()
-    .UseRouting()
-    .UseAuthentication()
-    .UseAuthorization()
-    .UseEndpoints(endpoints =>
-    {
-        endpoints.MapControllers();
-    });
+    .UseRouting();
+
+// Enable Swagger middleware
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"MediaBrowser API {version}");
+    c.RoutePrefix = "swagger";
+});
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.Run();
