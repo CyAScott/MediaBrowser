@@ -1,9 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
+
 namespace MediaBrowser.Users;
 
 [ApiController, Route("api/[controller]")]
 public class UsersController(UserConfig userConfig, MediaDbContext context) : ControllerBase
 {
-    [HttpPost("login")]
+    const string _cookieName = "mb_auth";
+
+    [HttpPost("login"), AllowAnonymous]
     public async Task<ActionResult<UserReadModel>> Login([FromBody] UserLoginRequest request)
     {
         var user = await context.Users.SingleOrDefaultAsync(u => u.UserName == request.UserName);
@@ -30,7 +34,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        Response.Cookies.Append("jwt", tokenString, new CookieOptions
+        Response.Cookies.Append(_cookieName, tokenString, new CookieOptions
         {
             HttpOnly = true,
             Expires = tokenDescriptor.Expires,
@@ -41,20 +45,28 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         return user.ToReadModel();
     }
 
+    [HttpPost("logout")]
+    public ActionResult Logout()
+    {
+        Response.Cookies.Append(_cookieName, "", new CookieOptions
+        {
+            HttpOnly = true,
+            Expires = DateTime.UtcNow.AddDays(-1),
+            Secure = true,
+            SameSite = SameSiteMode.Strict
+        });
+        return NoContent();
+    }
+
     [HttpGet("me")]
     public async Task<ActionResult<UserReadModel>> Me()
     {
-        if (User.Identity?.IsAuthenticated != true)
-        {
-            return Unauthorized();
-        }
-
         var user = await context.Users.SingleAsync(u => u.UserName == User.Identity.Name);
 
         return user.ToReadModel();
     }
     
-    [HttpPost("register")]
+    [HttpPost("register"), AllowAnonymous]
     public async Task<ActionResult<UserReadModel>> Register([FromBody] UserRegisterRequest request)
     {
         if (await context.Users.AnyAsync(u => u.UserName == request.UserName))
