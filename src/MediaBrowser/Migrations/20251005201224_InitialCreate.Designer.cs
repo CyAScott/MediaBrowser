@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaBrowser.Migrations
 {
     [DbContext(typeof(MediaDbContext))]
-    [Migration("20251004203231_InitialCreate")]
+    [Migration("20251005201224_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,22 +24,24 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    b.Property<string>("CastMember")
+                    b.Property<Guid>("MediaId")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("media_id");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
                         .HasColumnName("cast_member");
 
-                    b.Property<Guid>("MediaId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("MediaId", "CastMember")
+                    b.HasIndex("MediaId", "Name")
                         .IsUnique();
 
                     b.ToTable("media_cast", (string)null);
@@ -49,22 +51,24 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    b.Property<string>("Director")
+                    b.Property<Guid>("MediaId")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("media_id");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
                         .HasColumnName("director");
 
-                    b.Property<Guid>("MediaId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("MediaId", "Director")
+                    b.HasIndex("MediaId", "Name")
                         .IsUnique();
 
                     b.ToTable("media_directors", (string)null);
@@ -74,22 +78,24 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
-                    b.Property<string>("Genre")
+                    b.Property<Guid>("MediaId")
+                        .HasMaxLength(36)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("media_id");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
                         .HasColumnName("genre");
 
-                    b.Property<Guid>("MediaId")
-                        .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("MediaId", "Genre")
+                    b.HasIndex("MediaId", "Name")
                         .IsUnique();
 
                     b.ToTable("media_genres", (string)null);
@@ -106,9 +112,8 @@ namespace MediaBrowser.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("created_on");
 
-                    b.Property<string>("CtimeMs")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<long>("CtimeMs")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("ctime_ms");
 
                     b.Property<string>("Description")
@@ -131,6 +136,7 @@ namespace MediaBrowser.Migrations
 
                     b.Property<string>("Md5")
                         .IsRequired()
+                        .HasMaxLength(32)
                         .HasColumnType("TEXT")
                         .HasColumnName("md5");
 
@@ -139,9 +145,8 @@ namespace MediaBrowser.Migrations
                         .HasColumnType("TEXT")
                         .HasColumnName("mime");
 
-                    b.Property<string>("MtimeMs")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<long>("MtimeMs")
+                        .HasColumnType("INTEGER")
                         .HasColumnName("mtime_ms");
 
                     b.Property<string>("OriginalTitle")
@@ -193,14 +198,16 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
                     b.Property<Guid>("MediaId")
+                        .HasMaxLength(36)
                         .HasColumnType("TEXT")
                         .HasColumnName("media_id");
 
-                    b.Property<string>("Producer")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
@@ -208,7 +215,7 @@ namespace MediaBrowser.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MediaId", "Producer")
+                    b.HasIndex("MediaId", "Name")
                         .IsUnique();
 
                     b.ToTable("media_producers", (string)null);
@@ -218,14 +225,16 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasMaxLength(36)
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
 
                     b.Property<Guid>("MediaId")
+                        .HasMaxLength(36)
                         .HasColumnType("TEXT")
                         .HasColumnName("media_id");
 
-                    b.Property<string>("Writer")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
@@ -233,7 +242,7 @@ namespace MediaBrowser.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MediaId", "Writer")
+                    b.HasIndex("MediaId", "Name")
                         .IsUnique();
 
                     b.ToTable("media_writers", (string)null);
@@ -268,47 +277,70 @@ namespace MediaBrowser.Migrations
 
             modelBuilder.Entity("MediaBrowser.Media.Cast.CastEntity", b =>
                 {
-                    b.HasOne("MediaBrowser.Media.MediaEntity", null)
-                        .WithMany()
+                    b.HasOne("MediaBrowser.Media.MediaEntity", "Media")
+                        .WithMany("Cast")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Directors.DirectorEntity", b =>
                 {
-                    b.HasOne("MediaBrowser.Media.MediaEntity", null)
-                        .WithMany()
+                    b.HasOne("MediaBrowser.Media.MediaEntity", "Media")
+                        .WithMany("Directors")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Genres.GenreEntity", b =>
                 {
-                    b.HasOne("MediaBrowser.Media.MediaEntity", null)
-                        .WithMany()
+                    b.HasOne("MediaBrowser.Media.MediaEntity", "Media")
+                        .WithMany("Genres")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Producers.ProducerEntity", b =>
                 {
-                    b.HasOne("MediaBrowser.Media.MediaEntity", null)
-                        .WithMany()
+                    b.HasOne("MediaBrowser.Media.MediaEntity", "Media")
+                        .WithMany("Producers")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Media");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Writers.WriterEntity", b =>
                 {
-                    b.HasOne("MediaBrowser.Media.MediaEntity", null)
-                        .WithMany()
+                    b.HasOne("MediaBrowser.Media.MediaEntity", "Media")
+                        .WithMany("Writers")
                         .HasForeignKey("MediaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Media");
+                });
+
+            modelBuilder.Entity("MediaBrowser.Media.MediaEntity", b =>
+                {
+                    b.Navigation("Cast");
+
+                    b.Navigation("Directors");
+
+                    b.Navigation("Genres");
+
+                    b.Navigation("Producers");
+
+                    b.Navigation("Writers");
                 });
 #pragma warning restore 612, 618
         }

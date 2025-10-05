@@ -9,8 +9,8 @@ public class SearchRequest
     public Sort Sort { get; init; } = Sort.CreatedOn;
     [Range(0, int.MaxValue)]
     public int Skip { get; init; }
-    [Range(1, 100)]
-    public required int Take { get; init; }
+    [Range(1, int.MaxValue)]
+    public required int? Take { get; init; }
 }
 
 public enum Sort

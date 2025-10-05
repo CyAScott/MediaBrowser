@@ -20,8 +20,6 @@ public class MediaEntity
 	[Column("mime")]
 	public required string Mime { get; init; }
 
-	public string Extension() => "mp4";
-
 	[Column("size")]
 	public required long? Size { get; init; }
 
@@ -34,7 +32,7 @@ public class MediaEntity
 	[Column("duration")]
 	public required double? Duration { get; init; }
 
-	[Column("md5")]
+	[Column("md5"), MaxLength(32)]
 	public required string Md5 { get; init; }
 
 	[Column("rating")]
@@ -47,10 +45,10 @@ public class MediaEntity
 	public required string Published { get; init; }
 
 	[Column("ctime_ms")]
-	public required string CtimeMs { get; init; }
+	public required long CtimeMs { get; init; }
 
 	[Column("mtime_ms")]
-	public required string MtimeMs { get; init; }
+	public required long MtimeMs { get; init; }
 
 	[Column("created_on")]
 	public required DateTime? CreatedOn { get; init; }
@@ -60,43 +58,48 @@ public class MediaEntity
 
 	[Column("ffprobe")]
 	public required string Ffprobe { get; init; }
-}
-
-public class MediaJoin
-{
-	public required MediaEntity Media { get; init; }
-	public string[] Cast { get; init; } = [];
-	public string[] Directors { get; init; } = [];
-	public string[] Genres { get; init; } = [];
-	public string[] Producers { get; init; } = [];
-	public string[] Writers { get; init; } = [];
-
-	public MediaReadModel ToReadModel() => new()
+	
+	public ICollection<CastEntity> Cast { get; init; } = [];
+	
+	public ICollection<DirectorEntity> Directors { get; init; } = [];
+	
+	public ICollection<GenreEntity> Genres { get; init; } = [];
+	
+	public ICollection<ProducerEntity> Producers { get; init; } = [];
+	
+	public ICollection<WriterEntity> Writers { get; init; } = [];
+	
+	public MediaReadModel ToReadModel(MediaConfig config) => new()
 	{
-		Id = Media.Id,
-		Path = Media.Path,
-		Title = Media.Title,
-		OriginalTitle = Media.OriginalTitle,
-		Description = Media.Description,
-		Mime = Media.Mime,
-		Size = Media.Size,
-		Width = Media.Width,
-		Height = Media.Height,
-		Duration = Media.Duration,
-		Md5 = Media.Md5,
-		Rating = Media.Rating,
-		UserStarRating = Media.UserStarRating,
-		Published = Media.Published,
-		CtimeMs = Media.CtimeMs,
-		MtimeMs = Media.MtimeMs,
-		CreatedOn = Media.CreatedOn,
-		UpdatedOn = Media.UpdatedOn,
-		Ffprobe = JsonSerializer.Deserialize<FfprobeResponse>(Media.Ffprobe)!,
-		Cast = Cast,
-		Directors = Directors,
-		Genres = Genres,
-		Producers = Producers,
-		Writers = Writers
+		Id = Id,
+		Path = Path,
+		Title = Title,
+		OriginalTitle = OriginalTitle,
+		Description = Description,
+		Mime = Mime,
+		Size = Size,
+		Width = Width,
+		Height = Height,
+		Duration = Duration,
+		Md5 = Md5,
+		Rating = Rating,
+		UserStarRating = UserStarRating,
+		Published = Published,
+		CtimeMs = CtimeMs,
+		MtimeMs = MtimeMs,
+		CreatedOn = CreatedOn,
+		UpdatedOn = UpdatedOn,
+		Ffprobe = JsonSerializer.Deserialize<FfprobeResponse>(Ffprobe)!,
+		Cast = Cast.Select(it => it.Name).ToList(),
+		Directors = Directors.Select(it => it.Name).ToList(),
+		Genres = Genres.Select(it => it.Name).ToList(),
+		Producers = Producers.Select(it => it.Name).ToList(),
+		Writers = Writers.Select(it => it.Name).ToList(),
+		Url = $"/api/Media/{Id}/file",
+		ThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
+			? $"/api/Media/{Id}/file/thumbnail" : null,
+		FanartThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
+			? $"/api/Media/{Id}/file/thumbnail-fanart" : null
 	};
 }
 
@@ -107,15 +110,46 @@ public class MediaEntityConfiguration : IEntityTypeConfiguration<MediaEntity>
 		builder.ToTable("media");
 		
 		builder
-			.Property(it => it.CreatedOn)
-			.HasConversion(
-				value => value == null ? value : DateTime.SpecifyKind(value.Value, DateTimeKind.Unspecified),
-				value => value == null ? value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc));
-		
+			.Property(m => m.Id)
+			.HasConversion<string>(
+				value => value.ToString(),
+				value => Guid.Parse(value));
+
 		builder
-			.Property(it => it.UpdatedOn)
+			.Property(m => m.CreatedOn)
 			.HasConversion(
 				value => value == null ? value : DateTime.SpecifyKind(value.Value, DateTimeKind.Unspecified),
 				value => value == null ? value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc));
+
+		builder
+			.Property(m => m.UpdatedOn)
+			.HasConversion(
+				value => value == null ? value : DateTime.SpecifyKind(value.Value, DateTimeKind.Unspecified),
+				value => value == null ? value : DateTime.SpecifyKind(value.Value, DateTimeKind.Utc));
+
+		builder.HasMany(m => m.Cast)
+			.WithOne(c => c.Media)
+			.HasForeignKey(c => c.MediaId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		builder.HasMany(m => m.Directors)
+			.WithOne(d => d.Media)
+			.HasForeignKey(d => d.MediaId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		builder.HasMany(m => m.Genres)
+			.WithOne(g => g.Media)
+			.HasForeignKey(g => g.MediaId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		builder.HasMany(m => m.Producers)
+			.WithOne(p => p.Media)
+			.HasForeignKey(p => p.MediaId)
+			.OnDelete(DeleteBehavior.Cascade);
+
+		builder.HasMany(m => m.Writers)
+			.WithOne(w => w.Media)
+			.HasForeignKey(w => w.MediaId)
+			.OnDelete(DeleteBehavior.Cascade);
 	}
 }

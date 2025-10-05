@@ -3,193 +3,200 @@ namespace MediaBrowser.Media.Ffmpeg;
 public class FfprobeResponse
 {
     [JsonPropertyName("streams")]
-    public required IReadOnlyList<Streams> Streams { get; init; }
+    public required IReadOnlyList<Stream>? Streams { get; init; }
     [JsonPropertyName("format")]
-    public required Format Format { get; init; }
+    public required Format? Format { get; init; }
+    [JsonPropertyName("ext")]
+    public required string Ext { get; set; }
+    [JsonPropertyName("mime")]
+    public required string Mime { get; set; }
 }
 
-public class Streams
+public class Stream
 {
     [JsonPropertyName("index")]
-    public required int Index { get; init; }
+    public int? Index { get; set; }
     [JsonPropertyName("codec_name")]
-    public required string CodecName { get; init; }
+    public string? CodecName { get; set; }
     [JsonPropertyName("codec_long_name")]
-    public required string CodecLongName { get; init; }
+    public string? CodecLongName { get; set; }
     [JsonPropertyName("profile")]
-    public required string Profile { get; init; }
+    public string? Profile { get; set; }
     [JsonPropertyName("codec_type")]
-    public required string CodecType { get; init; }
+    public string? CodecType { get; set; }
     [JsonPropertyName("codec_tag_string")]
-    public required string CodecTagString { get; init; }
+    public string? CodecTagString { get; set; }
     [JsonPropertyName("codec_tag")]
-    public required string CodecTag { get; init; }
-    [JsonPropertyName("sample_fmt")]
-    public required string SampleFmt { get; init; }
-    [JsonPropertyName("sample_rate")]
-    public required string SampleRate { get; init; }
-    [JsonPropertyName("channels")]
-    public required int Channels { get; init; }
-    [JsonPropertyName("channel_layout")]
-    public required string ChannelLayout { get; init; }
-    [JsonPropertyName("bits_per_sample")]
-    public required int BitsPerSample { get; init; }
-    [JsonPropertyName("initial_padding")]
-    public required int InitialPadding { get; init; }
-    [JsonPropertyName("id")]
-    public required string Id { get; init; }
-    [JsonPropertyName("r_frame_rate")]
-    public required string RFrameRate { get; init; }
-    [JsonPropertyName("avg_frame_rate")]
-    public required string AvgFrameRate { get; init; }
-    [JsonPropertyName("time_base")]
-    public required string TimeBase { get; init; }
-    [JsonPropertyName("start_pts")]
-    public required int StartPts { get; init; }
-    [JsonPropertyName("start_time")]
-    public required string StartTime { get; init; }
-    [JsonPropertyName("duration_ts")]
-    public required int DurationTs { get; init; }
-    [JsonPropertyName("duration")]
-    public required string Duration { get; init; }
-    [JsonPropertyName("bit_rate")]
-    public required string BitRate { get; init; }
-    [JsonPropertyName("nb_frames")]
-    public required string NbFrames { get; init; }
-    [JsonPropertyName("extradata_size")]
-    public required int ExtradataSize { get; init; }
-    [JsonPropertyName("disposition")]
-    public required Disposition Disposition { get; init; }
-    [JsonPropertyName("tags")]
-    public required DispositionTags Tags { get; init; }
+    public string? CodecTag { get; set; }
     [JsonPropertyName("width")]
-    public required int Width { get; init; }
+    public int? Width { get; set; }
     [JsonPropertyName("height")]
-    public required int Height { get; init; }
+    public int? Height { get; set; }
     [JsonPropertyName("coded_width")]
-    public required int CodedWidth { get; init; }
+    public int? CodedWidth { get; set; }
     [JsonPropertyName("coded_height")]
-    public required int CodedHeight { get; init; }
+    public int? CodedHeight { get; set; }
     [JsonPropertyName("has_b_frames")]
-    public required int HasBFrames { get; init; }
+    public int? HasBFrames { get; set; }
     [JsonPropertyName("sample_aspect_ratio")]
-    public required string SampleAspectRatio { get; init; }
+    public string? SampleAspectRatio { get; set; }
     [JsonPropertyName("display_aspect_ratio")]
-    public required string DisplayAspectRatio { get; init; }
+    public string? DisplayAspectRatio { get; set; }
     [JsonPropertyName("pix_fmt")]
-    public required string PixFmt { get; init; }
+    public string? PixFmt { get; set; }
     [JsonPropertyName("level")]
-    public required int Level { get; init; }
+    public int? Level { get; set; }
     [JsonPropertyName("color_range")]
-    public required string ColorRange { get; init; }
+    public string? ColorRange { get; set; }
     [JsonPropertyName("color_space")]
-    public required string ColorSpace { get; init; }
+    public string? ColorSpace { get; set; }
     [JsonPropertyName("color_transfer")]
-    public required string ColorTransfer { get; init; }
+    public string? ColorTransfer { get; set; }
     [JsonPropertyName("color_primaries")]
-    public required string ColorPrimaries { get; init; }
+    public string? ColorPrimaries { get; set; }
     [JsonPropertyName("chroma_location")]
-    public required string ChromaLocation { get; init; }
+    public string? ChromaLocation { get; set; }
     [JsonPropertyName("field_order")]
-    public required string FieldOrder { get; init; }
+    public string? FieldOrder { get; set; }
     [JsonPropertyName("refs")]
-    public required int Refs { get; init; }
+    public int? Refs { get; set; }
     [JsonPropertyName("is_avc")]
-    public required string IsAvc { get; init; }
+    public string? IsAvc { get; set; }
     [JsonPropertyName("nal_length_size")]
-    public required string NalLengthSize { get; init; }
+    public string? NalLengthSize { get; set; }
+    [JsonPropertyName("id")]
+    public string? Id { get; set; }
+    [JsonPropertyName("r_frame_rate")]
+    public string? RFrameRate { get; set; }
+    [JsonPropertyName("avg_frame_rate")]
+    public string? AvgFrameRate { get; set; }
+    [JsonPropertyName("time_base")]
+    public string? TimeBase { get; set; }
+    [JsonPropertyName("start_pts")]
+    public int? StartPts { get; set; }
+    [JsonPropertyName("start_time")]
+    public string? StartTime { get; set; }
+    [JsonPropertyName("duration_ts")]
+    public int? DurationTs { get; set; }
+    [JsonPropertyName("duration")]
+    public string? Duration { get; set; }
+    [JsonPropertyName("bit_rate")]
+    public string? BitRate { get; set; }
     [JsonPropertyName("bits_per_raw_sample")]
-    public required string BitsPerRawSample { get; init; }
+    public string? BitsPerRawSample { get; set; }
+    [JsonPropertyName("nb_frames")]
+    public string? NbFrames { get; set; }
+    [JsonPropertyName("extradata_size")]
+    public int? ExtradataSize { get; set; }
+    [JsonPropertyName("disposition")]
+    public Disposition? Disposition { get; set; }
+    [JsonPropertyName("tags")]
+    public StreamTags? Tags { get; set; }
+    [JsonPropertyName("sample_fmt")]
+    public string? SampleFmt { get; set; }
+    [JsonPropertyName("sample_rate")]
+    public string? SampleRate { get; set; }
+    [JsonPropertyName("channels")]
+    public int? Channels { get; set; }
+    [JsonPropertyName("channel_layout")]
+    public string? ChannelLayout { get; set; }
+    [JsonPropertyName("bits_per_sample")]
+    public int? BitsPerSample { get; set; }
+    [JsonPropertyName("initial_padding")]
+    public int? InitialPadding { get; set; }
 }
 
 public class Disposition
 {
     [JsonPropertyName("default")]
-    public required int Default { get; init; }
+    public int? Default { get; set; }
     [JsonPropertyName("dub")]
-    public required int Dub { get; init; }
+    public int? Dub { get; set; }
     [JsonPropertyName("original")]
-    public required int Original { get; init; }
+    public int? Original { get; set; }
     [JsonPropertyName("comment")]
-    public required int Comment { get; init; }
+    public int? Comment { get; set; }
     [JsonPropertyName("lyrics")]
-    public required int Lyrics { get; init; }
+    public int? Lyrics { get; set; }
     [JsonPropertyName("karaoke")]
-    public required int Karaoke { get; init; }
+    public int? Karaoke { get; set; }
     [JsonPropertyName("forced")]
-    public required int Forced { get; init; }
+    public int? Forced { get; set; }
     [JsonPropertyName("hearing_impaired")]
-    public required int HearingImpaired { get; init; }
+    public int? HearingImpaired { get; set; }
     [JsonPropertyName("visual_impaired")]
-    public required int VisualImpaired { get; init; }
+    public int? VisualImpaired { get; set; }
     [JsonPropertyName("clean_effects")]
-    public required int CleanEffects { get; init; }
+    public int? CleanEffects { get; set; }
     [JsonPropertyName("attached_pic")]
-    public required int AttachedPic { get; init; }
+    public int? AttachedPic { get; set; }
     [JsonPropertyName("timed_thumbnails")]
-    public required int TimedThumbnails { get; init; }
+    public int? TimedThumbnails { get; set; }
     [JsonPropertyName("non_diegetic")]
-    public required int NonDiegetic { get; init; }
+    public int? NonDiegetic { get; set; }
     [JsonPropertyName("captions")]
-    public required int Captions { get; init; }
+    public int? Captions { get; set; }
     [JsonPropertyName("descriptions")]
-    public required int Descriptions { get; init; }
+    public int? Descriptions { get; set; }
     [JsonPropertyName("metadata")]
-    public required int Metadata { get; init; }
+    public int? Metadata { get; set; }
     [JsonPropertyName("dependent")]
-    public required int Dependent { get; init; }
+    public int? Dependent { get; set; }
     [JsonPropertyName("still_image")]
-    public required int StillImage { get; init; }
+    public int? StillImage { get; set; }
     [JsonPropertyName("multilayer")]
-    public required int Multilayer { get; init; }
+    public int? Multilayer { get; set; }
 }
 
-public class DispositionTags
+public class StreamTags
 {
-    public string creation_time { get; init; }
-    public string language { get; init; }
-    public string handler_name { get; init; }
-    public string vendor_id { get; init; }
+    [JsonPropertyName("creation_time")]
+    public string? CreationTime { get; set; }
+    [JsonPropertyName("language")]
+    public string? Language { get; set; }
+    [JsonPropertyName("handler_name")]
+    public string? HandlerName { get; set; }
+    [JsonPropertyName("vendor_id")]
+    public string? VendorId { get; set; }
 }
 
 public class Format
 {
     [JsonPropertyName("filename")]
-    public required string Filename { get; init; }
+    public string? Filename { get; set; }
     [JsonPropertyName("nb_streams")]
-    public required int NbStreams { get; init; }
+    public int? NbStreams { get; set; }
     [JsonPropertyName("nb_programs")]
-    public required int NbPrograms { get; init; }
+    public int? NbPrograms { get; set; }
     [JsonPropertyName("nb_stream_groups")]
-    public required int NbStreamGroups { get; init; }
+    public int? NbStreamGroups { get; set; }
     [JsonPropertyName("format_name")]
-    public required string FormatName { get; init; }
+    public string? FormatName { get; set; }
     [JsonPropertyName("format_long_name")]
-    public required string FormatLongName { get; init; }
+    public string? FormatLongName { get; set; }
     [JsonPropertyName("start_time")]
-    public required string StartTime { get; init; }
+    public string? StartTime { get; set; }
     [JsonPropertyName("duration")]
-    public required string Duration { get; init; }
+    public string? Duration { get; set; }
     [JsonPropertyName("size")]
-    public required string Size { get; init; }
+    public string? Size { get; set; }
     [JsonPropertyName("bit_rate")]
-    public required string BitRate { get; init; }
+    public string? BitRate { get; set; }
     [JsonPropertyName("probe_score")]
-    public required int ProbeScore { get; init; }
+    public int? ProbeScore { get; set; }
     [JsonPropertyName("tags")]
-    public required FormatTags Tags { get; init; }
+    public FormatTags? Tags { get; set; }
 }
 
 public class FormatTags
 {
     [JsonPropertyName("major_brand")]
-    public required string MajorBrand { get; init; }
+    public string? MajorBrand { get; set; }
     [JsonPropertyName("minor_version")]
-    public required string MinorVersion { get; init; }
+    public string? MinorVersion { get; set; }
     [JsonPropertyName("compatible_brands")]
-    public required string CompatibleBrands { get; init; }
+    public string? CompatibleBrands { get; set; }
     [JsonPropertyName("creation_time")]
-    public required string CreationTime { get; init; }
-    [JsonPropertyName("encoder")]
-    public required string Encoder { get; init; }
+    public string? CreationTime { get; set; }
 }
+

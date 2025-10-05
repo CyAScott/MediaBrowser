@@ -30,9 +30,9 @@ public class MediaReadModel
 
     public required string Published { get; init; }
 
-    public required string CtimeMs { get; init; }
+    public required long CtimeMs { get; init; }
 
-    public required string MtimeMs { get; init; }
+    public required long MtimeMs { get; init; }
 
     public required DateTime? CreatedOn { get; init; }
 
@@ -49,4 +49,10 @@ public class MediaReadModel
     public required IReadOnlyList<string> Producers { get; init; }
     
     public required IReadOnlyList<string> Writers { get; init; }
+    
+    public required string Url { get; init; }
+    
+    public required string? ThumbnailUrl { get; init; }
+    
+    public required string? FanartThumbnailUrl { get; init; }
 }

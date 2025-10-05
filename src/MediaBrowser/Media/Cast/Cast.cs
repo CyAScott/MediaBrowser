@@ -2,12 +2,13 @@ namespace MediaBrowser.Media.Cast;
 
 public class CastEntity
 {
-    [Column("id"), Key]
-    public required int Id { get; init; }
-    [Column("media_id")]
+    [Column("id"), Key, MaxLength(36), Required]
+    public required int Id { get; set; } 
+    [Column("media_id"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
     [Column("cast_member"), Required, MaxLength(50)]
     public required string Name { get; init; }
+    public required MediaEntity Media { get; init; }
 }
 
 public class CastEntityConfiguration : IEntityTypeConfiguration<CastEntity>
@@ -16,12 +17,10 @@ public class CastEntityConfiguration : IEntityTypeConfiguration<CastEntity>
     {
         builder.ToTable("media_cast");
         
-        builder.HasIndex(e => new { e.MediaId, CastMember = e.Name })
-            .IsUnique();
+        builder.HasIndex(e => new { e.MediaId, e.Name }).IsUnique();
 
-        builder.HasOne<MediaEntity>()
-            .WithMany()
-            .HasForeignKey(e => e.MediaId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(e => e.Media)
+            .WithMany(m => m.Cast)
+            .HasForeignKey(e => e.MediaId);
     }
 }

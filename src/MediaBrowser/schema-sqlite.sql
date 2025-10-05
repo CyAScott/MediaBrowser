@@ -19,8 +19,8 @@ CREATE TABLE "media" (
     "rating" REAL NULL,
     "user_star_rating" INTEGER NULL,
     "published" TEXT NOT NULL,
-    "ctime_ms" TEXT NOT NULL,
-    "mtime_ms" TEXT NOT NULL,
+    "ctime_ms" INTEGER NOT NULL,
+    "mtime_ms" INTEGER NOT NULL,
     "created_on" TEXT NULL,
     "updated_on" TEXT NULL,
     "ffprobe" TEXT NOT NULL
@@ -80,7 +80,7 @@ CREATE UNIQUE INDEX "IX_media_writers_media_id_writer" ON "media_writers" ("medi
 CREATE UNIQUE INDEX "IX_users_user_name" ON "users" ("user_name");
 
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-VALUES ('20251004203231_InitialCreate', '9.0.9');
+VALUES ('20251005201224_InitialCreate', '9.0.9');
 
 COMMIT;
 

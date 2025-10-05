@@ -25,12 +25,12 @@ namespace MediaBrowser.Migrations
                     width = table.Column<int>(type: "INTEGER", nullable: true),
                     height = table.Column<int>(type: "INTEGER", nullable: true),
                     duration = table.Column<double>(type: "REAL", nullable: true),
-                    md5 = table.Column<string>(type: "TEXT", nullable: false),
+                    md5 = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
                     rating = table.Column<double>(type: "REAL", nullable: true),
                     user_star_rating = table.Column<int>(type: "INTEGER", nullable: true),
                     published = table.Column<string>(type: "TEXT", nullable: false),
-                    ctime_ms = table.Column<string>(type: "TEXT", nullable: false),
-                    mtime_ms = table.Column<string>(type: "TEXT", nullable: false),
+                    ctime_ms = table.Column<long>(type: "INTEGER", nullable: false),
+                    mtime_ms = table.Column<long>(type: "INTEGER", nullable: false),
                     created_on = table.Column<DateTime>(type: "TEXT", nullable: true),
                     updated_on = table.Column<DateTime>(type: "TEXT", nullable: true),
                     ffprobe = table.Column<string>(type: "TEXT", nullable: false)
@@ -57,9 +57,9 @@ namespace MediaBrowser.Migrations
                 name: "media_cast",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "INTEGER", maxLength: 36, nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    media_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    media_id = table.Column<Guid>(type: "TEXT", maxLength: 36, nullable: false),
                     cast_member = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -77,9 +77,9 @@ namespace MediaBrowser.Migrations
                 name: "media_directors",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "INTEGER", maxLength: 36, nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    media_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    media_id = table.Column<Guid>(type: "TEXT", maxLength: 36, nullable: false),
                     director = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -97,9 +97,9 @@ namespace MediaBrowser.Migrations
                 name: "media_genres",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "INTEGER", maxLength: 36, nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    media_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    media_id = table.Column<Guid>(type: "TEXT", maxLength: 36, nullable: false),
                     genre = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -117,9 +117,9 @@ namespace MediaBrowser.Migrations
                 name: "media_producers",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "INTEGER", maxLength: 36, nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    media_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    media_id = table.Column<Guid>(type: "TEXT", maxLength: 36, nullable: false),
                     producer = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -137,9 +137,9 @@ namespace MediaBrowser.Migrations
                 name: "media_writers",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                    id = table.Column<int>(type: "INTEGER", maxLength: 36, nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    media_id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    media_id = table.Column<Guid>(type: "TEXT", maxLength: 36, nullable: false),
                     writer = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false)
                 },
                 constraints: table =>

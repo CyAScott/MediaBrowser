@@ -71,6 +71,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+app.UseMiddleware<JwtCookieMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseEndpoints(endpoints =>

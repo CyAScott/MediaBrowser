@@ -5,8 +5,6 @@ namespace MediaBrowser.Users;
 [ApiController, Route("api/[controller]")]
 public class UsersController(UserConfig userConfig, MediaDbContext context) : ControllerBase
 {
-    const string _cookieName = "mb_auth";
-
     [HttpPost("login"), AllowAnonymous]
     public async Task<ActionResult<UserReadModel>> Login([FromBody] UserLoginRequest request)
     {
@@ -41,7 +39,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        Response.Cookies.Append(_cookieName, tokenString, new CookieOptions
+        Response.Cookies.Append(JwtCookieMiddleware.CookieName, tokenString, new CookieOptions
         {
             HttpOnly = true,
             Expires = tokenDescriptor.Expires,
@@ -53,7 +51,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpPost("logout")]
     public ActionResult Logout()
     {
-        Response.Cookies.Append(_cookieName, "", new CookieOptions
+        Response.Cookies.Append(JwtCookieMiddleware.CookieName, "", new CookieOptions
         {
             HttpOnly = true,
             Expires = DateTime.UtcNow.AddDays(-1),
