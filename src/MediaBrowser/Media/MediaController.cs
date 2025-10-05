@@ -95,6 +95,41 @@ public class MediaController(MediaConfig mediaConfig, MediaDbContext context) : 
         };
     }
     
+    [HttpGet("cast")]
+    public async Task<IReadOnlyList<string>> GetAllCast() =>
+        await context.Casts.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
+
+    [HttpGet("cast/{name}/thumbnail")]
+    public Task<ActionResult> GetCastThumbnail(string name) => File(mediaConfig.CastDirectory, $"{name}.jpg");
+
+    [HttpGet("directors")]
+    public async Task<IReadOnlyList<string>> GetAllDirectors() =>
+        await context.Directors.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
+
+    [HttpGet("director/{name}/thumbnail")]
+    public Task<ActionResult> GetDirectorThumbnail(string name) => File(mediaConfig.DirectorsDirectory, $"{name}.jpg");
+    
+    [HttpGet("genres")]
+    public async Task<IReadOnlyList<string>> GetAllGenres() =>
+        await context.Genres.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
+
+    [HttpGet("genre/{name}/thumbnail")]
+    public Task<ActionResult> GetGenreThumbnail(string name) => File(mediaConfig.GenresDirectory, $"{name}.jpg");
+    
+    [HttpGet("producers")]
+    public async Task<IReadOnlyList<string>> GetAllProducers() =>
+        await context.Producers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
+
+    [HttpGet("producer/{name}/thumbnail")]
+    public Task<ActionResult> GetProducerThumbnail(string name) => File(mediaConfig.ProducersDirectory, $"{name}.jpg");
+    
+    [HttpGet("writers")]
+    public async Task<IReadOnlyList<string>> GetAllWriters() =>
+        await context.Writers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
+
+    [HttpGet("writer/{name}/thumbnail")]
+    public Task<ActionResult> GetWriterThumbnail(string name) => File(mediaConfig.WritersDirectory, $"{name}.jpg");
+    
     [HttpGet("{id:guid}/file")]
     public Task<ActionResult> Stream(Guid id) =>
         File(id, media => $".{media.ToReadModel(mediaConfig).Ffprobe.Ext}", media => media.Mime, true);
@@ -146,5 +181,25 @@ public class MediaController(MediaConfig mediaConfig, MediaDbContext context) : 
         Response.Headers["Last-Modified"] = lastModified.ToString("R");
 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media));
+    }
+
+    async Task<ActionResult> File(string directory, string name)
+    {
+        var filePath = Path.Combine(directory, name);
+        if (!System.IO.File.Exists(filePath))
+        {
+            return NotFound();
+        }
+
+        var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
+        if (Request.Headers.ContainsKey("If-Modified-Since") &&
+            DateTime.TryParse(Request.Headers["If-Modified-Since"], out var ifModifiedSince) &&
+            Math.Abs((lastModified - ifModifiedSince.ToUniversalTime()).TotalSeconds) < 2)
+        {
+            return StatusCode(StatusCodes.Status304NotModified);
+        }
+        Response.Headers["Last-Modified"] = lastModified.ToString("R");
+
+        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), "image/jpeg");
     }
 }
