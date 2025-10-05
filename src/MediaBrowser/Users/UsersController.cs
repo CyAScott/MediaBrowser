@@ -16,6 +16,13 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
             return Unauthorized();
         }
 
+        Login(user);
+
+        return user.ToReadModel();
+    }
+
+    void Login(UserEntity user)
+    {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.UTF8.GetBytes(userConfig.JwtSecretKey);
         var tokenDescriptor = new SecurityTokenDescriptor
@@ -41,8 +48,6 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
             Secure = true,
             SameSite = SameSiteMode.Strict
         });
-
-        return user.ToReadModel();
     }
 
     [HttpPost("logout")]
@@ -61,7 +66,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpGet("me")]
     public async Task<ActionResult<UserReadModel>> Me()
     {
-        var user = await context.Users.SingleAsync(u => u.UserName == User.Identity.Name);
+        var user = await context.Users.SingleAsync(u => u.UserName == User.Identity!.Name);
 
         return user.ToReadModel();
     }
@@ -83,6 +88,8 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
 
         context.Users.Add(user);
         await context.SaveChangesAsync();
+
+        Login(user);
 
         return user.ToReadModel();
     }
