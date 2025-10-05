@@ -7,7 +7,7 @@ public class DirectorEntity
     [Column("media_id")]
     public required Guid MediaId { get; init; }
     [Column("director"), Required, MaxLength(50)]
-    public required string Director { get; init; }
+    public required string Name { get; init; }
 }
 
 public class DirectorEntityConfiguration : IEntityTypeConfiguration<DirectorEntity>
@@ -16,7 +16,7 @@ public class DirectorEntityConfiguration : IEntityTypeConfiguration<DirectorEnti
     {
         builder.ToTable("media_directors");
         
-        builder.HasIndex(e => new { e.MediaId, e.Director })
+        builder.HasIndex(e => new { e.MediaId, Director = e.Name })
             .IsUnique();
 
         builder.HasOne<MediaEntity>()

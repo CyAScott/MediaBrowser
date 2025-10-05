@@ -7,7 +7,7 @@ public class ProducerEntity
     [Column("media_id")]
     public required Guid MediaId { get; init; }
     [Column("producer"), Required, MaxLength(50)]
-    public required string Producer { get; init; }
+    public required string Name { get; init; }
 }
 
 public class ProducerEntityConfiguration : IEntityTypeConfiguration<ProducerEntity>
@@ -16,7 +16,7 @@ public class ProducerEntityConfiguration : IEntityTypeConfiguration<ProducerEnti
     {
         builder.ToTable("media_producers");
         
-        builder.HasIndex(e => new { e.MediaId, e.Producer })
+        builder.HasIndex(e => new { e.MediaId, Producer = e.Name })
             .IsUnique();
 
         builder.HasOne<MediaEntity>()

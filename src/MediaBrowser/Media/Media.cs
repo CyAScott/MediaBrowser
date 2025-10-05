@@ -60,38 +60,43 @@ public class MediaEntity
 
 	[Column("ffprobe")]
 	public required string Ffprobe { get; init; }
+}
 
-	public MediaReadModel ToReadModel(
-		string[] cast,
-		string[] directors,
-		string[] genres,
-		string[] producers,
-		string[] writers) => new()
+public class MediaJoin
+{
+	public required MediaEntity Media { get; init; }
+	public string[] Cast { get; init; } = [];
+	public string[] Directors { get; init; } = [];
+	public string[] Genres { get; init; } = [];
+	public string[] Producers { get; init; } = [];
+	public string[] Writers { get; init; } = [];
+
+	public MediaReadModel ToReadModel() => new()
 	{
-		Id = Id,
-		Path = Path,
-		Title = Title,
-		OriginalTitle = OriginalTitle,
-		Description = Description,
-		Mime = Mime,
-		Size = Size,
-		Width = Width,
-		Height = Height,
-		Duration = Duration,
-		Md5 = Md5,
-		Rating = Rating,
-		UserStarRating = UserStarRating,
-		Published = Published,
-		CtimeMs = CtimeMs,
-		MtimeMs = MtimeMs,
-		CreatedOn = CreatedOn,
-		UpdatedOn = UpdatedOn,
-		Ffprobe = JsonSerializer.Deserialize<FfprobeResponse>(Ffprobe)!,
-		Cast = cast,
-		Directors = directors,
-		Genres = genres,
-		Producers = producers,
-		Writers = writers
+		Id = Media.Id,
+		Path = Media.Path,
+		Title = Media.Title,
+		OriginalTitle = Media.OriginalTitle,
+		Description = Media.Description,
+		Mime = Media.Mime,
+		Size = Media.Size,
+		Width = Media.Width,
+		Height = Media.Height,
+		Duration = Media.Duration,
+		Md5 = Media.Md5,
+		Rating = Media.Rating,
+		UserStarRating = Media.UserStarRating,
+		Published = Media.Published,
+		CtimeMs = Media.CtimeMs,
+		MtimeMs = Media.MtimeMs,
+		CreatedOn = Media.CreatedOn,
+		UpdatedOn = Media.UpdatedOn,
+		Ffprobe = JsonSerializer.Deserialize<FfprobeResponse>(Media.Ffprobe)!,
+		Cast = Cast,
+		Directors = Directors,
+		Genres = Genres,
+		Producers = Producers,
+		Writers = Writers
 	};
 }
 

@@ -7,7 +7,7 @@ public class GenreEntity
     [Column("media_id")]
     public required Guid MediaId { get; init; }
     [Column("genre"), Required, MaxLength(50)]
-    public required string Genre { get; init; }
+    public required string Name { get; init; }
 }
 
 public class GenreEntityConfiguration : IEntityTypeConfiguration<GenreEntity>
@@ -16,7 +16,7 @@ public class GenreEntityConfiguration : IEntityTypeConfiguration<GenreEntity>
     {
         builder.ToTable("media_genres");
         
-        builder.HasIndex(e => new { e.MediaId, e.Genre })
+        builder.HasIndex(e => new { e.MediaId, Genre = e.Name })
             .IsUnique();
 
         builder.HasOne<MediaEntity>()

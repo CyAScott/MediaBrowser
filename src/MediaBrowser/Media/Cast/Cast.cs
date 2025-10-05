@@ -7,7 +7,7 @@ public class CastEntity
     [Column("media_id")]
     public required Guid MediaId { get; init; }
     [Column("cast_member"), Required, MaxLength(50)]
-    public required string CastMember { get; init; }
+    public required string Name { get; init; }
 }
 
 public class CastEntityConfiguration : IEntityTypeConfiguration<CastEntity>
@@ -16,7 +16,7 @@ public class CastEntityConfiguration : IEntityTypeConfiguration<CastEntity>
     {
         builder.ToTable("media_cast");
         
-        builder.HasIndex(e => new { e.MediaId, e.CastMember })
+        builder.HasIndex(e => new { e.MediaId, CastMember = e.Name })
             .IsUnique();
 
         builder.HasOne<MediaEntity>()

@@ -7,7 +7,7 @@ public class WriterEntity
     [Column("media_id")]
     public required Guid MediaId { get; init; }
     [Column("writer"), Required, MaxLength(50)]
-    public required string Writer { get; init; }
+    public required string Name { get; init; }
 }
 
 public class WriterEntityConfiguration : IEntityTypeConfiguration<WriterEntity>
@@ -16,7 +16,7 @@ public class WriterEntityConfiguration : IEntityTypeConfiguration<WriterEntity>
     {
         builder.ToTable("media_writers");
         
-        builder.HasIndex(e => new { e.MediaId, e.Writer })
+        builder.HasIndex(e => new { e.MediaId, Writer = e.Name })
             .IsUnique();
 
         builder.HasOne<MediaEntity>()
