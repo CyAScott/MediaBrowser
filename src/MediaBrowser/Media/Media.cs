@@ -59,15 +59,15 @@ public class MediaEntity
 	[Column("ffprobe")]
 	public required string Ffprobe { get; init; }
 	
-	public ICollection<CastEntity> Cast { get; init; } = [];
+	public ICollection<CastEntity> Cast { get; set; } = [];
 	
-	public ICollection<DirectorEntity> Directors { get; init; } = [];
+	public ICollection<DirectorEntity> Directors { get; set; } = [];
 	
-	public ICollection<GenreEntity> Genres { get; init; } = [];
+	public ICollection<GenreEntity> Genres { get; set; } = [];
 	
-	public ICollection<ProducerEntity> Producers { get; init; } = [];
+	public ICollection<ProducerEntity> Producers { get; set; } = [];
 	
-	public ICollection<WriterEntity> Writers { get; init; } = [];
+	public ICollection<WriterEntity> Writers { get; set; } = [];
 	
 	public MediaReadModel ToReadModel(MediaConfig config) => new()
 	{
@@ -101,6 +101,111 @@ public class MediaEntity
 		FanartThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
 			? $"/api/Media/{Id}/file/thumbnail-fanart" : null
 	};
+
+	public static MediaEntity Create(
+		FileInfo fileInfo,
+		FfprobeResponse ffprobe,
+		ImportMediaRequest request,
+		string hash, string mime,
+		IEnumerable<string> cast,
+		IEnumerable<string> directors,
+		IEnumerable<string> genres,
+		IEnumerable<string> producers,
+		IEnumerable<string> writers,
+		Guid? mediaId = null)
+	{
+		var castEntities = new List<CastEntity>();
+		var directorEntities = new List<DirectorEntity>();
+		var genreEntities = new List<GenreEntity>();
+		var producerEntities = new List<ProducerEntity>();
+		var writerEntities = new List<WriterEntity>();
+
+		var media = new MediaEntity
+		{
+			Id = mediaId ?? Guid.CreateVersion7(),
+			CtimeMs = (fileInfo.CreationTimeUtc - DateTime.UnixEpoch).Milliseconds,
+			CreatedOn = fileInfo.CreationTimeUtc,
+			UpdatedOn = fileInfo.LastWriteTimeUtc,
+			Path = fileInfo.Name,
+			Title = request.Title,
+			OriginalTitle = request.OriginalTitle,
+			Description = request.Description,
+			Mime = mime,
+			Size = fileInfo.Length,
+			Width = ffprobe.Streams?.Select(it => it.Width).OfType<int>().First(),
+			Height = ffprobe.Streams?.Select(it => it.Height).OfType<int>().First(),
+			Duration = double.Parse(ffprobe.Format?.Duration ?? "0"),
+			Md5 = hash,
+			Rating = request.Rating,
+			UserStarRating = request.UserStarRating,
+			Published = request.Published,
+			MtimeMs = (fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).Milliseconds,
+			Ffprobe = JsonSerializer.Serialize(ffprobe),
+			
+			Cast = castEntities,
+			Directors = directorEntities,
+			Genres = genreEntities,
+			Producers = producerEntities,
+			Writers = writerEntities
+		};
+		
+		foreach (var name in cast)
+		{
+			castEntities.Add(new CastEntity
+			{
+				Id = 0,
+				Media = media,
+				MediaId = media.Id,
+				Name = name
+			});
+		}
+		
+		foreach (var name in directors)
+		{
+			directorEntities.Add(new DirectorEntity
+			{
+				Id = 0,
+				Media = media,
+				MediaId = media.Id,
+				Name = name
+			});
+		}
+		
+		foreach (var name in genres)
+		{
+			genreEntities.Add(new GenreEntity
+			{
+				Id = 0,
+				Media = media,
+				MediaId = media.Id,
+				Name = name
+			});
+		}
+		
+		foreach (var name in producers)
+		{
+			producerEntities.Add(new ProducerEntity
+			{
+				Id = 0,
+				Media = media,
+				MediaId = media.Id,
+				Name = name
+			});
+		}
+		
+		foreach (var name in writers)
+		{
+			writerEntities.Add(new WriterEntity
+			{
+				Id = 0,
+				Media = media,
+				MediaId = media.Id,
+				Name = name
+			});
+		}
+		
+		return media;
+	}
 }
 
 public class MediaEntityConfiguration : IEntityTypeConfiguration<MediaEntity>

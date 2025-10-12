@@ -1,0 +1,47 @@
+<media type="Other">
+  <title>{{title}}</title>
+  <originaltitle>{{originalTitle}}</originaltitle>
+  <sorttitle>{{ctimeMs}}</sorttitle>
+  <description>{{description}}</description>
+  <cast>
+    {{#each cast}}
+    <name>{{this.name}}</name>
+    {{/each}}
+  </cast>
+  <rating>{{rating}}</rating>
+  <userStarRating>{{userStarRating}}</userStarRating>
+  <published>{{published}}</published>
+  <genres>
+    {{#each cast}}
+    <genre>{{this.name}}</genre>
+    {{/each}}
+  </genres>
+  <producers>
+    {{#each producers}}
+    <name>{{this.name}}</name>
+    {{/each}}
+  </producers>
+  <directors>
+    {{#each directors}}
+    <name>{{this.name}}</name>
+    {{/each}}
+  </directors>
+  <writers>
+    {{#each writers}}
+    <name>{{this.name}}</name>
+    {{/each}}
+  </writers>
+  <stats>
+    <ctime>{{ctimeMs}}</ctime>
+    <duration>{{duration}}</duration>
+    <ffprobe>{{ffprobe}}</ffprobe>
+    <height>{{height}}</height>
+    <id>{{id}}</id>
+    <md5>{{md5}}</md5>
+    <mime>{{mime}}</mime>
+    <mtimeMs>{{mtimeMs}}</mtimeMs>
+    <path>{{path}}</path>
+    <size>{{size}}</size>
+    <width>{{width}}</width>
+  </stats>
+</media>

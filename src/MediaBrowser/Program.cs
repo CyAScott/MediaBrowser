@@ -13,6 +13,8 @@ builder.Configuration
 
 var mediaConfig = new MediaConfig(builder.Configuration);
 builder.Services.AddSingleton(mediaConfig);
+builder.Services.AddSingleton<IFfmpeg, Ffmpeg>();
+builder.Services.AddSingleton<Nfo>();
 
 // Add services to the container
 builder.Services.AddControllers();
@@ -59,6 +61,35 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+var importLocation = app.Configuration.GetValue<string?>("db:importOnBootFrom");
+if (Directory.Exists(importLocation))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+    var nfo = app.Services.GetRequiredService<Nfo>();
+    var log = app.Services.GetRequiredService<ILogger<Nfo>>();
+
+    foreach (var file in Directory.GetFiles(importLocation, "*.nfo")
+        .Where(f => !f.StartsWith(".")))
+    {
+        try
+        {
+            var nfoLocation = Path.Combine(importLocation, file);
+            var rawXml = await File.ReadAllTextAsync(nfoLocation, Encoding.UTF8);
+            var mediaEntity = nfo.Read(rawXml);
+        
+            await db.Media.Where(m => m.Id == mediaEntity.Id).ExecuteDeleteAsync();
+            db.Media.Add(mediaEntity);
+            await db.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            log.LogError(ex.Message, ex);
+        }
+    }
+    return;
+}
+
 // Configure the HTTP request pipeline
 app.UseStaticFiles()
     .UseRouting();
@@ -74,10 +105,12 @@ app.UseSwaggerUI(c =>
 app.UseMiddleware<JwtCookieMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
+#pragma warning disable ASP0014
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
 });
+#pragma warning restore ASP0014
 
 if (dbConfig.MigrateOnBoot)
 {

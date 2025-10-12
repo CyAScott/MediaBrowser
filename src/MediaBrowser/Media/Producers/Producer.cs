@@ -2,13 +2,14 @@ namespace MediaBrowser.Media.Producers;
 
 public class ProducerEntity
 {
-    [Column("id"), Key, MaxLength(36), Required]
+    [Column("id"), Key, Required,
+     DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public required int Id { get; set; } 
     [Column("media_id"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
     [Column("producer"), Required, MaxLength(50)]
     public required string Name { get; init; }
-    public required MediaEntity Media { get; init; }
+    public MediaEntity Media { get; init; } = null!;
 }
 
 public class ProducerEntityConfiguration : IEntityTypeConfiguration<ProducerEntity>

@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
 [ApiController, Route("api/[controller]")]
-public class MediaController(MediaConfig mediaConfig, MediaDbContext context) : ControllerBase
+public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context) : ControllerBase
 {
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MediaReadModel>> Get(Guid id)
@@ -100,49 +100,57 @@ public class MediaController(MediaConfig mediaConfig, MediaDbContext context) : 
         await context.Casts.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
 
     [HttpGet("cast/{name}/thumbnail")]
-    public Task<ActionResult> GetCastThumbnail(string name) => File(mediaConfig.CastDirectory, $"{name}.jpg");
+    public ActionResult GetCastThumbnail(string name) => ReadFile(mediaConfig.CastDirectory, $"{name}.jpg");
 
     [HttpGet("directors")]
     public async Task<IReadOnlyList<string>> GetAllDirectors() =>
         await context.Directors.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
 
     [HttpGet("director/{name}/thumbnail")]
-    public Task<ActionResult> GetDirectorThumbnail(string name) => File(mediaConfig.DirectorsDirectory, $"{name}.jpg");
+    public ActionResult GetDirectorThumbnail(string name) => ReadFile(mediaConfig.DirectorsDirectory, $"{name}.jpg");
     
     [HttpGet("genres")]
     public async Task<IReadOnlyList<string>> GetAllGenres() =>
         await context.Genres.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
 
     [HttpGet("genre/{name}/thumbnail")]
-    public Task<ActionResult> GetGenreThumbnail(string name) => File(mediaConfig.GenresDirectory, $"{name}.jpg");
+    public ActionResult GetGenreThumbnail(string name) => ReadFile(mediaConfig.GenresDirectory, $"{name}.jpg");
     
     [HttpGet("producers")]
     public async Task<IReadOnlyList<string>> GetAllProducers() =>
         await context.Producers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
 
     [HttpGet("producer/{name}/thumbnail")]
-    public Task<ActionResult> GetProducerThumbnail(string name) => File(mediaConfig.ProducersDirectory, $"{name}.jpg");
+    public ActionResult GetProducerThumbnail(string name) => ReadFile(mediaConfig.ProducersDirectory, $"{name}.jpg");
     
     [HttpGet("writers")]
     public async Task<IReadOnlyList<string>> GetAllWriters() =>
         await context.Writers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
 
     [HttpGet("writer/{name}/thumbnail")]
-    public Task<ActionResult> GetWriterThumbnail(string name) => File(mediaConfig.WritersDirectory, $"{name}.jpg");
+    public ActionResult GetWriterThumbnail(string name) => ReadFile(mediaConfig.WritersDirectory, $"{name}.jpg");
     
     [HttpGet("{id:guid}/file")]
     public Task<ActionResult> Stream(Guid id) =>
-        File(id, media => $".{media.ToReadModel(mediaConfig).Ffprobe.Ext}", media => media.Mime, true);
+        ReadFile(id, media => $".{mediaConfig.GetExtensionFromMime(media.Mime)}", media => media.Mime, true);
     
     [HttpGet("{id:guid}/file/thumbnail-fanart")]
     public Task<ActionResult> StreamFanartThumbnail(Guid id) =>
-        File(id, _ => "-fanart.jpg", _ => "image/jpeg");
-    
+        ReadFile(id, _ => "-fanart.jpg", _ => "image/jpeg");
+
+    [HttpPost("{id:guid}/file/thumbnail-fanart")]
+    public Task<ActionResult> UpdateFanartThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
+        WriteFile(id, "-fanart.jpg", request.At);
+
     [HttpGet("{id:guid}/file/thumbnail")]
     public Task<ActionResult> StreamThumbnail(Guid id) =>
-        File(id, _ => ".jpg", _ => "image/jpeg");
+        ReadFile(id, _ => ".jpg", _ => "image/jpeg");
+
+    [HttpPost("{id:guid}/file/thumbnail")]
+    public Task<ActionResult> UpdateThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
+        WriteFile(id, ".jpg", request.At);
     
-    async Task<ActionResult> File(Guid id,
+    async Task<ActionResult> ReadFile(Guid id,
         Func<MediaEntity, string> extension,
         Func<MediaEntity, string> mime,
         bool etag = false)
@@ -183,7 +191,7 @@ public class MediaController(MediaConfig mediaConfig, MediaDbContext context) : 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media));
     }
 
-    async Task<ActionResult> File(string directory, string name)
+    ActionResult ReadFile(string directory, string name)
     {
         var filePath = Path.Combine(directory, name);
         if (!System.IO.File.Exists(filePath))
@@ -201,5 +209,32 @@ public class MediaController(MediaConfig mediaConfig, MediaDbContext context) : 
         Response.Headers["Last-Modified"] = lastModified.ToString("R");
 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), "image/jpeg");
+    }
+
+    async Task<ActionResult> WriteFile(Guid id, string extension, double at)
+    {
+        var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
+        if (media == null)
+        {
+            return NotFound();
+        }
+        
+        var filePath = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.{mediaConfig.GetExtensionFromMime(media.Mime)}");
+        
+        if (!System.IO.File.Exists(filePath))
+        {
+            return NotFound();
+        }
+
+        var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
+        
+        if (!await ffmpeg.TryExtractThumbnail(filePath,
+                outputPath: thumbnailLocation,
+                at: TimeSpan.FromSeconds(at)))
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable);
+        }
+
+        return Ok();
     }
 }

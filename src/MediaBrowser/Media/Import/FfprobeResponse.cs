@@ -1,4 +1,4 @@
-namespace MediaBrowser.Media.Ffmpeg;
+namespace MediaBrowser.Media.Import;
 
 public class FfprobeResponse
 {
@@ -6,10 +6,6 @@ public class FfprobeResponse
     public required IReadOnlyList<Stream>? Streams { get; init; }
     [JsonPropertyName("format")]
     public required Format? Format { get; init; }
-    [JsonPropertyName("ext")]
-    public required string Ext { get; set; }
-    [JsonPropertyName("mime")]
-    public required string Mime { get; set; }
 }
 
 public class Stream
