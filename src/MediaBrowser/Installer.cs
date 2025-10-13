@@ -1,10 +1,16 @@
+using System.Text;
+using MediaBrowser.Media;
+using MediaBrowser.Media.Import;
+using MediaBrowser.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace MediaBrowser;
 
-static class Installer
+public static class Installer
 {
     const string _version = "v1";
 
@@ -48,9 +54,12 @@ static class Installer
                 .RequireAuthenticatedUser()
                 .Build();
         });
+
+        MediaInstaller.OnBoot(builder);
+        ImportInstaller.OnBoot(builder);
     }
 
-    public static Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
         // Configure the HTTP request pipeline
         app.UseStaticFiles()
@@ -74,6 +83,7 @@ static class Installer
         });
 #pragma warning restore ASP0014
         
-        return Task.CompletedTask;
+        await MediaInstaller.OnStartup(app, source);
+        await ImportInstaller.OnStartup(app, source);
     }
 }
