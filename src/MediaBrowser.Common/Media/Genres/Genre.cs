@@ -10,7 +10,7 @@ public class GenreEntity
     public required Guid MediaId { get; init; }
     [Column("genre"), JsonPropertyName("name"), Required, MaxLength(50)]
     public required string Name { get; init; }
-    [JsonPropertyName("media")]
+    [JsonIgnore]
     public MediaEntity Media { get; init; } = null!;
 }
 

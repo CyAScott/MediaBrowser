@@ -12,7 +12,7 @@
   <userStarRating>{{userStarRating}}</userStarRating>
   <published>{{published}}</published>
   <genres>
-    {{#each cast}}
+    {{#each genres}}
     <genre>{{this.name}}</genre>
     {{/each}}
   </genres>

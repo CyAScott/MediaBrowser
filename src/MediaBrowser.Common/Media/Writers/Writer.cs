@@ -10,7 +10,7 @@ public class WriterEntity
     public required Guid MediaId { get; init; }
     [Column("writer"), JsonPropertyName("name"), Required, MaxLength(50)]
     public required string Name { get; init; }
-    [JsonPropertyName("media")]
+    [JsonIgnore]
     public MediaEntity Media { get; init; } = null!;
 }
 

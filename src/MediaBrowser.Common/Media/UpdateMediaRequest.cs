@@ -9,10 +9,10 @@ public class UpdateMediaRequest
     public required string Description { get; init; }
 
     [Range(0, 10)]
-    public required double? Rating { get; init; }
+    public double? Rating { get; init; }
 
     [Range(0, 5)]
-    public required int? UserStarRating { get; init; }
+    public int? UserStarRating { get; init; }
     
     public required IReadOnlyList<string> Cast { get; init; }
     
