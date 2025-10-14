@@ -74,7 +74,6 @@ public class Nfo(MediaConfig mediaConfig)
             Title = xmlDoc.SelectSingleNode("//title")?.InnerText ?? string.Empty,
             OriginalTitle = xmlDoc.SelectSingleNode("//originaltitle")?.InnerText  ?? string.Empty,
             Description = xmlDoc.SelectSingleNode("//description")?.InnerText  ?? string.Empty,
-            Published = xmlDoc.SelectSingleNode("//published")?.InnerText  ?? string.Empty,
             Rating = double.TryParse(xmlDoc.SelectSingleNode("//rating")?.InnerText ?? string.Empty, out var rating)
                 ? rating
                 : null,
