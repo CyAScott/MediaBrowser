@@ -154,11 +154,21 @@ public class MediaEntity
             Writers = writerEntities
         };
 
-        castEntities.AddRange(cast.Select(name => new CastEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
-        directorEntities.AddRange(directors.Select(name => new DirectorEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
-        genreEntities.AddRange(genres.Select(name => new GenreEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
-        producerEntities.AddRange(producers.Select(name => new ProducerEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
-        writerEntities.AddRange(writers.Select(name => new WriterEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        castEntities.AddRange(cast
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new CastEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        directorEntities.AddRange(directors
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new DirectorEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        genreEntities.AddRange(genres
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new GenreEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        producerEntities.AddRange(producers
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new ProducerEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        writerEntities.AddRange(writers
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new WriterEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
 
         return media;
     }
@@ -171,11 +181,21 @@ public class MediaEntity
         Title = request.Title;
         UserStarRating = request.UserStarRating;
 
-        Cast = request.Cast.Select(name => new CastEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
-        Directors = request.Directors.Select(name => new DirectorEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
-        Genres = request.Genres.Select(name => new GenreEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
-        Producers = request.Producers.Select(name => new ProducerEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
-        Writers = request.Writers.Select(name => new WriterEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Cast = request.Cast
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new CastEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Directors = request.Directors
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new DirectorEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Genres = request.Genres
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new GenreEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Producers = request.Producers
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new ProducerEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Writers = request.Writers
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new WriterEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
     }
 }
 
