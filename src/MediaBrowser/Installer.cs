@@ -35,7 +35,8 @@ public static class Installer
     public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
         // Configure the HTTP request pipeline
-        app.UseStaticFiles()
+        app.UseDefaultFiles()
+            .UseStaticFiles()
             .UseRouting();
 
         // Enable Swagger middleware
