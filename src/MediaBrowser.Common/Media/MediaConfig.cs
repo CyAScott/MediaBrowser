@@ -30,6 +30,7 @@ public class MediaConfig(IConfiguration configuration)
     public string MediaDirectory { get; } = configuration["media:mediaDirectory"]!;
     public string ProducersDirectory { get; } = configuration["media:producersDirectory"]!;
     public string WritersDirectory { get; } = configuration["media:writersDirectory"]!;
+    public bool SyncOnBoot { get; } = bool.Parse(configuration["media:syncOnBoot"] ?? "false");
 }
 
 public class FileExtensionInfo

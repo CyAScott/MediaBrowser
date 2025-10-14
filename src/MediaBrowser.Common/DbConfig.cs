@@ -8,10 +8,6 @@ public class DbConfig(IConfiguration configuration)
     public string SqliteConnectionString { get; } = configuration["db:sqliteConnectionString"]!;
     public string SqlServerConnectionString { get; } = configuration["db:sqlServerConnectionString"]!;
     public DbType DbType { get; } = Enum.Parse<DbType>(configuration["db:type"] ?? nameof(DbType.Sqlite), true);
-    /// <summary>
-    /// A directory where NFO files are located to import into the DB on boot.
-    /// </summary>
-    public string ImportOnBootFrom { get; } = configuration["db:importOnBootFrom"]!;
 }
 
 public enum DbType

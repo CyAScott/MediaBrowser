@@ -46,7 +46,7 @@ public class Nfo(MediaConfig mediaConfig)
 
         var mime = xmlDoc.SelectSingleNode("//mime")?.InnerText;
 
-        if (mediaConfig.TryToGetExtensionFromMime(mime, out var extension))
+        if (!mediaConfig.TryToGetExtensionFromMime(mime, out var extension))
         {
             throw new ParseNfoException(3, "Invalid or missing mime type");
         }
@@ -60,7 +60,7 @@ public class Nfo(MediaConfig mediaConfig)
         FfprobeResponse ffprobeResponse;
         try
         {
-            var json = Guard.Against.NullOrEmpty(xmlDoc.SelectSingleNode("//Ffprobe")?.InnerText);
+            var json = Guard.Against.NullOrEmpty(xmlDoc.SelectSingleNode("//ffprobe")?.InnerText);
             
             ffprobeResponse = Guard.Against.Null(JsonSerializer.Deserialize<FfprobeResponse>(json));
         }

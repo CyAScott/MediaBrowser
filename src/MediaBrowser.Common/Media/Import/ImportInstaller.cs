@@ -10,9 +10,9 @@ public static class ImportInstaller
 
     public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
-        var dbConfig = app.Services.GetRequiredService<DbConfig>();
+        var mediaConfig = app.Services.GetRequiredService<MediaConfig>();
 
-        if (!Directory.Exists(dbConfig.ImportOnBootFrom))
+        if (!mediaConfig.SyncOnBoot)
         {
             return;
         }
@@ -22,12 +22,11 @@ public static class ImportInstaller
         var nfo = app.Services.GetRequiredService<Nfo>();
         var log = app.Services.GetRequiredService<ILogger<Nfo>>();
 
-        foreach (var file in Directory.GetFiles(dbConfig.ImportOnBootFrom, "*.nfo")
+        foreach (var nfoLocation in Directory.GetFiles(mediaConfig.MediaDirectory, "*.nfo")
             .Where(f => !Path.GetFileName(f).StartsWith(".")))
         {
             try
             {
-                var nfoLocation = Path.Combine(dbConfig.ImportOnBootFrom, file);
                 var rawXml = await File.ReadAllTextAsync(nfoLocation, Encoding.UTF8, source.Token);
                 var mediaEntity = nfo.Read(rawXml);
         
