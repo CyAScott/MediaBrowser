@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 
 namespace MediaBrowser.Media.Import;
 
@@ -124,8 +123,4 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
 
         return Ok();
     }
-
-    bool IsNameValid(string name) => Regex.IsMatch(name,
-        @"^([a-z\d]+ )*[a-z\d]+$",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase) && name.Length <= 50;
 }

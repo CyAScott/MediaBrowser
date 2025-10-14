@@ -23,6 +23,16 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             return NotFound();
         }
 
+        if (request.Cast
+            .Concat(request.Directors)
+            .Concat(request.Genres)
+            .Concat(request.Producers)
+            .Concat(request.Writers)
+            .Any(it => !IsNameValid(it)))
+        {
+            return StatusCode(StatusCodes.Status417ExpectationFailed);
+        }
+
         media.Update(request);
         
         await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
