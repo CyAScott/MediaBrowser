@@ -1,11 +1,7 @@
-using System.Text;
 using MediaBrowser.Media;
 using MediaBrowser.Media.Import;
 using MediaBrowser.Users;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 namespace MediaBrowser;
@@ -30,33 +26,10 @@ public static class Installer
         {
             c.SwaggerDoc(_version, new OpenApiInfo { Title = "MediaBrowser API", Version = _version });
         });
-        
-        // Configure JWT authentication
-        var userConfig = new UserConfig(builder.Configuration);
-        builder.Services.AddSingleton(userConfig);
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = userConfig.JwtIssuer,
-                    ValidAudience = userConfig.JwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userConfig.JwtSecretKey))
-                };
-            });
-        builder.Services.AddAuthorization(options =>
-        {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
-        });
 
         MediaInstaller.OnBoot(builder);
         ImportInstaller.OnBoot(builder);
+        UserInstaller.OnBoot(builder);
     }
 
     public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
@@ -72,18 +45,16 @@ public static class Installer
             c.SwaggerEndpoint($"/swagger/{_version}/swagger.json", $"MediaBrowser API {_version}");
             c.RoutePrefix = "swagger";
         });
+        
+        await MediaInstaller.OnStartup(app, source);
+        await ImportInstaller.OnStartup(app, source);
+        await UserInstaller.OnStartup(app, source);
 
-        app.UseMiddleware<JwtCookieMiddleware>();
-        app.UseAuthentication();
-        app.UseAuthorization();
 #pragma warning disable ASP0014
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
         });
 #pragma warning restore ASP0014
-        
-        await MediaInstaller.OnStartup(app, source);
-        await ImportInstaller.OnStartup(app, source);
     }
 }
