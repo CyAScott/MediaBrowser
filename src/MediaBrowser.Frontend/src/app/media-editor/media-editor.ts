@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
-import { MediaReadModel, MediaService } from '../services';
+import { MediaReadModel, MediaService, UpdateMediaRequest } from '../services';
 import { firstValueFrom } from 'rxjs';
 import { ImportService } from '../services/import.service';
 
@@ -32,25 +32,15 @@ export class MediaEditorComponent implements OnInit {
   thumbnail: number | null = null;
 
   // Form fields for editable properties
-  editableData: {
-    cast: string[];
-    description: string;
-    directors: string[];
-    originalTitle: string;
-    path: string;
-    producers: string[];
-    title: string;
-    userStarRating?: number;
-    writers: string[];
-  } = {
+  editableData: UpdateMediaRequest = {
     cast: [],
-    description: '',
     directors: [],
+    description: '',
+    genres: [],
     originalTitle: '',
-    path: '',
     producers: [],
     title: '',
-    writers: []
+    writers: [],
   };
 
   async ngOnInit(): Promise<void> {
@@ -106,12 +96,12 @@ export class MediaEditorComponent implements OnInit {
       cast: [...mediaData.cast],
       description: mediaData.description,
       directors: [...mediaData.directors],
+      genres: [...mediaData.genres],
       originalTitle: mediaData.originalTitle,
-      path: mediaData.path,
       producers: [...mediaData.producers],
       title: mediaData.title,
       userStarRating: mediaData.userStarRating,
-      writers: [...mediaData.writers]
+      writers: [...mediaData.writers],
     };
   }
 
@@ -122,21 +112,17 @@ export class MediaEditorComponent implements OnInit {
 
     this.isSaving = true;
     try {
-      // Create updated media object
-      const updatedMedia: MediaReadModel = {
-        ...this.mediaData,
-        ...this.editableData
-      };
-
       if (this.mediaId) {
-        await this.mediaManager.update(updatedMedia);
+        await firstValueFrom(this.mediaService.update(this.mediaId, this.editableData));
         // Navigate back to player
         this.router.navigate(['/player', this.mediaId]);
       } else if (this.filename) {
-        await firstValueFrom(this.importService.import(this.filename, updatedMedia));
+        await firstValueFrom(this.importService.import(this.filename, {
+          ...this.editableData,
+          thumbnail: this.thumbnail ?? 0
+        }));
         this.router.navigate(['/import']);
       }
-
     } catch (error) {
       console.error('Error saving media changes:', error);
     } finally {
@@ -153,7 +139,9 @@ export class MediaEditorComponent implements OnInit {
   }
 
   // Helper methods for formatted display
-  formatDuration(seconds: number): string {
+  formatDuration(seconds?: number): string {
+    seconds ??= 0;
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const remainingSeconds = (seconds % 60).toFixed(3);
@@ -166,8 +154,8 @@ export class MediaEditorComponent implements OnInit {
     return date.toLocaleString();
   }
 
-  formatFileSize(bytes: number): string {
-    const mb = bytes / (1024 * 1024);
+  formatFileSize(bytes?: number): string {
+    const mb = (bytes ?? 0) / (1024 * 1024);
     return `${mb.toFixed(2)} MB`;
   }
 

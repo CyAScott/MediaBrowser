@@ -21,28 +21,28 @@
       <!-- Title Section -->
       <div class="form-section">
         <h3>Title Information</h3>
-        
+
         <div class="form-group">
           <label for="title">Title</label>
-          <input 
+          <input
             id="title"
-            type="text" 
+            type="text"
             [(ngModel)]="editableData.title"
             class="form-input">
         </div>
 
         <div class="form-group">
           <label for="originalTitle">Original Title</label>
-          <input 
+          <input
             id="originalTitle"
-            type="text" 
+            type="text"
             [(ngModel)]="editableData.originalTitle"
             class="form-input">
         </div>
 
         <div class="form-group">
           <label for="description">Description</label>
-          <textarea 
+          <textarea
             id="description"
             [(ngModel)]="editableData.description"
             class="form-textarea"
@@ -50,27 +50,14 @@
         </div>
       </div>
 
-      <!-- File Information -->
-      <div class="form-section">
-        <h3>File Information</h3>
-        
-        <div class="form-group">
-          <input 
-            id="path"
-            type="text" 
-            [(ngModel)]="editableData.path"
-            class="form-input">
-        </div>
-      </div>
-
       <!-- Rating Section -->
       <div class="form-section">
         <h3>Rating</h3>
-        
+
         <div class="form-group">
           <div class="star-rating">
-            <button 
-              *ngFor="let star of [1,2,3,4,5]" 
+            <button
+              *ngFor="let star of [1,2,3,4,5]"
               type="button"
               class="star-button"
               (click)="setRating(star)">
@@ -89,20 +76,20 @@
           <label>Cast</label>
           <div class="array-input">
             <div *ngFor="let member of editableData.cast; let i = index; trackBy: trackByIndex" class="array-item">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 [(ngModel)]="editableData.cast[i]"
                 class="form-input array-field"
                 placeholder="Cast member name">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 class="remove-button"
                 (click)="removeArrayItem('cast', i)">
                 <i class="fa-solid fa-times"></i>
               </button>
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="add-button"
               (click)="addArrayItem('cast')">
               <i class="fa-solid fa-plus"></i> Add Cast Member
@@ -115,20 +102,20 @@
           <label>Directors</label>
           <div class="array-input">
             <div *ngFor="let director of editableData.directors; let i = index; trackBy: trackByIndex" class="array-item">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 [(ngModel)]="editableData.directors[i]"
                 class="form-input array-field"
                 placeholder="Director name">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 class="remove-button"
                 (click)="removeArrayItem('directors', i)">
                 <i class="fa-solid fa-times"></i>
               </button>
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="add-button"
               (click)="addArrayItem('directors')">
               <i class="fa-solid fa-plus"></i> Add Director
@@ -141,20 +128,20 @@
           <label>Producers</label>
           <div class="array-input">
             <div *ngFor="let producer of editableData.producers; let i = index; trackBy: trackByIndex" class="array-item">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 [(ngModel)]="editableData.producers[i]"
                 class="form-input array-field"
                 placeholder="Producer name">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 class="remove-button"
                 (click)="removeArrayItem('producers', i)">
                 <i class="fa-solid fa-times"></i>
               </button>
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="add-button"
               (click)="addArrayItem('producers')">
               <i class="fa-solid fa-plus"></i> Add Producer
@@ -167,20 +154,20 @@
           <label>Writers</label>
           <div class="array-input">
             <div *ngFor="let writer of editableData.writers; let i = index; trackBy: trackByIndex" class="array-item">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 [(ngModel)]="editableData.writers[i]"
                 class="form-input array-field"
                 placeholder="Writer name">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 class="remove-button"
                 (click)="removeArrayItem('writers', i)">
                 <i class="fa-solid fa-times"></i>
               </button>
             </div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="add-button"
               (click)="addArrayItem('writers')">
               <i class="fa-solid fa-plus"></i> Add Writer
@@ -192,7 +179,7 @@
       <!-- Read-only Information -->
       <div class="form-section">
         <h3>Media Information (Read Only)</h3>
-        
+
         <div class="readonly-grid">
           <div class="readonly-item">
             <label>ID</label>
@@ -249,9 +236,9 @@
       <!-- Video Player Section -->
       <div class="form-section video-section">
         <h3>Video Preview & Thumbnail Creation</h3>
-        
+
         <div class="video-container">
-          <video 
+          <video
             id="video-player"
             [src]="getVideoUrl()"
             controls
@@ -262,7 +249,7 @@
         </div>
 
         <div class="video-controls">
-          <button 
+          <button
             class="thumbnail-button"
             (click)="createThumbnailFromVideo()"
             [disabled]="isCreatingThumbnail || !mediaData">
