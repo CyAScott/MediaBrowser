@@ -10,13 +10,13 @@ public class MediaEntity
     public required string Path { get; init; }
 
     [Column("title")]
-    public required string Title { get; init; }
+    public required string Title { get; set; }
 
     [Column("original_title")]
-    public required string OriginalTitle { get; init; }
+    public required string OriginalTitle { get; set; }
 
     [Column("description")]
-    public required string Description { get; init; }
+    public required string Description { get; set; }
 
     [Column("mime")]
     public required string Mime { get; init; }
@@ -37,10 +37,10 @@ public class MediaEntity
     public required string Md5 { get; init; }
 
     [Column("rating")]
-    public required double? Rating { get; init; }
+    public required double? Rating { get; set; }
 
     [Column("user_star_rating")]
-    public required int? UserStarRating { get; init; }
+    public required int? UserStarRating { get; set; }
 
     [Column("published")]
     public required string Published { get; init; }
@@ -123,11 +123,13 @@ public class MediaEntity
         var producerEntities = new List<ProducerEntity>();
         var writerEntities = new List<WriterEntity>();
 
+        var createdOn = ctimeMs == null ? fileInfo.CreationTimeUtc : DateTime.UnixEpoch.AddMilliseconds(ctimeMs.Value);
+        
         var media = new MediaEntity
         {
             Id = mediaId ?? Guid.CreateVersion7(),
             CtimeMs = ctimeMs ?? Convert.ToInt64((fileInfo.CreationTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
-            CreatedOn = ctimeMs == null ? fileInfo.CreationTimeUtc : DateTime.UnixEpoch.AddMilliseconds(ctimeMs.Value),
+            CreatedOn = createdOn,
             UpdatedOn = mtimeMs == null ? fileInfo.LastWriteTimeUtc : DateTime.UnixEpoch.AddMilliseconds(mtimeMs.Value),
             Path = fileInfo.Name,
             Title = request.Title,
@@ -141,7 +143,7 @@ public class MediaEntity
             Md5 = hash,
             Rating = request.Rating,
             UserStarRating = request.UserStarRating,
-            Published = request.Published,
+            Published = createdOn.ToString("yyyy-MM-dd"),
             MtimeMs = mtimeMs ?? Convert.ToInt64((fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
             Ffprobe = ffprobe,
             
@@ -151,63 +153,29 @@ public class MediaEntity
             Producers = producerEntities,
             Writers = writerEntities
         };
-        
-        foreach (var name in cast)
-        {
-            castEntities.Add(new CastEntity
-            {
-                Id = 0,
-                Media = media,
-                MediaId = media.Id,
-                Name = name
-            });
-        }
-        
-        foreach (var name in directors)
-        {
-            directorEntities.Add(new DirectorEntity
-            {
-                Id = 0,
-                Media = media,
-                MediaId = media.Id,
-                Name = name
-            });
-        }
-        
-        foreach (var name in genres)
-        {
-            genreEntities.Add(new GenreEntity
-            {
-                Id = 0,
-                Media = media,
-                MediaId = media.Id,
-                Name = name
-            });
-        }
-        
-        foreach (var name in producers)
-        {
-            producerEntities.Add(new ProducerEntity
-            {
-                Id = 0,
-                Media = media,
-                MediaId = media.Id,
-                Name = name
-            });
-        }
-        
-        foreach (var name in writers)
-        {
-            writerEntities.Add(new WriterEntity
-            {
-                Id = 0,
-                Media = media,
-                MediaId = media.Id,
-                Name = name
-            });
-        }
-        
+
+        castEntities.AddRange(cast.Select(name => new CastEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        directorEntities.AddRange(directors.Select(name => new DirectorEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        genreEntities.AddRange(genres.Select(name => new GenreEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        producerEntities.AddRange(producers.Select(name => new ProducerEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+        writerEntities.AddRange(writers.Select(name => new WriterEntity {Id = 0, Media = media, MediaId = media.Id, Name = name}));
+
         return media;
+    }
+
+    public void Update(UpdateMediaRequest request)
+    {
+        Description = request.Description;
+        OriginalTitle = request.OriginalTitle;
+        Rating = request.Rating;
+        Title = request.Title;
+        UserStarRating = request.UserStarRating;
+
+        Cast = request.Cast.Select(name => new CastEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Directors = request.Directors.Select(name => new DirectorEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Genres = request.Genres.Select(name => new GenreEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Producers = request.Producers.Select(name => new ProducerEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
+        Writers = request.Writers.Select(name => new WriterEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
     }
 }
 

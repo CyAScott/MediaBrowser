@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
 [ApiController, Route("api/[controller]")]
-public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context) : ControllerBase
+public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
 {
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MediaReadModel>> Get(Guid id)
@@ -11,6 +11,24 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         {
             return NotFound();
         }
+        return media.ToReadModel(mediaConfig);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<MediaReadModel>> Update(Guid id, [FromBody] UpdateMediaRequest request)
+    {
+        var media = await context.MediaJoined.Where(m => m.Id == id).FirstOrDefaultAsync();
+        if (media == null)
+        {
+            return NotFound();
+        }
+
+        media.Update(request);
+        
+        await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
+        
+        await context.SaveChangesAsync();
+        
         return media.ToReadModel(mediaConfig);
     }
 
