@@ -14,13 +14,16 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
     {
         try
         {
-            using var ffprobe = Process.Start("ffprobe", [
+            using var ffprobe = Process.Start(new ProcessStartInfo("ffprobe", [
                 "-v", "quiet",
                 "-print_format", "json",
                 "-show_format",
                 "-show_streams",
                 path
-            ]);
+            ])
+            {
+                RedirectStandardOutput = true
+            })!;
 
             await ffprobe.WaitForExitAsync(cancellationToken);
         
