@@ -1,0 +1,18 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+  background-color: #1E1E1E;
+  /* Hide scrollbars for webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Hide scrollbars for all elements */
+* {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;     /* Firefox */
+}
+
+*::-webkit-scrollbar {
+  display: none;             /* Safari and Chrome */
+}

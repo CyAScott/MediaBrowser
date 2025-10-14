@@ -1,0 +1,128 @@
+
+.import-container {
+  padding: 0.25em 1em 0.5em 0.5em;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Directory selection styles */
+.directory-selection {
+  margin-bottom: 0.75rem;
+}
+
+.directory-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.directory-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid var(--secondary-fg);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background-color: var(--secondary-bg);
+  color: var(--secondary-fg);
+}
+
+.select-directory-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-button-bg);
+  color: var(--primary-button-fg);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.select-directory-btn:hover {
+  background-color: var(--primary-button-bg-hover);
+}
+
+.select-directory-btn:active {
+  background-color: var(--primary-button-active-bg);
+}
+
+/* Files section styles */
+.files-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.files-section h3 {
+  color: var(--primary-fg);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--primary-secondary-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.files-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--secondary-button-fg);
+  border-bottom: 1px solid var(--primary-fg);
+}
+
+.files-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--primary-fg);
+  color: var(--secondary-fg);
+}
+
+.files-table tr:last-child td {
+  border-bottom: none;
+}
+
+.filename {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.action {
+  text-align: center;
+  width: 80px;
+}
+
+.import-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--secondary-fg);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.import-btn:hover {
+  color: var(--primary-button-fg);
+  background-color: var(--primary-button-bg-hover);
+}
+
+.import-btn:active {
+  background-color: var(--primary-button-bg);
+}
+
+/* Empty state styles */
+.empty-state {
+  text-align: center;
+  color: var(--secondary-fg);
+  font-style: italic;
+  margin-top: 2rem;
+}
+
+.empty-state p {
+  margin: 0;
+}

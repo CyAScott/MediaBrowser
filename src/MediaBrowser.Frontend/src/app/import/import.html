@@ -1,0 +1,48 @@
+<div class="import-container">
+  <!-- Directory selection section -->
+  <div class="directory-selection">
+    <div class="directory-input-group">
+      <input 
+        type="text" 
+        class="directory-input" 
+        placeholder="Select a directory to scan for media files"
+        [value]="directoryPath || ''"
+        readonly>
+      <button 
+        class="select-directory-btn" 
+        (click)="selectDirectory()">
+        Select Directory
+      </button>
+    </div>
+  </div>
+
+  <!-- Files table section -->
+  <div class="files-section" *ngIf="files.length > 0">
+    <table class="files-table">
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let file of files">
+          <td class="filename">{{file.filename}}</td>
+          <td class="action">
+            <button 
+              class="import-btn"
+              (click)="importFile(file.path, file.filename)"
+              title="Import this file">
+              <i class="fa-solid fa-upload"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="files.length === 0">
+    <p>No media files found in the selected directory.</p>
+  </div>
+</div>

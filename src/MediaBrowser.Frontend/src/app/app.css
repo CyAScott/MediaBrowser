@@ -1,0 +1,49 @@
+/* App-wide styling */
+:host {
+  /* Background colors */
+  --primary-bg: #1E1E1E;
+  --primary-fg: #333;/* Fonts and borders */
+  --secondary-bg: #1B1B1B;
+  --secondary-fg: #888;/* Fonts and borders */
+
+  /* Input styles */
+  --primary-button-bg: #FF8000;
+  --primary-button-bg-hover: #FF9500;
+  --primary-button-fg: rgba(255,255,255,0.87);
+  --secondary-button-bg: #666;
+  --secondary-button-fg: rgba(255,255,255,0.87);
+  --secondary-button-bg-hover: #888;
+  --add-button-bg: #27ae60;
+  --add-button-bg-hover: #219a52;
+  --remove-button-bg: #e74c3c;
+  --remove-button-bg-hover: #c0392b;
+
+  --sidebar-width: 60px;
+  
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background: var(--primary-bg);
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--primary-bg);
+  box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.05);
+}
