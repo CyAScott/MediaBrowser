@@ -1,5 +1,6 @@
 using System.Xml;
 using HandlebarsDotNet;
+using HandlebarsDotNet.Extension.Json;
 
 namespace MediaBrowser.Media.Import;
 
@@ -12,13 +13,19 @@ public class Nfo(MediaConfig mediaConfig)
         
         var template = reader.ReadToEnd();
 
-        _template = Handlebars.Compile(template);
+        var handlebars = Handlebars.Create();
+        handlebars.Configuration.UseJson();
+        _template = handlebars.Compile(template);
     }
     static readonly HandlebarsTemplate<object, string> _template;
 
     public async Task Save(MediaEntity mediaEntity, string fileLocation)
     {
-        var contents = _template(mediaEntity);
+        var json = JsonSerializer.Serialize(mediaEntity);
+
+        using var document = JsonDocument.Parse(json);
+        
+        var contents = _template(document);
 
         if (File.Exists(fileLocation))
         {

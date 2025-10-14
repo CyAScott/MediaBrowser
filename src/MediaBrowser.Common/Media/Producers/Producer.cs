@@ -3,13 +3,14 @@ namespace MediaBrowser.Media.Producers;
 [Table("media_producers")]
 public class ProducerEntity
 {
-    [Column("id"), Key, Required,
+    [Column("id"), JsonPropertyName("id"), Key, Required,
      DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public required int Id { get; set; } 
-    [Column("media_id"), MaxLength(36), Required]
+    [Column("media_id"), JsonPropertyName("mediaId"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
-    [Column("producer"), Required, MaxLength(50)]
+    [Column("producer"), JsonPropertyName("name"), Required, MaxLength(50)]
     public required string Name { get; init; }
+    [JsonPropertyName("media")]
     public MediaEntity Media { get; init; } = null!;
 }
 

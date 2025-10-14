@@ -3,71 +3,76 @@ namespace MediaBrowser.Media;
 [Table("media")]
 public class MediaEntity
 {
-    [Column("id"), Key]
+    [Column("id"), JsonPropertyName("id"), Key]
     public required Guid Id { get; init; }
 
-    [Column("path")]
+    [Column("path"), JsonPropertyName("path")]
     public required string Path { get; init; }
 
-    [Column("title")]
+    [Column("title"), JsonPropertyName("title")]
     public required string Title { get; set; }
 
-    [Column("original_title")]
+    [Column("original_title"), JsonPropertyName("originalTitle")]
     public required string OriginalTitle { get; set; }
 
-    [Column("description")]
+    [Column("description"), JsonPropertyName("description")]
     public required string Description { get; set; }
 
-    [Column("mime")]
+    [Column("mime"), JsonPropertyName("mime")]
     public required string Mime { get; init; }
 
-    [Column("size")]
+    [Column("size"), JsonPropertyName("size")]
     public required long? Size { get; init; }
 
-    [Column("width")]
+    [Column("width"), JsonPropertyName("width")]
     public required int? Width { get; init; }
 
-    [Column("height")]
+    [Column("height"), JsonPropertyName("height")]
     public required int? Height { get; init; }
 
-    [Column("duration")]
-    public required double? Duration { get; init; }
+    [Column("duration"), JsonPropertyName("duration")]
+    public required double? Duration { get; set; }
 
-    [Column("md5"), MaxLength(32)]
+    [Column("md5"), JsonPropertyName("md5"), MaxLength(32)]
     public required string Md5 { get; init; }
 
-    [Column("rating")]
+    [Column("rating"), JsonPropertyName("rating")]
     public required double? Rating { get; set; }
 
-    [Column("user_star_rating")]
+    [Column("user_star_rating"), JsonPropertyName("userStarRating")]
     public required int? UserStarRating { get; set; }
 
-    [Column("published")]
+    [Column("published"), JsonPropertyName("published")]
     public required string Published { get; init; }
 
-    [Column("ctime_ms")]
+    [Column("ctime_ms"), JsonPropertyName("ctimeMs")]
     public required long CtimeMs { get; init; }
 
-    [Column("mtime_ms")]
+    [Column("mtime_ms"), JsonPropertyName("mtimeMs")]
     public required long MtimeMs { get; init; }
 
-    [Column("created_on")]
+    [Column("created_on"), JsonPropertyName("createdOn")]
     public required DateTime? CreatedOn { get; init; }
 
-    [Column("updated_on")]
+    [Column("updated_on"), JsonPropertyName("updatedOn")]
     public required DateTime? UpdatedOn { get; init; }
 
-    [Column("ffprobe")]
-    public required FfprobeResponse Ffprobe { get; init; }
+    [Column("ffprobe"), JsonPropertyName("ffprobe")]
+    public required FfprobeResponse Ffprobe { get; set; }
     
+    [JsonPropertyName("cast")]
     public ICollection<CastEntity> Cast { get; set; } = [];
     
+    [JsonPropertyName("directors")]
     public ICollection<DirectorEntity> Directors { get; set; } = [];
     
+    [JsonPropertyName("genres")]
     public ICollection<GenreEntity> Genres { get; set; } = [];
     
+    [JsonPropertyName("producers")]
     public ICollection<ProducerEntity> Producers { get; set; } = [];
     
+    [JsonPropertyName("writers")]
     public ICollection<WriterEntity> Writers { get; set; } = [];
     
     public MediaReadModel ToReadModel(MediaConfig config) => new()
