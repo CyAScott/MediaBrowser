@@ -113,7 +113,9 @@ public class MediaEntity
         IEnumerable<string> genres,
         IEnumerable<string> producers,
         IEnumerable<string> writers,
-        Guid? mediaId = null)
+        Guid? mediaId = null,
+        int? height = null, int? width = null,
+        long? ctimeMs = null, long? mtimeMs = null)
     {
         var castEntities = new List<CastEntity>();
         var directorEntities = new List<DirectorEntity>();
@@ -124,23 +126,23 @@ public class MediaEntity
         var media = new MediaEntity
         {
             Id = mediaId ?? Guid.CreateVersion7(),
-            CtimeMs = (fileInfo.CreationTimeUtc - DateTime.UnixEpoch).Milliseconds,
-            CreatedOn = fileInfo.CreationTimeUtc,
-            UpdatedOn = fileInfo.LastWriteTimeUtc,
+            CtimeMs = ctimeMs ?? Convert.ToInt64((fileInfo.CreationTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
+            CreatedOn = ctimeMs == null ? fileInfo.CreationTimeUtc : DateTime.UnixEpoch.AddMilliseconds(ctimeMs.Value),
+            UpdatedOn = mtimeMs == null ? fileInfo.LastWriteTimeUtc : DateTime.UnixEpoch.AddMilliseconds(mtimeMs.Value),
             Path = fileInfo.Name,
             Title = request.Title,
             OriginalTitle = request.OriginalTitle,
             Description = request.Description,
             Mime = mime,
             Size = fileInfo.Length,
-            Width = ffprobe.Streams?.Select(it => it.Width).OfType<int>().First(),
-            Height = ffprobe.Streams?.Select(it => it.Height).OfType<int>().First(),
+            Width = width ?? ffprobe.Streams?.Select(it => it.Width).OfType<int>().First(),
+            Height = height ?? ffprobe.Streams?.Select(it => it.Height).OfType<int>().First(),
             Duration = double.Parse(ffprobe.Format?.Duration ?? "0"),
             Md5 = hash,
             Rating = request.Rating,
             UserStarRating = request.UserStarRating,
             Published = request.Published,
-            MtimeMs = (fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).Milliseconds,
+            MtimeMs = mtimeMs ?? Convert.ToInt64((fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
             Ffprobe = ffprobe,
             
             Cast = castEntities,

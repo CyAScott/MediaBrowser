@@ -104,7 +104,11 @@ public class Nfo(MediaConfig mediaConfig)
             directors: request.Directors,
             genres: request.Genres,
             producers: request.Producers,
-            writers: request.Writers);
+            writers: request.Writers,
+            height: int.TryParse(xmlDoc.SelectSingleNode("//height")?.InnerText ?? string.Empty, out var height) ? height : null,
+            width: int.TryParse(xmlDoc.SelectSingleNode("//width")?.InnerText ?? string.Empty, out var width) ? width : null,
+            ctimeMs: long.TryParse(xmlDoc.SelectSingleNode("//ctime")?.InnerText ?? string.Empty, out var ctimeMs) ? ctimeMs : null,
+            mtimeMs: long.TryParse(xmlDoc.SelectSingleNode("//mtimeMs")?.InnerText ?? string.Empty, out var mtimeMs) ? mtimeMs : null);
 
         return media;
     }

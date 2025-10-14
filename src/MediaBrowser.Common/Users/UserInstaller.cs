@@ -35,6 +35,11 @@ public static class UserInstaller
     
     public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
+        if (source.IsCancellationRequested)
+        {
+            return;
+        }
+
         var userConfig = app.Services.GetRequiredService<UserConfig>();
         if (!string.IsNullOrEmpty(userConfig.InitialUserName)
             && !string.IsNullOrEmpty(userConfig.InitialPassword))

@@ -73,7 +73,7 @@ public record Stream
     [JsonPropertyName("start_time")]
     public string? StartTime { get; set; }
     [JsonPropertyName("duration_ts")]
-    public int? DurationTs { get; set; }
+    public ulong? DurationTs { get; set; }
     [JsonPropertyName("duration")]
     public string? Duration { get; set; }
     [JsonPropertyName("bit_rate")]
