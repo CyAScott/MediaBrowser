@@ -220,13 +220,13 @@ public class MediaEntityConfiguration(DbType type) : IEntityTypeConfiguration<Me
             .Property(m => m.CreatedOn)
             .HasConversion(
                 value => value.HasValue ? value.Value.ToUniversalTime() : (DateTime?)null,
-                value => value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : (DateTime?)null);
+                value => value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null);
 
         builder
             .Property(m => m.UpdatedOn)
             .HasConversion(
                 value => value.HasValue ? value.Value.ToUniversalTime() : (DateTime?)null,
-                value => value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : (DateTime?)null);
+                value => value.HasValue ? DateTime.SpecifyKind(value.Value, DateTimeKind.Utc) : null);
 
         // Configure string length limits for database compatibility
         builder.Property(m => m.Path).HasMaxLength(500);

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace MediaBrowser.Media.Import;
@@ -83,7 +84,7 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         var fileInfo = new FileInfo(filePath);
 
         string hash;
-        using (var md5 = System.Security.Cryptography.MD5.Create())
+        using (var md5 = MD5.Create())
         using (var stream = fileInfo.OpenRead())
         {
             hash = BitConverter.ToString(await md5.ComputeHashAsync(stream)).Replace("-", "").ToLowerInvariant();
