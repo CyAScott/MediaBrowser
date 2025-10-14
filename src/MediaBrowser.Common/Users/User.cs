@@ -7,7 +7,7 @@ public class UserEntity
     public Guid Id { get; init; }
 
     [Column("user_name"), MaxLength(50)]
-    public required string UserName { get; set; }
+    public required string Username { get; set; }
 
     [Column("password_hash"), MaxLength(50)]
     public required string PasswordHash { get; set; }
@@ -15,7 +15,7 @@ public class UserEntity
     public UserReadModel ToReadModel() => new()
     {
         Id = Id,
-        UserName = UserName
+        Username = Username
     };
 }
 
@@ -24,7 +24,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
     public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder
-            .HasIndex(u => u.UserName)
+            .HasIndex(u => u.Username)
             .IsUnique();
     }
 }
@@ -32,5 +32,5 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 public class UserReadModel
 {
     public Guid Id { get; init; }
-    public required string UserName { get; init; }
+    public required string Username { get; init; }
 }

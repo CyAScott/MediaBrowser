@@ -8,7 +8,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpPost("login"), AllowAnonymous]
     public async Task<ActionResult<UserReadModel>> Login([FromBody] UserLoginRequest request)
     {
-        var user = await context.Users.SingleOrDefaultAsync(u => u.UserName == request.UserName);
+        var user = await context.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return Unauthorized();
@@ -27,7 +27,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         {
             Subject = new ClaimsIdentity(
             [
-                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             ]),
             Expires = DateTime.UtcNow.AddMinutes(userConfig.JwtExpiryMinutes),
@@ -64,7 +64,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpGet("me")]
     public async Task<ActionResult<UserReadModel>> Me()
     {
-        var user = await context.Users.SingleAsync(u => u.UserName == User.Identity!.Name);
+        var user = await context.Users.SingleAsync(u => u.Username == User.Identity!.Name);
 
         return user.ToReadModel();
     }
@@ -72,7 +72,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpPost("register"), AllowAnonymous]
     public async Task<ActionResult<UserReadModel>> Register([FromBody] UserRegisterRequest request)
     {
-        if (await context.Users.AnyAsync(u => u.UserName == request.UserName))
+        if (await context.Users.AnyAsync(u => u.Username == request.Username))
         {
             return StatusCode(StatusCodes.Status409Conflict);
         }
@@ -80,7 +80,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         var user = new UserEntity
         {
             Id = Guid.NewGuid(),
-            UserName = request.UserName,
+            Username = request.Username,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 

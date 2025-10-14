@@ -274,7 +274,7 @@ namespace MediaBrowser.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("password_hash");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
@@ -282,7 +282,7 @@ namespace MediaBrowser.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserName")
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("users");

@@ -1,14 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MediaManager } from '../types/MediaManager';
-import { MediaInfo } from '../types/SearchMediaRequest';
-
-declare global {
-  interface Window {
-    mediaManager: MediaManager;
-  }
-}
+import { MediaReadModel, MediaService } from '../services';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 
 @Component({
   selector: 'app-player',
@@ -17,12 +11,12 @@ declare global {
   styleUrls: ['./player.css']
 })
 export class PlayerComponent implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+  private mediaService = inject(MediaService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
-  private mediaManager: MediaManager = window.mediaManager;
   
-  mediaData: MediaInfo | null = null;
+  mediaData: MediaReadModel | null = null;
   mediaId: string | null = null;
   headerVisible: boolean = true;
   private hideTimeout: number | null = null;
@@ -42,7 +36,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
 
   async loadMediaById(id: string): Promise<void> {
     try { 
-      const response = await this.mediaManager.getMediaById(id);
+      const response = await firstValueFrom(this.mediaService.get(id));
       this.mediaData = response;
       this.cdr.detectChanges();
     } catch (error) {

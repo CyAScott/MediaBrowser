@@ -25,7 +25,7 @@
       <div class="card-overlay">
         <div class="play-icon">▶</div>
       </div>
-      <div class="star-rating" *ngIf="result.userStarRating > 0">
+      <div class="star-rating" *ngIf="result.userStarRating && result.userStarRating > 0">
         <span class="stars">{{ getStarDisplay(result.userStarRating) }}</span>
       </div>
     </div>

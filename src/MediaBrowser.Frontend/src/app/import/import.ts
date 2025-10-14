@@ -1,19 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MediaManager } from '../types/MediaManager';
-import { MediaInfo } from '../types/SearchMediaRequest';
-
-declare global {
-  interface Window {
-    mediaManager: MediaManager;
-  }
-}
-
-interface FileInfo {
-  filename: string;
-  path: string;
-}
+import { ImportMediaRequest, ImportService } from '../services/import.service';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { MediaReadModel } from '../services';
 
 @Component({
   selector: 'app-import',
@@ -24,38 +14,18 @@ interface FileInfo {
 export class ImportComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
-  private readonly DIRECTORY_STORAGE_KEY = 'import-selected-directory';
+  private importService = inject(ImportService);
 
   directoryPath: string | null = null;
-  files: FileInfo[] = [];
+  files: string[] = [];
 
-  ngOnInit(): void {
-    this.loadPersistedDirectory();
+  ngOnInit(): Promise<void> {
+    return this.scanDirectory();
   }
 
-  private loadPersistedDirectory(): void {
-    const persistedPath = localStorage.getItem(this.DIRECTORY_STORAGE_KEY);
-    if (persistedPath) {
-      this.directoryPath = persistedPath;
-      this.scanDirectory(persistedPath);
-    }
-  }
-
-  private persistDirectory(path: string | null): void {
-    if (path) {
-      localStorage.setItem(this.DIRECTORY_STORAGE_KEY, path);
-    } else {
-      localStorage.removeItem(this.DIRECTORY_STORAGE_KEY);
-    }
-  }
-
-  private async scanDirectory(path: string): Promise<void> {
+  private async scanDirectory(): Promise<void> {
     try {
-      const files = await window.mediaManager.scanDirectory(path);
-      this.files = files.map(file => ({
-        filename: file.split(/[/\\]/).pop() || file,
-        path: file
-      }));
+      this.files = await firstValueFrom(this.importService.files());
       this.cdr.detectChanges();
     } catch (error) {
       console.error('Error scanning directory:', error);
@@ -64,62 +34,39 @@ export class ImportComponent implements OnInit {
     }
   }
 
-  async selectDirectory(): Promise<void> {
+  async importFile(filename: string): Promise<void> {
     try {
-      const selectedPath = await window.mediaManager.selectDirectory();
-      this.directoryPath = selectedPath;
-      this.persistDirectory(selectedPath);
-      
-      if (selectedPath) {
-        await this.scanDirectory(selectedPath);
-      } else {
-        this.files = [];
-        this.cdr.detectChanges();
-      }
-    } catch (error) {
-      console.error('Error selecting directory:', error);
-    }
-  }
 
-  async importFile(path: string, filename: string): Promise<void> {
-    try {
-      const ffprobeResult = await window.mediaManager.ffprobe(path);
-      const stats = await window.mediaManager.readFileStats(path);
-      
-      const videoStreams = ffprobeResult.streams.filter(it => it.width && it.height);
-
-      const mediaData: MediaInfo = {
-        title: filename,
-        originalTitle: filename,
-        description: '',
-        rating: 0,
-        userStarRating: 0,
-        published: stats.ctime.toISOString().split('T')[0],
+      /* Create a temporary MediaReadModel for the file to pass to the editor 
+       * The actual import will populate the non-editable fields like id, createdOn, etc.
+       */
+      const mediaData: MediaReadModel = {
         cast: [],
-        producers: [],
+        createdOn: new Date(),
+        ctimeMs: '',
+        description: '',
         directors: [],
-        writers: [],
-        //non-standard data
-        ctimeMs: Math.floor(stats.ctimeMs).toString(),
-        duration: parseFloat(ffprobeResult.format.duration) || 0,
-        ffprobe: ffprobeResult,
-        height: videoStreams[0].height!,
+        ffprobe: {},
+        genres: [],
         id: '',
-        md5: stats.md5,
-        mime: ffprobeResult.mime!,
-        mtimeMs: Math.floor(stats.mtimeMs).toString(),
-        path: filename,
-        size: stats.size,
-        width: videoStreams[0].width!,
-        //urls
-        fanartUrl: '',
-        thumbnailUrl: '',
-        url: stats.url
+        md5: '',
+        mime: '',
+        mtimeMs: '',
+        originalTitle: filename,
+        path: '',
+        producers: [],
+        published: '',
+        rating: 0,
+        title: filename,
+        updatedOn: new Date(),
+        url: `/api/import/file/${encodeURIComponent(filename)}`,
+        userStarRating: 0,
+        writers: [],
       };
 
       const state = { 
-        mediaData: mediaData,
-        path: path
+        mediaData,
+        filename
       };
 
       this.router.navigate(['/edit'], { state });

@@ -2,20 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Navigation, Router } from '@angular/router';
-import { MediaManager } from '../types/MediaManager';
-import { MediaInfo } from '../types/SearchMediaRequest';
-
-declare global {
-  interface Window {
-    mediaManager: MediaManager;
-  }
-}
+import { MediaReadModel, MediaService } from '../services/media.service';
+import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 
 interface SearchState {
   pageSize: number;
   pageIndex: number;
   keyword: string;
-  results: MediaInfo[];
+  results: MediaReadModel[];
   hasMoreResults: boolean;
   scrollPosition: number;
   sortBy: 'title' | 'createdOn' | 'duration' | 'userStarRating';
@@ -30,15 +24,14 @@ interface SearchState {
 })
 export class SearchComponent implements OnInit, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
-  private mediaManager: MediaManager = window.mediaManager;
-  
+
   @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLElement>;
   
   cast: string | null = null;
   pageSize: number = 25;
   pageIndex: number = 0;
   keyword: string = '';
-  results: MediaInfo[] = [];
+  results: MediaReadModel[] = [];
   isLoading: boolean = false;
   hasMoreResults: boolean = true;
   sortBy: 'title' | 'createdOn' | 'duration' | 'userStarRating' = 'title';
@@ -55,7 +48,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
   private navigation: Navigation | null = null;
   private scrollRestorePending = false;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private mediaService: MediaService) {
     this.navigation = this.router.currentNavigation();
     this.loadPersistedState();
   }
@@ -65,7 +58,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/player', id]);
   }
 
-  trackByResultId(index: number, result: MediaInfo): string {
+  trackByResultId(index: number, result: MediaReadModel): string {
     return result.id;
   }
 
@@ -79,7 +72,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
     return stars;
   }
 
-  getCastTooltip(result: MediaInfo): string {
+  getCastTooltip(result: MediaReadModel): string {
     if (!result.cast || result.cast.length === 0) {
       return 'No cast information available';
     }
@@ -141,14 +134,14 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
     try {
       this.isLoading = true;
-      const response = await this.mediaManager.searchMedia({
+      const response = await firstValueFrom(this.mediaService.search({
         cast: this.cast ? [this.cast] : undefined,
         keywords: this.keyword || undefined,
         take: this.pageSize,
         skip: this.pageIndex * this.pageSize,
         sort: this.sortBy,
         descending: this.sortDescending,
-      });
+      }));
       
       if (isNewSearch) {
         this.results = [...response.results];

@@ -2,15 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
-import { MediaManager } from '../types/MediaManager';
-import { Thumbnail } from '../types/MoveToMediaDirRequest';
-import { MediaInfo } from '../types/SearchMediaRequest';
-
-declare global {
-  interface Window {
-    mediaManager: MediaManager;
-  }
-}
+import { MediaReadModel, MediaService } from '../services';
+import { firstValueFrom } from 'rxjs';
+import { ImportService } from '../services/import.service';
 
 @Component({
   selector: 'app-media-editor',
@@ -19,23 +13,24 @@ declare global {
   styleUrls: ['./media-editor.css']
 })
 export class MediaEditorComponent implements OnInit {
-  private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
-  private mediaManager: MediaManager = window.mediaManager;
+  private importService = inject(ImportService);
+  private mediaService = inject(MediaService);
   private navigation: Navigation | null = null;
+  private route = inject(ActivatedRoute);
 
   constructor(private router: Router) {
     this.navigation = this.router.currentNavigation();
   }
   
-  mediaData: MediaInfo | null = null;
-  mediaId: string | null = null;
-  path: string | null = null;
-  thumbnail: Thumbnail | null = null;
+  filename: string | null = null;
+  isCreatingThumbnail: boolean = false;
   isLoading: boolean = false;
   isSaving: boolean = false;
-  isCreatingThumbnail: boolean = false;
-  
+  mediaData: MediaReadModel | null = null;
+  mediaId: string | null = null;
+  thumbnail: number | null = null;
+
   // Form fields for editable properties
   editableData: {
     cast: string[];
@@ -45,7 +40,7 @@ export class MediaEditorComponent implements OnInit {
     path: string;
     producers: string[];
     title: string;
-    userStarRating: number;
+    userStarRating?: number;
     writers: string[];
   } = {
     cast: [],
@@ -55,7 +50,6 @@ export class MediaEditorComponent implements OnInit {
     path: '',
     producers: [],
     title: '',
-    userStarRating: 0,
     writers: []
   };
 
@@ -77,12 +71,10 @@ export class MediaEditorComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.mediaData = await this.mediaManager.getMediaById(id);
-    if (!this.mediaData) {
-      throw new Error('Media not found');
-    }
-      
+    this.filename = null;
+    this.mediaData = await firstValueFrom(this.mediaService.get(id));
     this.setEditableData(this.mediaData);
+    this.thumbnail = 0;
 
     this.isLoading = false;
 
@@ -98,24 +90,18 @@ export class MediaEditorComponent implements OnInit {
       throw new Error('No navigation state found');
     }
 
+    this.filename = navigationState['filename'];
     this.mediaData = navigationState?.['mediaData'];
-    this.path = navigationState['path'];
+    this.thumbnail = 0;
 
-    if (!this.mediaData || !this.path) {
-      throw new Error('No media data or path found');
+    if (!this.mediaData || !this.filename) {
+      throw new Error('No media data or filename found');
     }
 
-    this.thumbnail = {
-      timestamp: Math.min(60, this.mediaData.duration),
-      x: 0,
-      y: 0,
-      width: this.mediaData.width || null,
-      height: this.mediaData.height || null
-    }
     this.setEditableData(this.mediaData);
   }
 
-  setEditableData(mediaData: MediaInfo): void {
+  setEditableData(mediaData: MediaReadModel): void {
     this.editableData = {
       cast: [...mediaData.cast],
       description: mediaData.description,
@@ -130,12 +116,14 @@ export class MediaEditorComponent implements OnInit {
   }
 
   async saveChanges(): Promise<void> {
-    if (!this.mediaData) return;
-    
+    if (!this.mediaData) {
+      return;
+    }
+
     this.isSaving = true;
     try {
       // Create updated media object
-      const updatedMedia: MediaInfo = {
+      const updatedMedia: MediaReadModel = {
         ...this.mediaData,
         ...this.editableData
       };
@@ -144,13 +132,8 @@ export class MediaEditorComponent implements OnInit {
         await this.mediaManager.update(updatedMedia);
         // Navigate back to player
         this.router.navigate(['/player', this.mediaId]);
-      } else if (this.path) {
-        await await this.mediaManager.moveToMediaDir({
-          filePath: this.path,
-          nfo: updatedMedia,
-          thumbnail: this.thumbnail!
-        });
-        // Navigate back to import
+      } else if (this.filename) {
+        await firstValueFrom(this.importService.import(this.filename, updatedMedia));
         this.router.navigate(['/import']);
       }
 
@@ -207,7 +190,7 @@ export class MediaEditorComponent implements OnInit {
   }
 
   getStarClass(starNumber: number): string {
-    return starNumber <= this.editableData.userStarRating ? 'fa-solid fa-star' : 'fa-regular fa-star';
+    return starNumber <= (this.editableData.userStarRating ?? 0) ? 'fa-solid fa-star' : 'fa-regular fa-star';
   }
 
   // Video player and thumbnail methods
@@ -220,16 +203,10 @@ export class MediaEditorComponent implements OnInit {
 
     this.isCreatingThumbnail = true;
     try {
-      this.thumbnail = {
-        timestamp: videoElement.currentTime,
-        x: 0,
-        y: 0,
-        width: this.mediaData?.width || null,
-        height: this.mediaData?.height || null
-      };
+      this.thumbnail = videoElement.currentTime;
 
       if (this.mediaId) {
-        await window.mediaManager.updateThumbnails(this.mediaId, this.thumbnail, null);
+        await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, { at: this.thumbnail }));
       }
     } catch (error) {
       console.error('Error creating thumbnail:', error);

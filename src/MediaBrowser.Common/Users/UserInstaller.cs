@@ -41,17 +41,17 @@ public static class UserInstaller
         }
 
         var userConfig = app.Services.GetRequiredService<UserConfig>();
-        if (!string.IsNullOrEmpty(userConfig.InitialUserName)
+        if (!string.IsNullOrEmpty(userConfig.InitialUsername)
             && !string.IsNullOrEmpty(userConfig.InitialPassword))
         {
             using var scope = app.Services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-            if (!await db.Users.AnyAsync(u => u.UserName == userConfig.InitialUserName, source.Token))
+            if (!await db.Users.AnyAsync(u => u.Username == userConfig.InitialUsername, source.Token))
             {
                 var user = new UserEntity
                 {
                     Id = Guid.NewGuid(),
-                    UserName = userConfig.InitialUserName,
+                    Username = userConfig.InitialUsername,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(userConfig.InitialPassword)
                 };
                 db.Users.Add(user);
