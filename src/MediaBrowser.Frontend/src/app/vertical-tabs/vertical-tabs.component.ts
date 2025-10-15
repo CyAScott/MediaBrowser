@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsersService } from '../services/users.service';
@@ -117,7 +117,7 @@ interface TabItem {
     }
   `]
 })
-export class VerticalTabsComponent implements OnInit {
+export class VerticalTabsComponent {
   private router = inject(Router);
   protected usersService = inject(UsersService);
 
@@ -137,13 +137,6 @@ export class VerticalTabsComponent implements OnInit {
   ];
 
   constructor() {}
-
-  ngOnInit(): void {
-    // Only navigate if authenticated and not already on login page
-    if (this.usersService.isAuthenticated() && this.router.url === '/') {
-      this.navigateToRoute('/search');
-    }
-  }
 
   navigateToRoute(route: string): void {
     this.router.navigate([route]);

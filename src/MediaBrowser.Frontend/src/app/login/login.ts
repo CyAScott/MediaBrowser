@@ -15,10 +15,10 @@ export class LoginComponent {
   private usersService = inject(UsersService);
   private router = inject(Router);
 
-  username: string = '';
-  password: string = '';
-  isLoading: boolean = false;
   errorMessage: string = '';
+  isLoading: boolean = false;
+  password: string = '';
+  username: string = '';
 
   async onSubmit(): Promise<void> {
     if (!this.username.trim() || !this.password.trim()) {
