@@ -2,10 +2,20 @@
   padding: 0.25em 1em 0.5em 0.5em;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  width: 100%;
 }
 
 .cast-header {
   padding-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+.cast-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .cast-header h2 {
@@ -17,9 +27,15 @@
 
 .cast-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
-  overflow-y: auto;
+  align-content: start;
+  padding-bottom: 1rem;
+}
+
+.cast-grid .result-card {
+  width: 100%;
+  height: auto;
 }
 
 .cast-info {
@@ -29,9 +45,10 @@
 }
 
 .cast-name {
-  font-size: 1rem;
+  font-size: 2.5rem;
   font-weight: bold;
   margin-bottom: 0.25rem;
+  opacity: 0.7;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -43,7 +60,7 @@
   gap: 1rem;
   color: var(--primary-fg);
   font-size: 1rem;
-  grid-column: 1 / -1;
+  flex: 1;
 }
 
 .spinner {
@@ -63,7 +80,7 @@
   color: var(--secondary-fg);
   font-size: 1rem;
   font-style: italic;
-  grid-column: 1 / -1;
+  flex: 1;
 }
 
 @keyframes spin {
@@ -74,19 +91,11 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .cast-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 0.75rem;
   }
   
-  .cast-card {
-    aspect-ratio: 2 / 3;
-  }
-  
   .cast-name {
-    font-size: 0.9rem;
-  }
-  
-  .cast-role {
-    font-size: 0.8rem;
+    font-size: 1.8rem;
   }
 }

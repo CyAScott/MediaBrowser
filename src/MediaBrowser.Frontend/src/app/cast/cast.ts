@@ -28,10 +28,11 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoading: boolean = false;
   private scrollPosition: number = 0;
   private readonly SCROLL_KEY = 'cast-scroll-position';
+  private scrollListener?: (event: Event) => void;
 
   constructor() { 
-    // Load saved scroll position
-    const savedScrollPosition = localStorage.getItem(this.SCROLL_KEY);
+    // Load saved scroll position from session storage
+    const savedScrollPosition = sessionStorage.getItem(this.SCROLL_KEY);
     if (savedScrollPosition) {
       this.scrollPosition = parseInt(savedScrollPosition, 10);
     }
@@ -42,24 +43,42 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    // Create bound scroll listener for proper cleanup
+    this.scrollListener = this.onScroll.bind(this);
+    
     // Add scroll event listener to save scroll position
     if (this.castGrid) {
-      this.castGrid.nativeElement.addEventListener('scroll', this.onScroll.bind(this));
+      this.castGrid.nativeElement.addEventListener('scroll', this.scrollListener);
+      
+      // Restore scroll position if data is already loaded
+      if (this.scrollPosition > 0 && this.castMembers.length > 0) {
+        requestAnimationFrame(() => {
+          this.castGrid.nativeElement.scrollTop = this.scrollPosition;
+        });
+      }
     }
   }
 
   ngOnDestroy(): void {
     // Remove scroll event listener
-    if (this.castGrid) {
-      this.castGrid.nativeElement.removeEventListener('scroll', this.onScroll.bind(this));
+    if (this.castGrid && this.scrollListener) {
+      this.castGrid.nativeElement.removeEventListener('scroll', this.scrollListener);
     }
   }
 
   private onScroll(event: Event): void {
     const element = event.target as HTMLDivElement;
     this.scrollPosition = element.scrollTop;
-    // Save scroll position to localStorage
-    localStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
+    // Save scroll position to sessionStorage
+    sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
+  }
+
+  clearScrollPosition(): void {
+    this.scrollPosition = 0;
+    sessionStorage.removeItem(this.SCROLL_KEY);
+    if (this.castGrid) {
+      this.castGrid.nativeElement.scrollTop = 0;
+    }
   }
 
   async loadCastMembers(): Promise<void> {
@@ -72,10 +91,13 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
         searchPath: '/search',
         searchParams: SearchComponent.createSearchQueryParams({ cast: [name] })
       }));
+      
+      // Restore scroll position after content is loaded and rendered
       if (this.castGrid && this.scrollPosition > 0) {
-        setTimeout(() => {
+        // Use requestAnimationFrame to ensure DOM is fully updated
+        requestAnimationFrame(() => {
           this.castGrid.nativeElement.scrollTop = this.scrollPosition;
-        }, 0);
+        });
       }
     } catch (error) {
       console.error('Load error:', error);

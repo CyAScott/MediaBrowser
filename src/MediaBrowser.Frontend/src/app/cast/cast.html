@@ -3,29 +3,31 @@
     <h2>Cast</h2>
   </div>
   
-  <div class="cast-grid" #castGrid *ngIf="!isLoading && castMembers.length > 0">
-    <a class="result-card" 
-         *ngFor="let castMember of castMembers;" 
-         [ngStyle]="{'backgroundImage':'url(' + castMember.imageUrl + ')'}"
-         [title]="castMember.name"
-         [routerLink]="castMember.searchPath"
-         [queryParams]="castMember.searchParams">
-      <div class="card-overlay">
-        <div class="cast-info">
-          <div class="cast-name">{{ castMember.name }}</div>
+  <div class="cast-content" #castGrid>
+    <div class="cast-grid" *ngIf="!isLoading && castMembers.length > 0">
+      <a class="result-card" 
+           *ngFor="let castMember of castMembers;" 
+           [ngStyle]="{'backgroundImage':'url(' + castMember.imageUrl + ')'}"
+           [title]="castMember.name"
+           [routerLink]="castMember.searchPath"
+           [queryParams]="castMember.searchParams">
+        <div class="card-overlay">
+          <div class="cast-info">
+            <div class="cast-name">{{ castMember.name }}</div>
+          </div>
         </div>
-      </div>
-    </a>
-  </div>
-  
-  <!-- Loading indicator -->
-  <div class="loading-indicator" *ngIf="isLoading">
-    <div class="spinner"></div>
-    <span>Loading cast members...</span>
-  </div>
-  
-  <!-- Empty state -->
-  <div class="empty-state" *ngIf="!isLoading && castMembers.length === 0">
-    <span>No cast members found</span>
+      </a>
+    </div>
+    
+    <!-- Loading indicator -->
+    <div class="loading-indicator" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Loading cast members...</span>
+    </div>
+    
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="!isLoading && castMembers.length === 0">
+      <span>No cast members found</span>
+    </div>
   </div>
 </div>
