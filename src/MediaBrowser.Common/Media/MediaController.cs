@@ -216,7 +216,8 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         }
         Response.Headers["Last-Modified"] = lastModified.ToString("R");
 
-        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media));
+        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media),
+            enableRangeProcessing: true);
     }
 
     ActionResult ReadFile(string directory, string name)

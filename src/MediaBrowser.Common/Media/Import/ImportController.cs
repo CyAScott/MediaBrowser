@@ -51,7 +51,8 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         }
         Response.Headers["Last-Modified"] = lastModified.ToString("R");
 
-        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), fileExtension.Mime);
+        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), fileExtension.Mime,
+            enableRangeProcessing: true);
     }
 
     [HttpPost("file/{name}")]
