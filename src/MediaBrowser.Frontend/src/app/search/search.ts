@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Navigation, Router } from '@angular/router';
+import { Navigation, Router, RouterModule } from '@angular/router';
 import { MediaReadModel, MediaService } from '../services/media.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 
@@ -18,7 +18,7 @@ interface SearchState {
 
 @Component({
   selector: 'app-search',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './search.html',
   styleUrls: ['./search.css']
 })
@@ -55,9 +55,8 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadPersistedState();
   }
 
-  onCardClick(id: string): void {
+  onCardClick(): void {
     this.saveCurrentState();
-    this.router.navigate(['/player', id]);
   }
 
   trackByResultId(index: number, result: MediaReadModel): string {

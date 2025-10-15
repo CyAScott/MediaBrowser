@@ -111,6 +111,9 @@
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .result-card:hover {

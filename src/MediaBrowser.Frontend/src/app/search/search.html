@@ -17,18 +17,19 @@
     </button>
   </div>
   <div class="search-results" #searchResults>
-    <div class="result-card" 
+    <a class="result-card" 
          *ngFor="let result of results; trackBy: trackByResultId" 
          [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
          [title]="getCastTooltip(result)"
-         (click)="onCardClick(result.id)">
+         [routerLink]="['/player', result.id]"
+         (mousedown)="onCardClick()">
       <div class="card-overlay">
         <div class="play-icon">▶</div>
       </div>
       <div class="star-rating" *ngIf="result.userStarRating && result.userStarRating > 0">
         <span class="stars">{{ getStarDisplay(result.userStarRating) }}</span>
       </div>
-    </div>
+    </a>
     
     <!-- Loading indicator -->
     <div class="loading-indicator" *ngIf="isLoading && results.length > 0">
