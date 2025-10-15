@@ -1,17 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { MediaService } from '../services';
+import { SearchComponent } from '../search/search';
 import { firstValueFrom } from 'rxjs';
 
 interface CastMember {
   name: string;
   imageUrl: string;
-  searchUrl: string;
+  searchPath: string;
+  searchParams: { [key: string]: string | string[] };
 }
 
 @Component({
   selector: 'app-cast',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './cast.html',
   styleUrls: ['./cast.css']
 })
@@ -66,7 +69,8 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
       this.castMembers = (await firstValueFrom(this.mediaService.getAllCast())).map(name => ({
         name,
         imageUrl: `/api/media/cast/${encodeURIComponent(name)}/thumbnail`,
-        searchUrl: `/search?cast=${encodeURIComponent(name)}`
+        searchPath: '/search',
+        searchParams: SearchComponent.createSearchQueryParams({ cast: [name] })
       }));
       if (this.castGrid && this.scrollPosition > 0) {
         setTimeout(() => {

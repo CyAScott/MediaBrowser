@@ -1,12 +1,12 @@
 <div class="search-container">
   <div class="search-form">
-    <input type="text" placeholder="Search for media files..." class="search-input" [(ngModel)]="keyword" (keydown.enter)="onSearch()" />
+    <input type="text" placeholder="Search for media files..." class="search-input" [(ngModel)]="keywords" (keydown.enter)="onSearch()" (input)="onKeywordsChange()" />
     
-    <button class="sort-direction-button" (click)="toggleSortDirection()" [title]="sortDescending ? 'Sort Ascending' : 'Sort Descending'">
-      {{ sortDescending ? '↓' : '↑' }}
+    <button class="sort-direction-button" (click)="toggleSortDirection()" [title]="descending ? 'Sort Ascending' : 'Sort Descending'">
+      {{ descending ? '↓' : '↑' }}
     </button>
     
-    <select class="sort-dropdown" [(ngModel)]="sortBy" (change)="onSortChange()">
+    <select class="sort-dropdown" [(ngModel)]="sort" (change)="onSortChange()">
       <option *ngFor="let option of sortOptions" [value]="option.value">
         {{ option.label }}
       </option>
