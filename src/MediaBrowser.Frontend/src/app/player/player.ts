@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { MediaReadModel, MediaService } from '../services';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 
@@ -12,6 +13,7 @@ import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 })
 export class PlayerComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
+  private location = inject(Location);
   private mediaService = inject(MediaService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -45,7 +47,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/search']);
+    this.location.back();
   }
 
   editMedia(): void {
