@@ -22,7 +22,7 @@ interface SearchState {
   templateUrl: './search.html',
   styleUrls: ['./search.css']
 })
-export class SearchComponent implements OnInit, AfterViewInit {
+export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
 
   @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLElement>;
@@ -47,6 +47,8 @@ export class SearchComponent implements OnInit, AfterViewInit {
   private readonly STORAGE_KEY = 'search-component-state';
   private navigation: Navigation | null = null;
   private scrollRestorePending = false;
+  private mainContentElement: HTMLElement | null = null;
+  private scrollHandler: ((event: Event) => void) | null = null;
 
   constructor(private router: Router, private mediaService: MediaService) {
     this.navigation = this.router.currentNavigation();
@@ -98,11 +100,38 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Find the main content element that actually scrolls
+    this.mainContentElement = document.querySelector('.main-content');
+    
+    // Create and store the scroll handler
+    this.scrollHandler = this.onMainContentScroll.bind(this);
+    
+    // Add scroll listener to the main content element
+    if (this.mainContentElement && this.scrollHandler) {
+      this.mainContentElement.addEventListener('scroll', this.scrollHandler, { passive: true });
+    }
+    
     // Restore scroll position after view is initialized
     if (this.scrollRestorePending) {
       setTimeout(() => this.restoreScrollPosition(), 0);
     }
   }
+
+  ngOnDestroy(): void {
+    // Remove scroll listener to prevent memory leaks
+    if (this.mainContentElement && this.scrollHandler) {
+      this.mainContentElement.removeEventListener('scroll', this.scrollHandler);
+    }
+  }
+
+  private onMainContentScroll(event: Event): void {
+    const element = event.target as HTMLElement;
+    this.handleScroll(element);
+  }
+
+  // Remove the unused HostListener methods
+  // @HostListener('window:scroll', ['$event'])
+  // @HostListener('document:scroll', ['$event'], { passive: true })
 
   async onSearch(): Promise<void> {
     // Reset for new search
@@ -111,8 +140,8 @@ export class SearchComponent implements OnInit, AfterViewInit {
     this.hasMoreResults = true;
     
     // Clear scroll position for new search
-    if (this.searchResultsElement?.nativeElement) {
-      this.searchResultsElement.nativeElement.scrollTop = 0;
+    if (this.mainContentElement) {
+      this.mainContentElement.scrollTop = 0;
     }
     
     await this.loadResults(true);
@@ -174,8 +203,7 @@ export class SearchComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onScroll(event: Event): void {
-    const element = event.target as HTMLElement;
+  private handleScroll(element: HTMLElement): void {
     const threshold = 100; // Load more when 100px from bottom
     
     // Save scroll position for persistence
@@ -184,6 +212,12 @@ export class SearchComponent implements OnInit, AfterViewInit {
     if (element.scrollHeight - element.scrollTop - element.clientHeight < threshold) {
       this.loadResults();
     }
+  }
+
+  // Keep the old method for compatibility but make it call the new one
+  onScroll(event: Event): void {
+    const element = event.target as HTMLElement;
+    this.handleScroll(element);
   }
 
   private loadPersistedState(): void {
@@ -239,8 +273,8 @@ export class SearchComponent implements OnInit, AfterViewInit {
   }
 
   private getCurrentScrollPosition(): number {
-    if (this.searchResultsElement?.nativeElement) {
-      return this.searchResultsElement.nativeElement.scrollTop;
+    if (this.mainContentElement) {
+      return this.mainContentElement.scrollTop;
     }
     return 0;
   }
@@ -248,10 +282,10 @@ export class SearchComponent implements OnInit, AfterViewInit {
   private restoreScrollPosition(): void {
     try {
       const savedState = localStorage.getItem(this.STORAGE_KEY);
-      if (savedState && this.searchResultsElement?.nativeElement) {
+      if (savedState && this.mainContentElement) {
         const state: SearchState = JSON.parse(savedState);
         if (state.scrollPosition > 0) {
-          this.searchResultsElement.nativeElement.scrollTop = state.scrollPosition;
+          this.mainContentElement.scrollTop = state.scrollPosition;
         }
       }
     } catch (error) {

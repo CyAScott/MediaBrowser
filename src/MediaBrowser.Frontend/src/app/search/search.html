@@ -16,7 +16,7 @@
       {{ isLoading ? 'Searching...' : 'Search' }}
     </button>
   </div>
-  <div class="search-results" #searchResults (scroll)="onScroll($event)">
+  <div class="search-results" #searchResults>
     <div class="result-card" 
          *ngFor="let result of results; trackBy: trackByResultId" 
          [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
