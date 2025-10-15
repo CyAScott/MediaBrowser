@@ -47,3 +47,7 @@
   background: var(--primary-bg);
   box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.05);
 }
+
+.main-content.no-sidebar {
+  margin-left: 0;
+}

@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { UsersService } from '../services/users.service';
+import { firstValueFrom } from 'rxjs';
 
 interface TabItem {
   route: string;
@@ -12,7 +14,7 @@ interface TabItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="vertical-tabs">
+    <nav class="vertical-tabs" *ngIf="usersService.isAuthenticated()">
       <div class="tab-list">
         <button 
           *ngFor="let tab of tabs" 
@@ -20,6 +22,14 @@ interface TabItem {
           [class.active]="isActiveRoute(tab.route)"
           (click)="navigateToRoute(tab.route)">
           <span class="tab-icon" [innerHTML]="tab.icon"></span>
+        </button>
+      </div>
+      <div class="tab-footer">
+        <button 
+          class="tab-button logout-button"
+          (click)="logout()"
+          title="Logout">
+          <span class="tab-icon"><i class="fa fa-sign-out"></i></span>
         </button>
       </div>
     </nav>
@@ -36,6 +46,7 @@ interface TabItem {
       left: 0;
       top: 0;
       z-index: 1000;
+      justify-content: space-between;
     }
 
     .tab-list {
@@ -43,6 +54,13 @@ interface TabItem {
       flex-direction: column;
       padding: 1rem 0;
       gap: 0.5rem;
+    }
+
+    .tab-footer {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 0;
+      border-top: 1px solid rgba(212, 212, 212, 0.1);
     }
 
     .tab-button {
@@ -89,6 +107,10 @@ interface TabItem {
       line-height: 1;
     }
 
+    .logout-button:hover {
+      background: rgba(220, 38, 38, 0.2);
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -96,6 +118,9 @@ interface TabItem {
   `]
 })
 export class VerticalTabsComponent implements OnInit {
+  private router = inject(Router);
+  protected usersService = inject(UsersService);
+
   tabs: TabItem[] = [
     {
       route: '/search',
@@ -111,10 +136,13 @@ export class VerticalTabsComponent implements OnInit {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor() {}
 
   ngOnInit(): void {
-    this.navigateToRoute('/search');
+    // Only navigate if authenticated and not already on login page
+    if (this.usersService.isAuthenticated() && this.router.url === '/') {
+      this.navigateToRoute('/search');
+    }
   }
 
   navigateToRoute(route: string): void {
@@ -123,5 +151,10 @@ export class VerticalTabsComponent implements OnInit {
 
   isActiveRoute(route: string): boolean {
     return this.router.url === route;
+  }
+
+  async logout(): Promise<void> {
+    await firstValueFrom(this.usersService.logout());
+    this.router.navigate(['/login']);
   }
 }

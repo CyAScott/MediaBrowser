@@ -41,7 +41,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
 
         Response.Cookies.Append(JwtCookieMiddleware.CookieName, tokenString, new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = false,
             Expires = tokenDescriptor.Expires,
             Secure = true,
             SameSite = SameSiteMode.Strict

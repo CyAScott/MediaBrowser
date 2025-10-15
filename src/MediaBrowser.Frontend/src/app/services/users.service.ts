@@ -39,4 +39,8 @@ export class UsersService {
   logout(): Observable<void> {
     return this.apiService.post<void>('/users/logout', {});
   }
+
+  isAuthenticated(): boolean {
+    return /(^|;\s*)mb_auth=/.test(document.cookie);
+  }
 }

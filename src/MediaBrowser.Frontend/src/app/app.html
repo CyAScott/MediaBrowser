@@ -1,6 +1,6 @@
 <div class="app-container">
   <app-vertical-tabs></app-vertical-tabs>
-  <main class="main-content">
+  <main class="main-content" [class.no-sidebar]="!usersService.isAuthenticated()">
     <router-outlet></router-outlet>
   </main>
 </div>
