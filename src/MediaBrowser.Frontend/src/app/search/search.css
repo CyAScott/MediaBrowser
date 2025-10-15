@@ -106,25 +106,6 @@
   transform: translateY(-20px);
 }
 
-.star-rating {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 4px;
-  padding: 4px 8px;
-  backdrop-filter: blur(4px);
-  z-index: 2;
-}
-
-.stars {
-  color: var(--primary-button-bg);
-  font-size: 1rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-  font-weight: bold;
-}
-
 .loading-indicator {
   grid-column: 1 / -1;
   display: flex;

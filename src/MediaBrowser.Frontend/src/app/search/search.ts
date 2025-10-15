@@ -41,17 +41,17 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
   
   // Search parameters that match SearchMediaRequest
   cast: string[] = [];
+  descending: boolean = false;
   genres: string[] = [];
   keywords: string = '';
-  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = 'title';
-  descending: boolean = false;
-  take: number = 25;
   skip: number = 0;
+  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = 'title';
+  take: number = 25;
   
   // UI state
   results: MediaReadModel[] = [];
-  isLoading: boolean = false;
   hasMoreResults: boolean = true;
+  isLoading: boolean = false;
   pageIndex: number = 0;
 
   /**
@@ -103,16 +103,6 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackByResultId(index: number, result: MediaReadModel): string {
     return result.id;
-  }
-
-  getStarDisplay(rating: number): string {
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-    let stars = '★'.repeat(fullStars);
-    if (hasHalfStar) {
-      stars += '☆';
-    }
-    return stars;
   }
 
   getCastTooltip(result: MediaReadModel): string {
@@ -328,7 +318,7 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
         pageIndex: this.pageIndex,
         scrollPosition: position
       };
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.error('Error saving scroll position:', error);
     }
@@ -343,7 +333,7 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private restoreScrollPosition(): void {
     try {
-      const savedState = localStorage.getItem(this.STORAGE_KEY);
+      const savedState = sessionStorage.getItem(this.STORAGE_KEY);
       if (savedState && this.mainContentElement) {
         const state: SearchState = JSON.parse(savedState);
         if (state.scrollPosition > 0) {
