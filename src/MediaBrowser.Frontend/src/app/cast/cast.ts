@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
 import { MediaService } from '../services';
 import { firstValueFrom } from 'rxjs';
 
 interface CastMember {
   name: string;
   imageUrl: string;
+  searchUrl: string;
 }
 
 @Component({
@@ -18,7 +18,6 @@ interface CastMember {
 export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private mediaService = inject(MediaService);
-  private router = inject(Router);
 
   @ViewChild('castGrid', { static: false }) castGrid!: ElementRef<HTMLDivElement>;
 
@@ -66,7 +65,8 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.castMembers = (await firstValueFrom(this.mediaService.getAllCast())).map(name => ({
         name,
-        imageUrl: `/api/media/cast/${encodeURIComponent(name)}/thumbnail`
+        imageUrl: `/api/media/cast/${encodeURIComponent(name)}/thumbnail`,
+        searchUrl: `/search?cast=${encodeURIComponent(name)}`
       }));
       if (this.castGrid && this.scrollPosition > 0) {
         setTimeout(() => {
@@ -79,11 +79,5 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
-  }
-
-  onCastMemberClick(castMember: CastMember): void {
-    const state = { cast: castMember.name };
-
-    this.router.navigate(['/search'], { state });
   }
 }

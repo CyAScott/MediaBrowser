@@ -4,17 +4,17 @@
   </div>
   
   <div class="cast-grid" #castGrid *ngIf="!isLoading && castMembers.length > 0">
-    <div class="cast-card" 
+    <a class="result-card" 
          *ngFor="let castMember of castMembers;" 
          [ngStyle]="{'backgroundImage':'url(' + castMember.imageUrl + ')'}"
          [title]="castMember.name"
-         (click)="onCastMemberClick(castMember)">
+         [href]="castMember.searchUrl">
       <div class="card-overlay">
         <div class="cast-info">
           <div class="cast-name">{{ castMember.name }}</div>
         </div>
       </div>
-    </div>
+    </a>
   </div>
   
   <!-- Loading indicator -->
