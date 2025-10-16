@@ -1,15 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MediaReadModel, MediaService, SearchMediaRequest } from '../services/media.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
-
-interface SearchState {
-  pageSize: number;
-  pageIndex: number;
-  scrollPosition: number;
-}
 
 /**
  * SearchComponent that uses URL query parameters for search state management.
@@ -21,7 +15,7 @@ interface SearchState {
  * - genres: array of genre names  
  * - sort: sort field ('title' | 'createdOn' | 'duration' | 'userStarRating')
  * - descending: boolean for sort direction
- * - take: number of results per page
+ * - pageIndex: current page index (0-based)
  * 
  * Example URLs:
  * /search?keywords=action&sort=createdOn&descending=true
@@ -33,20 +27,26 @@ interface SearchState {
   templateUrl: './search.html',
   styleUrls: ['./search.css']
 })
-export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
+export class SearchComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
 
-  @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLElement>;
+  @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLDivElement>;
   
   // Search parameters that match SearchMediaRequest
+  readonly pageSize: number = 25;
   cast: string[] = [];
   descending: boolean = false;
   genres: string[] = [];
   keywords: string = '';
-  skip: number = 0;
   sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = 'title';
-  take: number = 25;
+  
+  readonly sortOptions = [
+    { value: 'title', label: 'Title' },
+    { value: 'createdOn', label: 'Created On' },
+    { value: 'duration', label: 'Duration' },
+    { value: 'userStarRating', label: 'Rating' }
+  ] as const;
   
   // UI state
   results: MediaReadModel[] = [];
@@ -54,12 +54,17 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
   isLoading: boolean = false;
   pageIndex: number = 0;
 
+  // Scroll management
+  private pendingScrollUpdate: boolean = false;
+  private scrollPosition: number = 0;
+  private readonly SCROLL_KEY = 'search-scroll-position';  
+
   /**
    * Helper method to create search query parameters for navigation
    * @param params Search parameters that match SearchMediaRequest interface
    * @returns Query parameters object for router navigation
    */
-  static createSearchQueryParams(params: Partial<SearchMediaRequest>): { [key: string]: string | string[] } {
+  static createSearchQueryParams(params: Partial<SearchMediaRequest>, pageIndex: number): { [key: string]: string | string[] } {
     const queryParams: { [key: string]: string | string[] } = {};
     
     if (params.keywords?.trim()) {
@@ -71,34 +76,38 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
     if (params.genres && params.genres.length > 0) {
       queryParams['genres'] = params.genres;
     }
-    if (params.sort && params.sort !== 'title') {
+    if (params.sort) {
       queryParams['sort'] = params.sort;
     }
     if (params.descending) {
       queryParams['descending'] = 'true';
     }
-    if (params.take && params.take !== 25) {
-      queryParams['take'] = params.take.toString();
-    }
+    queryParams['pageIndex'] = pageIndex.toString();
     
     return queryParams;
   }
-  
-  readonly sortOptions = [
-    { value: 'title', label: 'Title' },
-    { value: 'createdOn', label: 'Created On' },
-    { value: 'duration', label: 'Duration' },
-    { value: 'userStarRating', label: 'Rating' }
-  ] as const;
-  
-  private readonly STORAGE_KEY = 'search-component-scroll';
-  private mainContentElement: HTMLElement | null = null;
-  private scrollHandler: ((event: Event) => void) | null = null;
 
-  constructor(private router: Router, private mediaService: MediaService) {}
+  constructor(private router: Router, private mediaService: MediaService) {
+    // Load saved scroll position from session storage
+    const savedScrollPosition = sessionStorage.getItem(this.SCROLL_KEY);
+    if (savedScrollPosition) {
+      this.scrollPosition = parseInt(savedScrollPosition, 10);
+    }
+  }
 
   onCardClick(): void {
+    console.log('onCardClick()');
     this.saveScrollPosition();
+    this.updateQueryParams();
+  }
+
+  clearScrollPosition(): void {
+    console.log('clearScrollPosition()');
+    this.scrollPosition = 0;
+    sessionStorage.removeItem(this.SCROLL_KEY);
+    if (this.searchResultsElement) {
+      this.searchResultsElement.nativeElement.scrollTop = 0;
+    }
   }
 
   trackByResultId(index: number, result: MediaReadModel): string {
@@ -113,57 +122,35 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async ngOnInit(): Promise<void> {
+    console.log(`ngOnInit()`);
+
     // Load initial state from query parameters
     this.loadFromQueryParams();
+    if (this.pageIndex === 0) {
+      this.clearScrollPosition();
+    }
 
     // Always perform search based on current parameters
-    await this.onSearch();
-  }
-
-  ngAfterViewInit(): void {
-    // Find the main content element that actually scrolls
-    this.mainContentElement = document.querySelector('.main-content');
-    
-    // Create and store the scroll handler
-    this.scrollHandler = this.onMainContentScroll.bind(this);
-    
-    // Add scroll listener to the main content element
-    if (this.mainContentElement && this.scrollHandler) {
-      this.mainContentElement.addEventListener('scroll', this.scrollHandler, { passive: true });
-    }
-    
-    // Restore scroll position if available
-    setTimeout(() => this.restoreScrollPosition(), 0);
-  }
-
-  ngOnDestroy(): void {
-    // Remove scroll listener to prevent memory leaks
-    if (this.mainContentElement && this.scrollHandler) {
-      this.mainContentElement.removeEventListener('scroll', this.scrollHandler);
-    }
-  }
-
-  private onMainContentScroll(event: Event): void {
-    const element = event.target as HTMLElement;
-    this.handleScroll(element);
+    await this.loadResults(
+      this.pageIndex === 0,
+      0,
+      Math.max(this.pageIndex * this.pageSize, this.pageSize)
+    );
   }
 
   async onSearch(): Promise<void> {
+    console.log(`onSearch()`);
+
     // Reset pagination for new search
-    this.pageIndex = 0;
-    this.skip = 0;
-    this.results = [];
+    this.clearScrollPosition();
     this.hasMoreResults = true;
+    this.pageIndex = 0;
+    this.results = [];
     
     // Update URL with current search parameters
     this.updateQueryParams();
     
-    // Clear scroll position for new search
-    if (this.mainContentElement) {
-      this.mainContentElement.scrollTop = 0;
-    }
-    
-    await this.loadResults(true);
+    await this.loadResults();
   }
 
   toggleSortDirection(): void {
@@ -179,19 +166,24 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
     this.onSearch();
   }
 
-  async loadResults(isNewSearch: boolean = false): Promise<void> {
-    if (this.isLoading || (!this.hasMoreResults && !isNewSearch)) {
+  async loadResults(
+    autoIncrementPage: boolean = true,
+    skip: number = this.pageIndex * this.pageSize,
+    take: number = this.pageSize): Promise<void> {
+    if (this.isLoading || !this.hasMoreResults) {
       return;
     }
+
+    console.log(`loadResults(autoIncrementPage=${autoIncrementPage}, skip=${skip}, take=${take})`);
 
     try {
       this.isLoading = true;
       
       // Build search request matching SearchMediaRequest interface
       const searchRequest: SearchMediaRequest = {
+        skip: skip,
         sort: this.sort,
-        take: this.take,
-        skip: this.skip
+        take: take,
       };
 
       // Add optional parameters only if they have values
@@ -209,61 +201,64 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       const response = await firstValueFrom(this.mediaService.search(searchRequest));
-      
-      if (isNewSearch) {
-        this.results = [...response.results];
-      } else {
-        this.results = [...this.results, ...response.results];
-      }
+
+      this.results = [...this.results, ...response.results];
 
       // Check if we have more results
-      this.hasMoreResults = response.results.length === this.take;
+      this.hasMoreResults = response.results.length === take;
       
       // Increment for next load
-      if (response.results.length > 0) {
+      if (autoIncrementPage && response.results.length > 0) {
         this.pageIndex++;
-        this.skip = this.pageIndex * this.take;
       }
-      
+
+      this.updateQueryParams();
+
       this.cdr.detectChanges();
       
-      console.log('Results loaded, total:', this.results.length, 'hasMore:', this.hasMoreResults);
+      // Restore scroll position after content is loaded and rendered (only once per component lifecycle)
+      if (this.searchResultsElement && this.scrollPosition > 0) {
+        this.pendingScrollUpdate = true;
+        // Use requestAnimationFrame to ensure DOM is fully updated
+        requestAnimationFrame(() => {
+          console.log(`requestAnimationFrame: ${this.scrollPosition}`);
+          this.searchResultsElement.nativeElement.scrollTop = this.scrollPosition;
+          setTimeout(() => {
+            this.pendingScrollUpdate = false;
+          }, 100);
+        });
+      }
     } catch (error) {
       console.error('Search error:', error);
-      if (isNewSearch) {
-        this.results = [];
-      }
+      this.results = [];
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
-  private handleScroll(element: HTMLElement): void {
+  // Keep the old method for compatibility but make it call the new one
+  onScroll(event: Event): void {
+    const element = event.target as HTMLElement;
     const threshold = 100; // Load more when 100px from bottom
-    
-    // Save scroll position for persistence
-    this.saveScrollPosition(element.scrollTop);
-    
-    if (element.scrollHeight - element.scrollTop - element.clientHeight < threshold) {
+
+    if (!this.isLoading && !this.pendingScrollUpdate && element.scrollHeight - element.scrollTop - element.clientHeight < threshold) {
+      console.log('onScroll()');
+      this.saveScrollPosition();
       this.loadResults();
     }
   }
 
-  // Keep the old method for compatibility but make it call the new one
-  onScroll(event: Event): void {
-    const element = event.target as HTMLElement;
-    this.handleScroll(element);
-  }
-
   private loadFromQueryParams(): void {
     const params = this.route.snapshot.queryParams;
+
+    console.log(`loadFromQueryParams(${JSON.stringify(params)})`);
     
     // Load search parameters from URL
     this.keywords = params['keywords'] || '';
     this.sort = params['sort'] || 'title';
     this.descending = params['descending'] === 'true';
-    this.take = parseInt(params['take']) || 25;
+    this.pageIndex = parseInt(params['pageIndex']) || 0;
     
     // Handle array parameters
     if (params['cast']) {
@@ -292,15 +287,15 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.genres.length > 0) {
       queryParams['genres'] = this.genres;
     }
-    if (this.sort !== 'title') {
-      queryParams['sort'] = this.sort;
-    }
+    queryParams['sort'] = this.sort;
     if (this.descending) {
       queryParams['descending'] = 'true';
     }
-    if (this.take !== 25) {
-      queryParams['take'] = this.take.toString();
+    if (this.pageIndex) {
+      queryParams['pageIndex'] = this.pageIndex.toString();
     }
+
+    console.log(`updateQueryParams(${JSON.stringify(queryParams)})`);
 
     // Update URL without triggering navigation
     this.router.navigate([], {
@@ -310,38 +305,17 @@ export class SearchComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private saveScrollPosition(scrollTop?: number): void {
+  private saveScrollPosition(): void {
     try {
-      const position = scrollTop ?? this.getCurrentScrollPosition();
-      const state: SearchState = {
-        pageSize: this.take,
-        pageIndex: this.pageIndex,
-        scrollPosition: position
-      };
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.error('Error saving scroll position:', error);
-    }
-  }
-
-  private getCurrentScrollPosition(): number {
-    if (this.mainContentElement) {
-      return this.mainContentElement.scrollTop;
-    }
-    return 0;
-  }
-
-  private restoreScrollPosition(): void {
-    try {
-      const savedState = sessionStorage.getItem(this.STORAGE_KEY);
-      if (savedState && this.mainContentElement) {
-        const state: SearchState = JSON.parse(savedState);
-        if (state.scrollPosition > 0) {
-          this.mainContentElement.scrollTop = state.scrollPosition;
-        }
+      if (this.searchResultsElement) {
+        this.scrollPosition = this.searchResultsElement.nativeElement.scrollTop;
+        sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
+        console.log(`saveScrollPosition(${this.scrollPosition})`);
+      } else {
+        this.clearScrollPosition();
       }
     } catch (error) {
-      console.error('Error restoring scroll position:', error);
+      console.error('Error saving scroll position:', error);
     }
   }
 }

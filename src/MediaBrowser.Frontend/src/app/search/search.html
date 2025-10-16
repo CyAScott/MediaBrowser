@@ -1,42 +1,52 @@
 <div class="search-container">
-  <div class="search-form">
-    <input type="text" placeholder="Search for media files..." class="search-input" [(ngModel)]="keywords" (keydown.enter)="onSearch()" (input)="onKeywordsChange()" />
-    
-    <button class="sort-direction-button" (click)="toggleSortDirection()" [title]="descending ? 'Sort Ascending' : 'Sort Descending'">
-      {{ descending ? '↓' : '↑' }}
-    </button>
-    
-    <select class="sort-dropdown" [(ngModel)]="sort" (change)="onSortChange()">
-      <option *ngFor="let option of sortOptions" [value]="option.value">
-        {{ option.label }}
-      </option>
-    </select>
-    
-    <button class="search-button" (click)="onSearch()" [disabled]="isLoading">
-      {{ isLoading ? 'Searching...' : 'Search' }}
-    </button>
+  <div class="search-header">
+    <div class="search-form">
+      <input type="text" placeholder="Search for media files..." class="search-input" [(ngModel)]="keywords" (keydown.enter)="onSearch()" (input)="onKeywordsChange()" />
+      
+      <button class="sort-direction-button" (click)="toggleSortDirection()" [title]="descending ? 'Sort Ascending' : 'Sort Descending'">
+        {{ descending ? '↓' : '↑' }}
+      </button>
+      
+      <select class="sort-dropdown" [(ngModel)]="sort" (change)="onSortChange()">
+        <option *ngFor="let option of sortOptions" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+      
+      <button class="search-button" (click)="onSearch()" [disabled]="isLoading">
+        {{ isLoading ? 'Searching...' : 'Search' }}
+      </button>
+    </div>
   </div>
-  <div class="search-results" #searchResults>
-    <a class="result-card" 
-         *ngFor="let result of results; trackBy: trackByResultId" 
-         [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
-         [title]="getCastTooltip(result)"
-         [routerLink]="['/player', result.id]"
-         (mousedown)="onCardClick()">
-      <div class="card-overlay">
-        <div class="play-icon">▶</div>
-      </div>
-    </a>
+  
+  <div class="search-content" #searchResults (scroll)="onScroll($event)">
+    <div class="search-grid" *ngIf="!isLoading && results.length > 0">
+      <a class="result-card" 
+           *ngFor="let result of results; trackBy: trackByResultId" 
+           [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
+           [title]="getCastTooltip(result)"
+           [routerLink]="['/player', result.id]"
+           (mousedown)="onCardClick()">
+        <div class="card-overlay">
+          <div class="play-icon">▶</div>
+        </div>
+      </a>
+    </div>
     
     <!-- Loading indicator -->
-    <div class="loading-indicator" *ngIf="isLoading && results.length > 0">
+    <div class="loading-indicator" *ngIf="isLoading">
       <div class="spinner"></div>
-      <span>Loading more results...</span>
+      <span>{{ results.length > 0 ? 'Loading more results...' : 'Searching...' }}</span>
     </div>
     
     <!-- No more results indicator -->
     <div class="no-more-results" *ngIf="!hasMoreResults && results.length > 0 && !isLoading">
       <span>No more results to load</span>
+    </div>
+    
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="!isLoading && results.length === 0">
+      <span>No results found</span>
     </div>
   </div>
 </div>

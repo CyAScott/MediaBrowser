@@ -89,7 +89,7 @@ export class CastComponent implements OnInit, AfterViewInit, OnDestroy {
         name,
         imageUrl: `/api/media/cast/${encodeURIComponent(name)}/thumbnail`,
         searchPath: '/search',
-        searchParams: SearchComponent.createSearchQueryParams({ cast: [name] })
+        searchParams: SearchComponent.createSearchQueryParams({ cast: [name] }, 0)
       }));
       
       // Restore scroll position after content is loaded and rendered
