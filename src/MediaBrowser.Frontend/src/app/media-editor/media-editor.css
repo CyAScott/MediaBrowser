@@ -40,7 +40,7 @@
 }
 
 .back-button {
-  background: var(--primary1-bg);
+  background: var(--primary3-bg);
   color: var(--fg4);
   border-radius: 50%;
   font-size: 1rem;
@@ -63,7 +63,7 @@
 }
 
 .cancel-button {
-  background: var(--primary2-bg);
+  background: var(--primary3-bg);
 }
 
 .cancel-button:hover:not(:disabled) {
@@ -71,7 +71,7 @@
 }
 
 .save-button {
-  background: var(--primary1-bg);
+  background: var(--primary3-bg);
   color: var(--fg4);
 }
 
@@ -287,7 +287,7 @@
 }
 
 .thumbnail-button {
-  background: var(--primary1-bg);
+  background: var(--primary3-bg);
   color: var(--fg4);
   border-radius: 6px;
   padding: 0.75rem 1.5rem;

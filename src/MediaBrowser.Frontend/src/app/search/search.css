@@ -41,7 +41,7 @@
 
 .search-button {
   padding: 0.75rem 1.5rem;
-  background: var(--primary1-bg);
+  background: var(--primary3-bg);
   color: var(--fg4);
   border: none;
   border-radius: var(--radius2);
