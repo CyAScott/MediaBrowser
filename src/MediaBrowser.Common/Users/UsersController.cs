@@ -43,7 +43,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         {
             HttpOnly = false,
             Expires = tokenDescriptor.Expires,
-            Secure = true,
+            Secure = userConfig.UseSecureCookies,
             SameSite = SameSiteMode.Strict
         });
     }
@@ -53,9 +53,9 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     {
         Response.Cookies.Append(JwtCookieMiddleware.CookieName, "", new CookieOptions
         {
-            HttpOnly = true,
+            HttpOnly = false,
             Expires = DateTime.UtcNow.AddDays(-1),
-            Secure = true,
+            Secure = userConfig.UseSecureCookies,
             SameSite = SameSiteMode.Strict
         });
         return NoContent();

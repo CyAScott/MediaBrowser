@@ -8,4 +8,5 @@ public class UserConfig(IConfiguration configuration)
     public int JwtExpiryMinutes { get; } = int.Parse(configuration["jwt:expiryMinutes"]!);
     public string? InitialUsername { get; } = configuration["initial:userName"];
     public string? InitialPassword { get; } = configuration["initial:password"];
+    public bool UseSecureCookies { get; } = bool.Parse(configuration["cookies:secure"] ?? "true");
 }
