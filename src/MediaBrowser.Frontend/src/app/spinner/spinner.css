@@ -9,6 +9,8 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in-out forwards;
 }
 
 .spinner-content {
@@ -32,5 +34,14 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
