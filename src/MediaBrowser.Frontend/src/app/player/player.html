@@ -4,7 +4,7 @@
     [class.fade-out]="!headerVisible"
     (mousemove)="onMouseMove()"
     (mouseleave)="onMouseLeave()">
-    <button class="back-button" (click)="goBack()">
+    <button class="back-button" *ngIf="hasHistory" (click)="goBack()">
       <i class="fa-solid fa-chevron-left"></i>
     </button>
     <h2>{{ mediaData.title }}</h2>

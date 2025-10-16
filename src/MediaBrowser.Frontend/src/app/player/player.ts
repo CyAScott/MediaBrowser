@@ -21,6 +21,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   mediaData: MediaReadModel | null = null;
   mediaId: string | null = null;
   headerVisible: boolean = true;
+  hasHistory: boolean = false;
   private hideTimeout: number | null = null;
 
   async ngOnInit(): Promise<void> {
@@ -29,6 +30,10 @@ export class PlayerComponent implements OnInit, OnDestroy {
       this.mediaId = mediaId;
       this.loadMediaById(mediaId);
     }
+    
+    // Check if there's history available
+    this.hasHistory = window.history.length > 1;
+    
     this.startHideTimer();
   }
 
