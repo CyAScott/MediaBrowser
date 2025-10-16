@@ -174,4 +174,11 @@
   .search-input {
     order: -1;
   }
+  
+  /* Hide sort and search buttons on mobile */
+  .sort-direction-button,
+  .sort-dropdown,
+  .search-button {
+    display: none;
+  }
 }

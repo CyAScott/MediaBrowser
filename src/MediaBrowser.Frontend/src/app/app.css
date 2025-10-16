@@ -20,12 +20,33 @@
 
 .main-content {
   flex: 1;
-  margin-left: var(--sidebar-width);
   height: 100vh;
   overflow-y: auto;
   box-shadow: inset 2px 0 5px rgba(0, 0, 0, 0.05);
 }
 
-.main-content.no-sidebar {
-  margin-left: 0;
+/* Desktop: sidebar on left */
+@media (min-width: 769px) {
+  .main-content {
+    margin-left: var(--sidebar-width);
+    margin-bottom: 0;
+  }
+
+  .main-content.no-sidebar {
+    margin-left: 0;
+  }
+}
+
+/* Mobile: tabs at bottom */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    margin-bottom: 70px; /* Height of mobile tab bar */
+    height: calc(100vh - 70px);
+  }
+
+  .main-content.no-sidebar {
+    margin-bottom: 0;
+    height: 100vh;
+  }
 }

@@ -79,4 +79,8 @@
   .cast-name {
     font-size: 1.8rem;
   }
+
+  .cast-header {
+    display: none;
+  }
 }
