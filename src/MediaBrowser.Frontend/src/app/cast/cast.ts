@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { MediaService } from '../services';
 import { SearchComponent } from '../search/search';
 import { firstValueFrom } from 'rxjs';
+import { SpinnerComponent } from '../spinner/spinner';
 
 interface CastMember {
   name: string;
@@ -14,7 +15,7 @@ interface CastMember {
 
 @Component({
   selector: 'app-cast',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SpinnerComponent],
   templateUrl: './cast.html',
   styleUrls: ['./cast.css']
 })

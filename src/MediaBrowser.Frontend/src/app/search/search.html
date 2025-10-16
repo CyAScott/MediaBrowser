@@ -20,7 +20,7 @@
   </div>
   
   <div class="search-content" #searchResults (scroll)="onScroll($event)">
-    <div class="search-grid" *ngIf="!isLoading && results.length > 0">
+    <div class="search-grid" *ngIf="results.length > 0">
       <a class="result-card" 
            *ngFor="let result of results; trackBy: trackByResultId" 
            [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
@@ -33,12 +33,6 @@
       </a>
     </div>
     
-    <!-- Loading indicator -->
-    <div class="loading-indicator" *ngIf="isLoading">
-      <div class="spinner"></div>
-      <span>{{ results.length > 0 ? 'Loading more results...' : 'Searching...' }}</span>
-    </div>
-    
     <!-- No more results indicator -->
     <div class="no-more-results" *ngIf="!hasMoreResults && results.length > 0 && !isLoading">
       <span>No more results to load</span>
@@ -49,4 +43,7 @@
       <span>No results found</span>
     </div>
   </div>
+  
+  <!-- Full screen spinner overlay -->
+  <app-spinner [isLoading]="isLoading"></app-spinner>
 </div>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MediaReadModel, MediaService, SearchMediaRequest } from '../services/media.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
+import { SpinnerComponent } from '../spinner/spinner';
 
 /**
  * SearchComponent that uses URL query parameters for search state management.
@@ -23,7 +24,7 @@ import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
  */
 @Component({
   selector: 'app-search',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent],
   templateUrl: './search.html',
   styleUrls: ['./search.css']
 })

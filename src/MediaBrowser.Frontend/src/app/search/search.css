@@ -135,15 +135,6 @@
   flex: 1;
 }
 
-.spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid var(--primary-fg);
-  border-top: 2px solid var(--primary-button-bg);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
 .no-more-results {
   display: flex;
   align-items: center;
