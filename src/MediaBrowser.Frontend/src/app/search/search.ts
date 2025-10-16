@@ -96,13 +96,11 @@ export class SearchComponent implements OnInit {
   }
 
   onCardClick(): void {
-    console.log('onCardClick()');
     this.saveScrollPosition();
     this.updateQueryParams();
   }
 
   clearScrollPosition(): void {
-    console.log('clearScrollPosition()');
     this.scrollPosition = 0;
     sessionStorage.removeItem(this.SCROLL_KEY);
     if (this.searchResultsElement) {
@@ -122,8 +120,6 @@ export class SearchComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    console.log(`ngOnInit()`);
-
     // Load initial state from query parameters
     this.loadFromQueryParams();
     if (this.pageIndex === 0) {
@@ -139,8 +135,6 @@ export class SearchComponent implements OnInit {
   }
 
   async onSearch(): Promise<void> {
-    console.log(`onSearch()`);
-
     // Reset pagination for new search
     this.clearScrollPosition();
     this.hasMoreResults = true;
@@ -173,8 +167,6 @@ export class SearchComponent implements OnInit {
     if (this.isLoading || !this.hasMoreResults) {
       return;
     }
-
-    console.log(`loadResults(autoIncrementPage=${autoIncrementPage}, skip=${skip}, take=${take})`);
 
     try {
       this.isLoading = true;
@@ -221,7 +213,6 @@ export class SearchComponent implements OnInit {
         this.pendingScrollUpdate = true;
         // Use requestAnimationFrame to ensure DOM is fully updated
         requestAnimationFrame(() => {
-          console.log(`requestAnimationFrame: ${this.scrollPosition}`);
           this.searchResultsElement.nativeElement.scrollTop = this.scrollPosition;
           setTimeout(() => {
             this.pendingScrollUpdate = false;
@@ -243,7 +234,6 @@ export class SearchComponent implements OnInit {
     const threshold = 100; // Load more when 100px from bottom
 
     if (!this.isLoading && !this.pendingScrollUpdate && element.scrollHeight - element.scrollTop - element.clientHeight < threshold) {
-      console.log('onScroll()');
       this.saveScrollPosition();
       this.loadResults();
     }
@@ -251,8 +241,6 @@ export class SearchComponent implements OnInit {
 
   private loadFromQueryParams(): void {
     const params = this.route.snapshot.queryParams;
-
-    console.log(`loadFromQueryParams(${JSON.stringify(params)})`);
     
     // Load search parameters from URL
     this.keywords = params['keywords'] || '';
@@ -295,8 +283,6 @@ export class SearchComponent implements OnInit {
       queryParams['pageIndex'] = this.pageIndex.toString();
     }
 
-    console.log(`updateQueryParams(${JSON.stringify(queryParams)})`);
-
     // Update URL without triggering navigation
     this.router.navigate([], {
       relativeTo: this.route,
@@ -310,7 +296,6 @@ export class SearchComponent implements OnInit {
       if (this.searchResultsElement) {
         this.scrollPosition = this.searchResultsElement.nativeElement.scrollTop;
         sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
-        console.log(`saveScrollPosition(${this.scrollPosition})`);
       } else {
         this.clearScrollPosition();
       }
