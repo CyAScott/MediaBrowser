@@ -190,7 +190,7 @@
 
 .remove-button {
   background: var(--remove-button-bg);
-  color: var(--primary-button-fg);
+  color: var(--remove-button-fg);
   border-radius: 4px;
   padding: 0.5rem;
   justify-content: center;
@@ -204,7 +204,7 @@
 
 .add-button {
   background: var(--add-button-bg);
-  color: var(--primary-button-fg);
+  color: var(--add-button-fg);
   border-radius: 4px;
   padding: 0.5rem 1rem;
   gap: 0.5rem;

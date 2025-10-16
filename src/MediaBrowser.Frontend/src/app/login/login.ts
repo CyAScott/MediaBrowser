@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsersService } from '../services/users.service';
@@ -12,8 +12,9 @@ import { firstValueFrom } from 'rxjs';
   styleUrls: ['./login.css']
 })
 export class LoginComponent {
-  private usersService = inject(UsersService);
+  private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private usersService = inject(UsersService);
 
   errorMessage: string = '';
   isLoading: boolean = false;
@@ -40,6 +41,7 @@ export class LoginComponent {
       this.errorMessage = 'An error occurred during login. Please try again.';
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 

@@ -14,8 +14,10 @@
   --secondary-button-fg: rgba(255,255,255,0.87);
   --secondary-button-bg-hover: #888;
   --add-button-bg: #27ae60;
+  --add-button-fg: rgba(255,255,255,0.87);
   --add-button-bg-hover: #219a52;
   --remove-button-bg: #e74c3c;
+  --remove-button-fg: rgba(255,255,255,0.87);
   --remove-button-bg-hover: #c0392b;
 
   --sidebar-width: 60px;
