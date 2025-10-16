@@ -22,8 +22,8 @@
 .spinner-animation {
   width: 50px;
   height: 50px;
-  border: 4px solid var(--primary-button-bg);
-  border-top: 4px solid var(--secondary-button-bg);
+  border: 4px solid var(--primary1-bg);
+  border-top: 4px solid var(--surface1-bg);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

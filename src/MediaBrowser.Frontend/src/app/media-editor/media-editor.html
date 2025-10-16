@@ -261,9 +261,7 @@
       </div>
     </div>
   </div>
-</div>
 
-<div class="loading-container" *ngIf="isLoading">
-  <i class="fa-solid fa-spinner fa-spin"></i>
-  <p>Loading media data...</p>
+  <!-- Full screen spinner overlay -->
+  <app-spinner [isLoading]="isLoading"></app-spinner>
 </div>

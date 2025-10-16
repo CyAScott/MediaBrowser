@@ -4,11 +4,11 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  width: 100%;
+  width: calc(100% - 2rem);
 }
 
 .search-header {
-  padding-bottom: 1rem;
+  padding-bottom: 0.25rem;
   flex-shrink: 0;
 }
 
@@ -16,6 +16,7 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+  padding-top: 1rem;
 }
 
 .search-form {
@@ -26,46 +27,45 @@
 .search-input {
   flex: 1;
   padding: 0.75rem;
-  border: 1px solid var(--primary-fg);
-  border-radius: 4px;
+  border: none;
+  border-radius: var(--radius2);
   font-size: 1rem;
-  background-color: var(--secondary-bg);
-  color: var(--secondary-fg);
+  background-color: var(--surface2-bg);
+  color: var(--fg2);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary-button-bg);
   box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
 }
 
 .search-button {
   padding: 0.75rem 1.5rem;
-  background: var(--primary-button-bg);
-  color: var(--primary-button-fg);
+  background: var(--primary1-bg);
+  color: var(--fg4);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius2);
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .search-button:hover:not(:disabled) {
-  background: var(--primary-button-bg-hover);
+  opacity: 0.8;
 }
 
 .search-button:disabled {
-  background: var(--secondary-button-bg);
-  color: var(--secondary-button-fg);
+  background: var(--surface3-bg);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .sort-direction-button {
   padding: 0.75rem;
-  background: var(--secondary-bg);
-  color: var(--primary-fg);
-  border: 1px solid var(--primary-fg);
-  border-radius: 4px;
+  background: var(--surface2-bg);
+  color: var(--fg2);
+  border: none;
+  border-radius: var(--radius2);
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
@@ -77,31 +77,30 @@
 }
 
 .sort-direction-button:hover {
-  background: var(--primary-button-bg);
-  color: var(--primary-button-fg);
-  border-color: var(--primary-button-bg);
+  opacity: 0.8;
 }
 
 .sort-dropdown {
   padding: 0.75rem;
-  border: 1px solid var(--primary-fg);
-  border-radius: 4px;
+  border: none;
+  border-radius: var(--radius2);
   font-size: 1rem;
-  background-color: var(--secondary-bg);
-  color: var(--secondary-fg);
+  background-color: var(--surface2-bg);
+  color: var(--fg2);
   cursor: pointer;
   min-width: 120px;
 }
 
 .sort-dropdown:focus {
   outline: none;
-  border-color: var(--primary-button-bg);
+  opacity: 0.8;
   box-shadow: 0 0 0 2px rgba(0, 122, 204, 0.2);
 }
 
 .sort-dropdown option {
-  background-color: var(--secondary-bg);
-  color: var(--secondary-fg);
+  background-color: var(--surface3-bg);
+  border: none;
+  color: var(--fg2);
 }
 
 .search-grid {
@@ -119,7 +118,6 @@
 
 .play-icon {
   font-size: 3rem;
-  color: var(--primary-button-fg);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   transform: translateY(-20px);
 }
@@ -130,7 +128,7 @@
   justify-content: center;
   padding: 4rem;
   gap: 1rem;
-  color: var(--primary-fg);
+  color: var(--fg2);
   font-size: 1rem;
   flex: 1;
 }
@@ -140,7 +138,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  color: var(--secondary-fg);
+  color: var(--fg2);
   font-size: 0.9rem;
   font-style: italic;
 }
@@ -150,7 +148,7 @@
   align-items: center;
   justify-content: center;
   padding: 4rem;
-  color: var(--secondary-fg);
+  color: var(--fg2);
   font-size: 1rem;
   font-style: italic;
   flex: 1;

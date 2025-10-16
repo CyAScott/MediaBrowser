@@ -38,7 +38,7 @@ interface TabItem {
     .vertical-tabs {
       width: 60px;
       height: 100vh;
-      background: #1E1E1E;
+      background: var(--surface2-bg);
       box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
@@ -60,7 +60,7 @@ interface TabItem {
       display: flex;
       flex-direction: column;
       padding: 1rem 0;
-      border-top: 1px solid rgba(212, 212, 212, 0.1);
+      border-top: 1px solid var(--fg3);
     }
 
     .tab-button {
@@ -68,9 +68,9 @@ interface TabItem {
       height: 44px;
       margin: 0 auto;
       border: none;
-      border-radius: 8px;
-      background: rgba(212, 212, 212, 0.1);
-      color: #D4D4D4;
+      border-radius: var(--radius2);
+      background: var(--surface3-bg);
+      color: var(--fg2);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -80,17 +80,18 @@ interface TabItem {
     }
 
     .tab-button:hover {
-      background: rgba(212, 212, 212, 0.2);
+      color: var(--fg1);
       transform: translateX(2px);
     }
 
     .tab-button.active {
-      background: rgba(212, 212, 212, 0.3);
+      color: var(--fg1);
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
       transform: translateX(4px);
     }
 
     .tab-button.active::before {
+      color: var(--fg1);
       content: '';
       position: absolute;
       left: -8px;
@@ -98,7 +99,7 @@ interface TabItem {
       transform: translateY(-50%);
       width: 4px;
       height: 24px;
-      background: #D4D4D4;
+      background: var(--fg1);
       border-radius: 0 2px 2px 0;
     }
 
@@ -108,7 +109,7 @@ interface TabItem {
     }
 
     .logout-button:hover {
-      background: rgba(220, 38, 38, 0.2);
+      color: var(--fg1);
     }
 
     @keyframes fadeIn {

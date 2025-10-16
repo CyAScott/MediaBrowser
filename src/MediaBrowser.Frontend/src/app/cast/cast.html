@@ -19,12 +19,6 @@
       </a>
     </div>
     
-    <!-- Loading indicator -->
-    <div class="loading-indicator" *ngIf="isLoading">
-      <div class="spinner"></div>
-      <span>Loading cast members...</span>
-    </div>
-    
     <!-- Empty state -->
     <div class="empty-state" *ngIf="!isLoading && castMembers.length === 0">
       <span>No cast members found</span>

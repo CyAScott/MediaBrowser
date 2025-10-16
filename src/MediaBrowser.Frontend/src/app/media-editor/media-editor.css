@@ -2,8 +2,6 @@
   padding: 1rem;
   max-width: 1200px;
   margin: 0 auto;
-  color: var(--secondary-fg);
-  background: var(--primary-bg);
   min-height: 100vh;
 }
 
@@ -13,7 +11,7 @@
   gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--primary-fg);
+  border-bottom: 1px solid var(--fg2);
 }
 
 .editor-header h1 {
@@ -42,8 +40,8 @@
 }
 
 .back-button {
-  background: var(--primary-button-bg);
-  color: var(--primary-button-fg);
+  background: var(--primary1-bg);
+  color: var(--fg4);
   border-radius: 50%;
   font-size: 1rem;
   justify-content: center;
@@ -53,39 +51,38 @@
 
 .back-button:hover {
   transform: scale(1.1);
-  background: var(--primary-button-bg-hover);
+  opacity: 0.8;
 }
 
 .cancel-button,
 .save-button {
   padding: 0.5rem 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius2);
   font-size: 0.9rem;
   gap: 0.5rem;
 }
 
 .cancel-button {
-  background: var(--secondary-button-bg);
-  color: var(--secondary-button-fg);
+  background: var(--primary2-bg);
 }
 
 .cancel-button:hover:not(:disabled) {
-  background: var(--secondary-button-bg-hover);
+  opacity: 0.8;
 }
 
 .save-button {
-  background: var(--primary-button-bg);
-  color: var(--primary-button-fg);
+  background: var(--primary1-bg);
+  color: var(--fg4);
 }
 
 .save-button:hover:not(:disabled) {
-  background: var(--primary-button-bg-hover);
+  opacity: 0.8;
 }
 
 .cancel-button:disabled,
 .save-button:disabled,
 .thumbnail-button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -101,17 +98,16 @@
 }
 
 .form-section {
-  background: var(--secondary-bg);
-  border-radius: 8px;
+  background: var(--surface2-bg);
+  border-radius: var(--radius2);
   padding: 1.5rem;
-  border: 1px solid var(--primary-fg);
 }
 
 .form-section h3 {
   margin: 0 0 1rem;
-  color: var(--secondary-fg);
+  color: var(--fg2);
   font-size: 1.2rem;
-  border-bottom: 1px solid var(--primary-fg);
+  border-bottom: 1px solid var(--fg2);
   padding-bottom: 0.5rem;
 }
 
@@ -128,17 +124,17 @@
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: var(--secondary-fg);
+  color: var(--fg2);
 }
 
 .form-input,
 .form-textarea {
   width: calc(100% - 1.5rem);
   padding: 0.75rem;
-  border: 1px solid var(--primary-fg);
-  border-radius: 4px;
-  background: var(--secondary-bg);
-  color: var(--secondary-fg);
+  border: none;
+  border-radius: var(--radius2);
+  background: var(--surface1-bg);
+  color: var(--fg2);
   font-size: 0.9rem;
   transition: border-color 0.2s;
 }
@@ -146,7 +142,6 @@
 .form-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--primary-fg);
 }
 
 .form-textarea {
@@ -164,7 +159,7 @@
   border: none;
   cursor: pointer;
   font-size: 1.5rem;
-  color: var(--primary-button-bg);
+  color: var(--primary1-bg);
   transition: transform 0.1s;
 }
 
@@ -189,23 +184,23 @@
 }
 
 .remove-button {
-  background: var(--remove-button-bg);
-  color: var(--remove-button-fg);
-  border-radius: 4px;
+  background: var(--danger1-bg);
+  color: var(--fg1);
+  border-radius: var(--radius2);
   padding: 0.5rem;
   justify-content: center;
   width: 2rem;
   height: 2rem;
-}
+} 
 
 .remove-button:hover {
-  background: var(--remove-button-bg-hover);
+  opacity: 0.8;
 }
 
 .add-button {
-  background: var(--add-button-bg);
-  color: var(--add-button-fg);
-  border-radius: 4px;
+  background: var(--success1-bg);
+  color: var(--fg1);
+  border-radius: var(--radius2);
   padding: 0.5rem 1rem;
   gap: 0.5rem;
   align-self: flex-start;
@@ -213,7 +208,7 @@
 }
 
 .add-button:hover {
-  background: var(--add-button-bg-hover);
+  opacity: 0.8;
 }
 
 .readonly-grid {
@@ -230,7 +225,6 @@
 }
 
 .readonly-item label {
-  color: var(--secondary-fg);
   font-size: 0.9rem;
   margin-bottom: 0;
   text-align: right;
@@ -238,27 +232,12 @@
 }
 
 .readonly-item span {
-  color: var(--secondary-fg);
   font-family: monospace;
-  background: var(--secondary-bg);
+  background: var(--surface3-bg);
+  height: 1rem;
   padding: 0.5rem;
-  border-radius: 4px;
+  border-radius: var(--radius2);
   font-size: 0.9rem;
-}
-
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  height: 50vh;
-  color: var(--secondary-fg);
-}
-
-.loading-container i {
-  font-size: 2rem;
-  color: var(--primary-button-bg);
 }
 
 @media (min-width: 768px) {
@@ -287,8 +266,8 @@
 
 .video-container {
   margin-bottom: 1rem;
-  background: var(--secondary-bg);
-  border-radius: 8px;
+  background: var(--surface2-bg);
+  border-radius: var(--radius2);
   padding: 1rem;
   display: flex;
   justify-content: center;
@@ -297,7 +276,7 @@
 .video-player {
   max-width: 100%;
   max-height: 400px;
-  border-radius: 4px;
+  border-radius: var(--radius2);
   background: black;
 }
 
@@ -308,8 +287,8 @@
 }
 
 .thumbnail-button {
-  background: var(--primary-button-bg);
-  color: var(--primary-button-fg);
+  background: var(--primary1-bg);
+  color: var(--fg4);
   border-radius: 6px;
   padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
@@ -317,7 +296,7 @@
 }
 
 .thumbnail-button:hover:not(:disabled) {
-  background: var(--primary-button-bg-hover);
+  opacity: 0.8;
   transform: translateY(-1px);
 }
 

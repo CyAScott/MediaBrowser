@@ -1,6 +1,44 @@
 /* You can add global styles to this file, and also import other style files */
+
+:root {
+  /* Best used for primary elements like buttons, links, and other primary elements.  */
+  --primary1-bg: #f5e614;
+  --primary2-bg: #f8e943;
+  --primary3-bg: #fbeb60;
+
+  /* Best used for surface elements like cards, backgrounds, and other surface elements. */
+  --surface1-bg: #1e1e1e;
+  --surface2-bg: #333;
+  --surface3-bg: #494949;
+
+  /* Fonts and borders */
+  --fg1: #fff;
+  --fg2: #aaa;
+  --fg3: #494949;
+  --fg4: #000;
+
+  --success1-bg: #22946e;
+  --success2-bg: #47d5a6;
+  --success3-bg: #9ae8ce;
+
+  --warning1-bg: #a87a2a;
+  --warning2-bg: #d7ac61;
+  --warning3-bg: #ecd7b2;
+
+  --danger1-bg: #9c2121;
+  --danger2-bg: #d94a4a;
+  --danger3-bg: #eb9e9e;
+
+  --sidebar-width: 60px;
+
+  --radius1: 4px;
+  --radius2: 8px;
+  --radius3: 12px;
+}
+
 body {
-  background-color: #1E1E1E;
+  background-color: var(--surface1-bg);
+  color: var(--fg2);
   /* Hide scrollbars for webkit browsers (Chrome, Safari, Edge) */
   ::-webkit-scrollbar {
     display: none;
@@ -20,19 +58,19 @@ body {
 /* Global result card styles - used across multiple components */
 .result-card {
   aspect-ratio: 9 / 16;
-  background-color: #1B1B1B; /* --secondary-bg */
+  background-color: var(--surface2-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  border: 1px solid #333; /* --primary-fg */
-  border-radius: 8px;
+  border: 1px solid var(--fg4);
+  border-radius: var(--radius2);
+  color: var(--fg2);
   cursor: pointer;
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
   display: block;
   text-decoration: none;
-  color: inherit;
 }
 
 .result-card:hover {

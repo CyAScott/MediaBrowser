@@ -5,10 +5,11 @@ import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { MediaReadModel, MediaService, UpdateMediaRequest } from '../services';
 import { firstValueFrom } from 'rxjs';
 import { ImportService } from '../services/import.service';
+import { SpinnerComponent } from '../spinner/spinner';
 
 @Component({
   selector: 'app-media-editor',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SpinnerComponent],
   templateUrl: './media-editor.html',
   styleUrls: ['./media-editor.css']
 })
