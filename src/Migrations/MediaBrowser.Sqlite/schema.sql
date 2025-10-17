@@ -82,5 +82,10 @@ CREATE UNIQUE INDEX "IX_users_user_name" ON "users" ("user_name");
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20251013215024_InitialCreate', '9.0.9');
 
+ALTER TABLE "media" ADD "thumbnail" REAL NULL;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20251017193532_Thumbnail', '9.0.9');
+
 COMMIT;
 

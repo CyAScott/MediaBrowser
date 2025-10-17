@@ -237,25 +237,42 @@
       <div class="form-section video-section">
         <h3>Video Preview & Thumbnail Creation</h3>
 
-        <div class="video-container">
-          <video
-            id="video-player"
-            [src]="getVideoUrl()"
-            controls
-            preload="metadata"
-            class="video-player">
-            Your browser does not support the video tag.
-          </video>
+        <div class="video-thumbnail-container">
+          <div class="video-container">
+            <video
+              id="video-player"
+              (loadedmetadata)="onVideoMetadataLoaded($event)"
+              [src]="getVideoUrl()"
+              controls
+              preload="metadata"
+              class="video-player">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+
+          <div class="thumbnail-preview-container">
+            <div class="result-card thumbnail-preview" 
+                 [style.background-image]="thumbnailPreviewUrl ? 'url(' + thumbnailPreviewUrl + ')' : 'none'">
+            </div>
+          </div>
         </div>
 
         <div class="video-controls">
           <button
             class="thumbnail-button"
-            (click)="createThumbnailFromVideo()"
+            (click)="setThumbnailPreview()"
             [disabled]="isCreatingThumbnail || !mediaData">
+            <i class="fa-solid fa-eye" *ngIf="!isCreatingThumbnail"></i>
+            <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
+            {{ isCreatingThumbnail ? 'Updating Preview...' : 'Set Preview Image' }}
+          </button>
+          <button
+            class="thumbnail-button save-thumbnail-button"
+            (click)="createThumbnailFromVideo()"
+            [disabled]="isCreatingThumbnail || !mediaData || !thumbnail">
             <i class="fa-solid fa-camera" *ngIf="!isCreatingThumbnail"></i>
             <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
-            {{ isCreatingThumbnail ? 'Creating Thumbnail...' : 'Create Thumbnail at Current Time' }}
+            {{ isCreatingThumbnail ? 'Saving Thumbnail...' : 'Save Thumbnail' }}
           </button>
         </div>
       </div>
@@ -263,5 +280,5 @@
   </div>
 
   <!-- Full screen spinner overlay -->
-  <app-spinner [isLoading]="isLoading || isSaving"></app-spinner>
+  <app-spinner [isLoading]="isCreatingThumbnail || isLoading || isSaving"></app-spinner>
 </div>

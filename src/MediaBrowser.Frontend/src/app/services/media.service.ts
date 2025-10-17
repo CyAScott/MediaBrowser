@@ -38,6 +38,7 @@ export interface MediaReadModel {
   producers: string[];
   writers: string[];
   url: string;
+  thumbnail?: number;
   thumbnailUrl?: string;
   fanartUrl?: string;
 }

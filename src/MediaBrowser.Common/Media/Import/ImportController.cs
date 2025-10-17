@@ -100,7 +100,8 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             directors,
             genres,
             producers,
-            writers);
+            writers,
+            thumbnail: request.Thumbnail);
         await context.Media.AddAsync(media);
         
         await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{hash}.nfo"));

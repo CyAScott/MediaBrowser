@@ -42,6 +42,7 @@
     <mtimeMs>{{mtimeMs}}</mtimeMs>
     <path>{{path}}</path>
     <size>{{size}}</size>
+    <thumbnail>{{thumbnail}}</thumbnail>
     <width>{{width}}</width>
   </stats>
 </media>

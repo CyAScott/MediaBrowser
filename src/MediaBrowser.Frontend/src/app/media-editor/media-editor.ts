@@ -31,6 +31,7 @@ export class MediaEditorComponent implements OnInit {
   mediaData: MediaReadModel | null = null;
   mediaId: string | null = null;
   thumbnail: number | null = null;
+  thumbnailPreviewUrl: string = '';
 
   // Form fields for editable properties
   editableData: UpdateMediaRequest = {
@@ -65,7 +66,8 @@ export class MediaEditorComponent implements OnInit {
     this.filename = null;
     this.mediaData = await firstValueFrom(this.mediaService.get(id));
     this.setEditableData(this.mediaData);
-    this.thumbnail = 0;
+    this.thumbnail = this.mediaData.thumbnail ?? 0;
+    this.thumbnailPreviewUrl = this.mediaData.thumbnailUrl || '';
 
     this.isLoading = false;
 
@@ -84,6 +86,7 @@ export class MediaEditorComponent implements OnInit {
     this.filename = navigationState['filename'];
     this.mediaData = navigationState?.['mediaData'];
     this.thumbnail = 0;
+    this.thumbnailPreviewUrl = '';
 
     if (!this.mediaData || !this.filename) {
       throw new Error('No media data or filename found');
@@ -184,6 +187,43 @@ export class MediaEditorComponent implements OnInit {
   }
 
   // Video player and thumbnail methods
+  setThumbnailPreview(): void {
+    const videoElement = document.querySelector('#video-player') as HTMLVideoElement;
+    if (!videoElement) {
+      console.error('Video player not found');
+      return;
+    }
+
+    this.thumbnail = videoElement.currentTime;
+    this.thumbnailPreviewUrl = this.generateThumbnailPreview(videoElement);
+  }
+
+  private generateThumbnailPreview(videoElement: HTMLVideoElement): string {
+    try {
+      // Create a canvas element to capture the video frame
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) {
+        console.error('Could not get canvas context');
+        return '';
+      }
+
+      // Set canvas dimensions to match video
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+
+      // Draw the current video frame to the canvas
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+      // Convert canvas to base64 data URL
+      return canvas.toDataURL('image/jpeg', 0.8);
+    } catch (error) {
+      console.error('Error generating thumbnail preview:', error);
+      return '';
+    }
+  }
+
   async createThumbnailFromVideo(): Promise<void> {
     const videoElement = document.querySelector('#video-player') as HTMLVideoElement;
     if (!videoElement) {
@@ -208,5 +248,11 @@ export class MediaEditorComponent implements OnInit {
 
   getVideoUrl(): string {
     return this.mediaData?.url || '';
+  }
+
+  onVideoMetadataLoaded(event: Event): void {
+    if (this.thumbnail !== null) {
+      (event.target as HTMLVideoElement).currentTime = this.thumbnail;
+    }
   }
 }

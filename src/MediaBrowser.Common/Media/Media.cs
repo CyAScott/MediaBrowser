@@ -59,6 +59,9 @@ public class MediaEntity
 
     [Column("ffprobe"), JsonPropertyName("ffprobe")]
     public required FfprobeResponse Ffprobe { get; set; }
+
+    [Column("thumbnail"), JsonPropertyName("thumbnail")]
+    public double? Thumbnail { get; set; }
     
     [JsonPropertyName("cast")]
     public ICollection<CastEntity> Cast { get; set; } = [];
@@ -102,6 +105,7 @@ public class MediaEntity
         Producers = Producers.Select(it => it.Name).ToList(),
         Writers = Writers.Select(it => it.Name).ToList(),
         Url = $"/api/Media/{Id}/file",
+        Thumbnail = Thumbnail,
         ThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
             ? $"/api/Media/{Id}/file/thumbnail" : null,
         FanartThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
@@ -119,6 +123,7 @@ public class MediaEntity
         IEnumerable<string> producers,
         IEnumerable<string> writers,
         Guid? mediaId = null,
+        double? thumbnail = null,
         int? height = null, int? width = null,
         long? ctimeMs = null, long? mtimeMs = null)
     {
@@ -151,6 +156,7 @@ public class MediaEntity
             Published = createdOn.ToString("yyyy-MM-dd"),
             MtimeMs = mtimeMs ?? Convert.ToInt64((fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
             Ffprobe = ffprobe,
+            Thumbnail = thumbnail,
             
             Cast = castEntities,
             Directors = directorEntities,

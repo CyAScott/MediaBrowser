@@ -22,18 +22,21 @@ namespace MediaBrowser.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
                         .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
+                        .HasColumnName("media_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
-                        .HasColumnName("cast_member");
+                        .HasColumnName("cast_member")
+                        .HasAnnotation("Relational:JsonPropertyName", "name");
 
                     b.HasKey("Id");
 
@@ -41,6 +44,8 @@ namespace MediaBrowser.Migrations
                         .IsUnique();
 
                     b.ToTable("media_cast");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "cast");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Directors.DirectorEntity", b =>
@@ -48,18 +53,21 @@ namespace MediaBrowser.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
                         .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
+                        .HasColumnName("media_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
-                        .HasColumnName("director");
+                        .HasColumnName("director")
+                        .HasAnnotation("Relational:JsonPropertyName", "name");
 
                     b.HasKey("Id");
 
@@ -67,6 +75,8 @@ namespace MediaBrowser.Migrations
                         .IsUnique();
 
                     b.ToTable("media_directors");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "directors");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Genres.GenreEntity", b =>
@@ -74,18 +84,21 @@ namespace MediaBrowser.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
                         .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
+                        .HasColumnName("media_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
-                        .HasColumnName("genre");
+                        .HasColumnName("genre")
+                        .HasAnnotation("Relational:JsonPropertyName", "name");
 
                     b.HasKey("Id");
 
@@ -93,6 +106,8 @@ namespace MediaBrowser.Migrations
                         .IsUnique();
 
                     b.ToTable("media_genres");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "genres");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.MediaEntity", b =>
@@ -100,94 +115,118 @@ namespace MediaBrowser.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("TEXT")
-                        .HasColumnName("created_on");
+                        .HasColumnName("created_on")
+                        .HasAnnotation("Relational:JsonPropertyName", "createdOn");
 
                     b.Property<long>("CtimeMs")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("ctime_ms");
+                        .HasColumnName("ctime_ms")
+                        .HasAnnotation("Relational:JsonPropertyName", "ctimeMs");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
                         .HasColumnType("TEXT")
-                        .HasColumnName("description");
+                        .HasColumnName("description")
+                        .HasAnnotation("Relational:JsonPropertyName", "description");
 
                     b.Property<double?>("Duration")
                         .HasColumnType("REAL")
-                        .HasColumnName("duration");
+                        .HasColumnName("duration")
+                        .HasAnnotation("Relational:JsonPropertyName", "duration");
 
                     b.Property<string>("Ffprobe")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasColumnName("ffprobe");
+                        .HasColumnName("ffprobe")
+                        .HasAnnotation("Relational:JsonPropertyName", "ffprobe");
 
                     b.Property<int?>("Height")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("height");
+                        .HasColumnName("height")
+                        .HasAnnotation("Relational:JsonPropertyName", "height");
 
                     b.Property<string>("Md5")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("TEXT")
-                        .HasColumnName("md5");
+                        .HasColumnName("md5")
+                        .HasAnnotation("Relational:JsonPropertyName", "md5");
 
                     b.Property<string>("Mime")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT")
-                        .HasColumnName("mime");
+                        .HasColumnName("mime")
+                        .HasAnnotation("Relational:JsonPropertyName", "mime");
 
                     b.Property<long>("MtimeMs")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("mtime_ms");
+                        .HasColumnName("mtime_ms")
+                        .HasAnnotation("Relational:JsonPropertyName", "mtimeMs");
 
                     b.Property<string>("OriginalTitle")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT")
-                        .HasColumnName("original_title");
+                        .HasColumnName("original_title")
+                        .HasAnnotation("Relational:JsonPropertyName", "originalTitle");
 
                     b.Property<string>("Path")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("TEXT")
-                        .HasColumnName("path");
+                        .HasColumnName("path")
+                        .HasAnnotation("Relational:JsonPropertyName", "path");
 
                     b.Property<string>("Published")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT")
-                        .HasColumnName("published");
+                        .HasColumnName("published")
+                        .HasAnnotation("Relational:JsonPropertyName", "published");
 
                     b.Property<double?>("Rating")
                         .HasColumnType("REAL")
-                        .HasColumnName("rating");
+                        .HasColumnName("rating")
+                        .HasAnnotation("Relational:JsonPropertyName", "rating");
 
                     b.Property<long?>("Size")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("size");
+                        .HasColumnName("size")
+                        .HasAnnotation("Relational:JsonPropertyName", "size");
+
+                    b.Property<double?>("Thumbnail")
+                        .HasColumnType("REAL")
+                        .HasColumnName("thumbnail")
+                        .HasAnnotation("Relational:JsonPropertyName", "thumbnail");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("TEXT")
-                        .HasColumnName("title");
+                        .HasColumnName("title")
+                        .HasAnnotation("Relational:JsonPropertyName", "title");
 
                     b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("TEXT")
-                        .HasColumnName("updated_on");
+                        .HasColumnName("updated_on")
+                        .HasAnnotation("Relational:JsonPropertyName", "updatedOn");
 
                     b.Property<int?>("UserStarRating")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("user_star_rating");
+                        .HasColumnName("user_star_rating")
+                        .HasAnnotation("Relational:JsonPropertyName", "userStarRating");
 
                     b.Property<int?>("Width")
                         .HasColumnType("INTEGER")
-                        .HasColumnName("width");
+                        .HasColumnName("width")
+                        .HasAnnotation("Relational:JsonPropertyName", "width");
 
                     b.HasKey("Id");
 
@@ -199,18 +238,21 @@ namespace MediaBrowser.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
                         .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
+                        .HasColumnName("media_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
-                        .HasColumnName("producer");
+                        .HasColumnName("producer")
+                        .HasAnnotation("Relational:JsonPropertyName", "name");
 
                     b.HasKey("Id");
 
@@ -218,6 +260,8 @@ namespace MediaBrowser.Migrations
                         .IsUnique();
 
                     b.ToTable("media_producers");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "producers");
                 });
 
             modelBuilder.Entity("MediaBrowser.Media.Writers.WriterEntity", b =>
@@ -225,18 +269,21 @@ namespace MediaBrowser.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasColumnName("id");
+                        .HasColumnName("id")
+                        .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
                         .HasColumnType("TEXT")
-                        .HasColumnName("media_id");
+                        .HasColumnName("media_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
-                        .HasColumnName("writer");
+                        .HasColumnName("writer")
+                        .HasAnnotation("Relational:JsonPropertyName", "name");
 
                     b.HasKey("Id");
 
@@ -244,6 +291,8 @@ namespace MediaBrowser.Migrations
                         .IsUnique();
 
                     b.ToTable("media_writers");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "writers");
                 });
 
             modelBuilder.Entity("MediaBrowser.Users.UserEntity", b =>

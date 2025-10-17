@@ -178,6 +178,23 @@ BEGIN
     VALUES (N'20251013215024_InitialCreate', N'9.0.9');
 END;
 
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251017193532_Thumbnail'
+)
+BEGIN
+    ALTER TABLE [media] ADD [thumbnail] float NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20251017193532_Thumbnail'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20251017193532_Thumbnail', N'9.0.9');
+END;
+
 COMMIT;
 GO
 

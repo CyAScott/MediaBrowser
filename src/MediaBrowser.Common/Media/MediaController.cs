@@ -176,7 +176,7 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
 
     [HttpPost("{id:guid}/file/thumbnail")]
     public Task<ActionResult> UpdateThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
-        WriteFile(id, ".jpg", request.At);
+        WriteFile(id, ".jpg", request.At, true);
     
     async Task<ActionResult> ReadFile(Guid id,
         Func<MediaEntity, string> extension,
@@ -240,12 +240,17 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), "image/jpeg");
     }
 
-    async Task<ActionResult> WriteFile(Guid id, string extension, double at)
+    async Task<ActionResult> WriteFile(Guid id, string extension, double at, bool isPrimary = false)
     {
         var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
         if (media == null)
         {
             return NotFound();
+        }
+
+        if (isPrimary)
+        {
+            media.Thumbnail = at;
         }
         
         var filePath = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.{mediaConfig.GetExtensionFromMime(media.Mime)}");
@@ -262,6 +267,12 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
                 at: TimeSpan.FromSeconds(at)))
         {
             return StatusCode(StatusCodes.Status406NotAcceptable);
+        }
+        
+        if (isPrimary)
+        {
+            await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
+            await context.SaveChangesAsync();
         }
 
         return Ok();

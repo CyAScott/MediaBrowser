@@ -160,5 +160,20 @@ BEGIN
     VALUES ('20251013215024_InitialCreate', '9.0.9');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20251017193532_Thumbnail') THEN
+    ALTER TABLE media ADD thumbnail double precision;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20251017193532_Thumbnail') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20251017193532_Thumbnail', '9.0.9');
+    END IF;
+END $EF$;
 COMMIT;
 

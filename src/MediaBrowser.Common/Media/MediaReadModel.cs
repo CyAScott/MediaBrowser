@@ -51,6 +51,8 @@ public class MediaReadModel
     public required IReadOnlyList<string> Writers { get; init; }
     
     public required string Url { get; init; }
+
+    public required double? Thumbnail { get; init; }
     
     public required string? ThumbnailUrl { get; init; }
     

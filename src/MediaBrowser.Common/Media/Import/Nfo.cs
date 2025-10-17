@@ -97,7 +97,9 @@ public class Nfo(MediaConfig mediaConfig)
                 .Select(x => x.InnerText).Distinct().ToList() ?? [],
             Writers = xmlDoc.SelectNodes("//writers/name")?.Cast<XmlNode>()
                 .Select(x => x.InnerText).Distinct().ToList() ?? [],
-            Thumbnail = 0 //not needed when importing from nfo
+            Thumbnail = double.TryParse(xmlDoc.SelectSingleNode("//thumbnail")?.InnerText ?? string.Empty, out var thumbnail)
+                ? thumbnail
+                : 0
         };
         
         var media = MediaEntity.Create(
@@ -111,6 +113,7 @@ public class Nfo(MediaConfig mediaConfig)
             genres: request.Genres,
             producers: request.Producers,
             writers: request.Writers,
+            thumbnail: request.Thumbnail,
             height: int.TryParse(xmlDoc.SelectSingleNode("//height")?.InnerText ?? string.Empty, out var height) ? height : null,
             width: int.TryParse(xmlDoc.SelectSingleNode("//width")?.InnerText ?? string.Empty, out var width) ? width : null,
             ctimeMs: long.TryParse(xmlDoc.SelectSingleNode("//ctime")?.InnerText ?? string.Empty, out var ctimeMs) ? ctimeMs : null,
