@@ -63,6 +63,7 @@ The best way to configure the service is through environment variables. Here are
 * `media__syncOnBoot` (boolean) - when true this will scan the media directory for NFO files and import the data from those files into the DB. After the import the service will terminate.
 * `media__`
 * `media__importExtensions` (dictionary) - a dictionary of file extensions and `order`, `mime`, and `ext`. The `order` is used to sort the dictionary so that using the mine for a file can be used to find a corresponding file extension (since it is possible to find multiple file extensions). The `mime` is the corresponding mime type for the file extension. The `ext` is the normalized file extension (i.e. `wave` is normalized to `wav`).
+* `media__importDirectory` (string) - a directory where files can be dumped so that they can be imported into the `media__mediaDirectory`.
 
 # TODO - Features
 
