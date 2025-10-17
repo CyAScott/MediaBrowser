@@ -69,7 +69,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         return user.ToReadModel();
     }
     
-    [HttpPost("register"), AllowAnonymous]
+    [HttpPost("register")]
     public async Task<ActionResult<UserReadModel>> Register([FromBody] UserRegisterRequest request)
     {
         if (await context.Users.AnyAsync(u => u.Username == request.Username))
