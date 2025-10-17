@@ -3,6 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   min-height: 100vh;
+  width: calc(100% - var(--sidebar-width));
 }
 
 .editor-header {
@@ -91,16 +92,11 @@
   flex-direction: column;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-
 .form-section {
   background: var(--surface2-bg);
   border-radius: var(--radius2);
   padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-section h3 {
@@ -238,9 +234,16 @@
   padding: 0.5rem;
   border-radius: var(--radius2);
   font-size: 0.9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (min-width: 768px) {
+  .editor-container {
+    height: 100%;
+    width: calc(100% - 1.5rem);
+  }
+
   .form-grid {
     grid-template-columns: repeat(2, 1fr);
   }

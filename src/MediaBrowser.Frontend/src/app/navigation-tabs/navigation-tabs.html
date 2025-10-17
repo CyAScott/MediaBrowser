@@ -1,0 +1,19 @@
+<nav class="navigation-tabs" *ngIf="usersService.isAuthenticated()">
+  <div class="tab-list">
+    <button 
+      *ngFor="let tab of tabs" 
+      class="tab-button"
+      [class.active]="isActiveRoute(tab.route)"
+      (click)="navigateToRoute(tab.route)">
+      <span class="tab-icon" [innerHTML]="tab.icon"></span>
+    </button>
+  </div>
+  <div class="tab-footer">
+    <button 
+      class="tab-button logout-button"
+      (click)="logout()"
+      title="Logout">
+      <span class="tab-icon"><i class="fa fa-sign-out"></i></span>
+    </button>
+  </div>
+</nav>

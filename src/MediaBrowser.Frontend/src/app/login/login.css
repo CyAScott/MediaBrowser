@@ -138,4 +138,9 @@
   .login-header h1 {
     font-size: 28px;
   }
+
+  .login-header p,
+  .form-group label {
+    display: none;
+  }
 }

@@ -1,7 +1,7 @@
 .player-container {
   position: relative;
   height: 100vh;
-  width: 100%;
+  width: calc(100% - var(--sidebar-width));
 }
 
 .player-header {
@@ -123,4 +123,12 @@
 
 .no-media button:hover {
   opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .player-container {
+    height: 100%;
+    width: calc(100% - 1.5rem);
+  }
 }

@@ -54,6 +54,7 @@ export class SearchComponent implements OnInit {
   hasMoreResults: boolean = true;
   isLoading: boolean = false;
   pageIndex: number = 0;
+  showSortModal: boolean = false;
 
   // Scroll management
   private pendingScrollUpdate: boolean = false;
@@ -151,6 +152,20 @@ export class SearchComponent implements OnInit {
   toggleSortDirection(): void {
     this.descending = !this.descending;
     this.onSearch();
+  }
+
+  toggleSortOptions(): void {
+    this.showSortModal = !this.showSortModal;
+  }
+
+  selectSortOption(sortValue: 'title' | 'createdOn' | 'duration' | 'userStarRating'): void {
+    this.sort = sortValue;
+    this.showSortModal = false;
+    this.onSearch();
+  }
+
+  closeSortModal(): void {
+    this.showSortModal = false;
   }
 
   onSortChange(): void {
