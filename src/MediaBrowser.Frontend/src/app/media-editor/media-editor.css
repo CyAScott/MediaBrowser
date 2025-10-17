@@ -3,7 +3,7 @@
   max-width: 1200px;
   margin: 0 auto;
   min-height: 100vh;
-  width: calc(100% - var(--sidebar-width));
+  width: calc(100% - (var(--sidebar-width) / 2));
 }
 
 .editor-header {
@@ -241,7 +241,7 @@
 @media (min-width: 768px) {
   .editor-container {
     height: 100%;
-    width: calc(100% - 1.5rem);
+    width: calc(100% - 2rem);
   }
 
   .form-grid {

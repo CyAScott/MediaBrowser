@@ -3,7 +3,7 @@
   padding: 0.25em 1em 0.5em 0.5em;
   display: flex;
   flex-direction: column;
-  width: calc(100% - var(--sidebar-width));
+  width: calc(100% - (var(--sidebar-width) / 2));
 }
 
 /* Files section styles */
@@ -13,22 +13,16 @@
   flex-direction: column;
 }
 
-.files-section h3 {
-  color: var(--fg2);
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-}
-
 .files-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: var(--surface2-bg);
   border-radius: var(--radius1);
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .files-table th {
+  background-color: var(--surface2-bg);
   padding: 1rem;
   text-align: left;
   font-weight: 600;
@@ -37,11 +31,11 @@
 
 .files-table td {
   padding: 0.75rem 1rem;
-  color: var(--fg3);
+  color: var(--fg2);
 }
 
-.files-table tr:last-child td {
-  border-bottom: none;
+.files-table tr:nth-child(even) td {
+  background-color: var(--surface2-bg);
 }
 
 .filename {
@@ -78,4 +72,12 @@
 
 .empty-state p {
   margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .import-container {
+    height: 100%;
+    width: calc(100% - 2rem);
+  }
 }

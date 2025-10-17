@@ -4,7 +4,7 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  width: calc(100% - var(--sidebar-width));
+  width: calc(100% - (var(--sidebar-width) / 2));
 }
 
 .cast-header {
@@ -73,7 +73,7 @@
 @media (max-width: 768px) {
   .cast-container {
     height: 100%;
-    width: calc(100% - 1.5rem);
+    width: calc(100% - 2rem);
   }
 
   .cast-grid {

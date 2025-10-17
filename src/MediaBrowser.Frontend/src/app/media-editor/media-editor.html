@@ -177,7 +177,7 @@
       </div>
 
       <!-- Read-only Information -->
-      <div class="form-section">
+      <div class="form-section" *ngIf="!filename">
         <h3>Media Information (Read Only)</h3>
 
         <div class="readonly-grid">
@@ -263,5 +263,5 @@
   </div>
 
   <!-- Full screen spinner overlay -->
-  <app-spinner [isLoading]="isLoading"></app-spinner>
+  <app-spinner [isLoading]="isLoading || isSaving"></app-spinner>
 </div>

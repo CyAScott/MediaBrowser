@@ -128,6 +128,7 @@ export class MediaEditorComponent implements OnInit {
       console.error('Error saving media changes:', error);
     } finally {
       this.isSaving = false;
+      this.cdr.detectChanges();
     }
   }
 

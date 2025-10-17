@@ -10,11 +10,12 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         !Directory.Exists(mediaConfig.ImportDirectory)
             ? []
             : Directory.GetFiles(mediaConfig.ImportDirectory!, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(file =>
-                    !file.StartsWith(".") &&
-                    file.Contains('.') &&
-                    mediaConfig.ImportExtensions.ContainsKey(Path.GetExtension(file).Substring(1)))
-                .Select(file => Path.Combine(mediaConfig.ImportDirectory, file))
+                .Select(Path.GetFileName)
+                .OfType<string>()
+                .Where(name =>
+                    !name.StartsWith(".") &&
+                    name.Contains('.') &&
+                    mediaConfig.ImportExtensions.ContainsKey(Path.GetExtension(name).Substring(1)))
                 .OrderBy(name => name)
                 .ToList();
 

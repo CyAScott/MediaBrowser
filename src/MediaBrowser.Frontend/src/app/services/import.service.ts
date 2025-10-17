@@ -19,6 +19,6 @@ export class ImportService {
   }
 
   import(name: string, request: ImportMediaRequest): Observable<void> {
-    return this.apiService.post<void>(`/import/file/${decodeURIComponent(name)}`, request);
+    return this.apiService.post<void>(`/import/file/${encodeURIComponent(name)}`, request);
   }
 }
