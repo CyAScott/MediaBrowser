@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/Migrations/">
-    <Project Path="Migrations\MediaBrowser.Mysql\MediaBrowser.MySql.csproj" Type="Classic C#" />
+    <Project Path="Migrations\MediaBrowser.MySql\MediaBrowser.MySql.csproj" Type="Classic C#" />
     <Project Path="Migrations\MediaBrowser.Postgres\MediaBrowser.Postgres.csproj" Type="Classic C#" />
     <Project Path="Migrations\MediaBrowser.Sqlite\MediaBrowser.Sqlite.csproj" Type="Classic C#" />
     <Project Path="Migrations\MediaBrowser.SqlServer\MediaBrowser.SqlServer.csproj" Type="Classic C#" />

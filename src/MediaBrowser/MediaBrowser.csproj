@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Migrations\MediaBrowser.Mysql\MediaBrowser.MySql.csproj" />
+    <ProjectReference Include="..\Migrations\MediaBrowser.MySql\MediaBrowser.MySql.csproj" />
     <ProjectReference Include="..\Migrations\MediaBrowser.Postgres\MediaBrowser.Postgres.csproj" />
     <ProjectReference Include="..\Migrations\MediaBrowser.Sqlite\MediaBrowser.Sqlite.csproj" />
     <ProjectReference Include="..\Migrations\MediaBrowser.SqlServer\MediaBrowser.SqlServer.csproj" />
