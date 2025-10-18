@@ -30,14 +30,18 @@ export class ReadonlyInfoSectionComponent {
     return date.toLocaleString();
   }
 
-  formatDuration(seconds?: number): string {
+  static formatDuration(seconds?: number): string {
     seconds ??= 0;
 
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = (seconds % 60).toFixed(3);
+    const remainingSeconds = Math.floor(seconds % 60);
     
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${hours ? `${hours}:` : ''}${minutes.toString().padStart(hours ? 2 : 1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  }
+
+  formatDuration(seconds?: number): string {
+    return ReadonlyInfoSectionComponent.formatDuration(seconds);
   }
 
   formatFileSize(bytes?: number): string {

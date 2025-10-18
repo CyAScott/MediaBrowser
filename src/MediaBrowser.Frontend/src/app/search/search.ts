@@ -97,9 +97,69 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  onCardClick(): void {
-    this.saveScrollPosition();
-    this.updateQueryParams();
+  private loadFromQueryParams(): void {
+    const params = this.route.snapshot.queryParams;
+    
+    // Load search parameters from URL
+    this.keywords = params['keywords'] || '';
+    this.sort = params['sort'] || 'title';
+    this.descending = params['descending'] === 'true';
+    this.pageIndex = parseInt(params['pageIndex']) || 0;
+    
+    // Handle array parameters
+    if (params['cast']) {
+      this.cast = Array.isArray(params['cast']) ? params['cast'] : [params['cast']];
+    } else {
+      this.cast = [];
+    }
+    
+    if (params['genres']) {
+      this.genres = Array.isArray(params['genres']) ? params['genres'] : [params['genres']];
+    } else {
+      this.genres = [];
+    }
+  }
+
+  private saveScrollPosition(): void {
+    try {
+      if (this.searchContentComponent?.searchResultsElement) {
+        this.scrollPosition = this.searchContentComponent.searchResultsElement.nativeElement.scrollTop;
+        sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
+      } else {
+        this.clearScrollPosition();
+      }
+    } catch (error) {
+      console.error('Error saving scroll position:', error);
+    }
+  }
+
+  private updateQueryParams(): void {
+    const queryParams: any = {};
+    
+    // Only add parameters that have values to keep URL clean
+    if (this.keywords?.trim()) {
+      queryParams['keywords'] = this.keywords.trim();
+    }
+    if (this.cast.length > 0) {
+      queryParams['cast'] = this.cast;
+    }
+    if (this.genres.length > 0) {
+      queryParams['genres'] = this.genres;
+    }
+    queryParams['sort'] = this.sort;
+    if (this.descending) {
+      queryParams['descending'] = 'true';
+    }
+    if (this.pageIndex) {
+      queryParams['pageIndex'] = this.pageIndex.toString();
+    }
+
+    // Update URL without triggering navigation
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'replace'
+    });
   }
 
   clearScrollPosition(): void {
@@ -110,61 +170,8 @@ export class SearchComponent implements OnInit {
     }
   }
 
-
-
-  async ngOnInit(): Promise<void> {
-    // Load initial state from query parameters
-    this.loadFromQueryParams();
-    if (this.pageIndex === 0) {
-      this.clearScrollPosition();
-    }
-
-    // Always perform search based on current parameters
-    await this.loadResults(
-      this.pageIndex === 0,
-      0,
-      Math.max(this.pageIndex * this.pageSize, this.pageSize)
-    );
-  }
-
-  async onSearch(): Promise<void> {
-    // Reset pagination for new search
-    this.clearScrollPosition();
-    this.hasMoreResults = true;
-    this.pageIndex = 0;
-    this.results = [];
-    
-    // Update URL with current search parameters
-    this.updateQueryParams();
-    
-    await this.loadResults();
-  }
-
-  toggleSortDirection(): void {
-    this.descending = !this.descending;
-    this.onSearch();
-  }
-
-  toggleSortOptions(): void {
-    this.showSortModal = !this.showSortModal;
-  }
-
-  selectSortOption(sortValue: 'title' | 'createdOn' | 'duration' | 'userStarRating'): void {
-    this.sort = sortValue;
-    this.showSortModal = false;
-    this.onSearch();
-  }
-
   closeSortModal(): void {
     this.showSortModal = false;
-  }
-
-  onSortChange(): void {
-    this.onSearch();
-  }
-
-  onKeywordsChange(): void {
-    this.onSearch();
   }
 
   async loadResults(
@@ -235,7 +242,30 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  // Keep the old method for compatibility but make it call the new one
+  async ngOnInit(): Promise<void> {
+    // Load initial state from query parameters
+    this.loadFromQueryParams();
+    if (this.pageIndex === 0) {
+      this.clearScrollPosition();
+    }
+
+    // Always perform search based on current parameters
+    await this.loadResults(
+      this.pageIndex === 0,
+      0,
+      Math.max(this.pageIndex * this.pageSize, this.pageSize)
+    );
+  }
+
+  onCardClick(): void {
+    this.saveScrollPosition();
+    this.updateQueryParams();
+  }
+
+  onKeywordsChange(): void {
+    this.onSearch();
+  }
+
   onScroll(event: Event): void {
     const element = event.target as HTMLElement;
     const threshold = 100; // Load more when 100px from bottom
@@ -246,68 +276,35 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  private loadFromQueryParams(): void {
-    const params = this.route.snapshot.queryParams;
+  async onSearch(): Promise<void> {
+    // Reset pagination for new search
+    this.clearScrollPosition();
+    this.hasMoreResults = true;
+    this.pageIndex = 0;
+    this.results = [];
     
-    // Load search parameters from URL
-    this.keywords = params['keywords'] || '';
-    this.sort = params['sort'] || 'title';
-    this.descending = params['descending'] === 'true';
-    this.pageIndex = parseInt(params['pageIndex']) || 0;
+    // Update URL with current search parameters
+    this.updateQueryParams();
     
-    // Handle array parameters
-    if (params['cast']) {
-      this.cast = Array.isArray(params['cast']) ? params['cast'] : [params['cast']];
-    } else {
-      this.cast = [];
-    }
-    
-    if (params['genres']) {
-      this.genres = Array.isArray(params['genres']) ? params['genres'] : [params['genres']];
-    } else {
-      this.genres = [];
-    }
+    await this.loadResults();
   }
 
-  private updateQueryParams(): void {
-    const queryParams: any = {};
-    
-    // Only add parameters that have values to keep URL clean
-    if (this.keywords?.trim()) {
-      queryParams['keywords'] = this.keywords.trim();
-    }
-    if (this.cast.length > 0) {
-      queryParams['cast'] = this.cast;
-    }
-    if (this.genres.length > 0) {
-      queryParams['genres'] = this.genres;
-    }
-    queryParams['sort'] = this.sort;
-    if (this.descending) {
-      queryParams['descending'] = 'true';
-    }
-    if (this.pageIndex) {
-      queryParams['pageIndex'] = this.pageIndex.toString();
-    }
-
-    // Update URL without triggering navigation
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: 'replace'
-    });
+  onSortChange(): void {
+    this.onSearch();
   }
 
-  private saveScrollPosition(): void {
-    try {
-      if (this.searchContentComponent?.searchResultsElement) {
-        this.scrollPosition = this.searchContentComponent.searchResultsElement.nativeElement.scrollTop;
-        sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
-      } else {
-        this.clearScrollPosition();
-      }
-    } catch (error) {
-      console.error('Error saving scroll position:', error);
-    }
+  selectSortOption(sortValue: 'title' | 'createdOn' | 'duration' | 'userStarRating'): void {
+    this.sort = sortValue;
+    this.showSortModal = false;
+    this.onSearch();
+  }
+
+  toggleSortDirection(): void {
+    this.descending = !this.descending;
+    this.onSearch();
+  }
+
+  toggleSortOptions(): void {
+    this.showSortModal = !this.showSortModal;
   }
 }

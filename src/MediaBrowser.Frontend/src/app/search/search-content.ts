@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, Output, ViewChild, ElementRef } from '@
 import { RouterModule } from '@angular/router';
 import { MediaReadModel } from '../services/media.service';
 import { SpinnerComponent } from '../spinner/spinner';
+import { ReadonlyInfoSectionComponent } from '../media-editor/readonly-info-section/readonly-info-section.component';
 
 @Component({
   selector: 'app-search-content',
@@ -11,31 +12,42 @@ import { SpinnerComponent } from '../spinner/spinner';
   styleUrls: ['./search-content.css']
 })
 export class SearchContentComponent {
-  @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLDivElement>;
-
-  @Input() results: MediaReadModel[] = [];
   @Input() hasMoreResults: boolean = true;
   @Input() isLoading: boolean = false;
+  @Input() results: MediaReadModel[] = [];
 
   @Output() scroll = new EventEmitter<Event>();
   @Output() cardClick = new EventEmitter<void>();
 
-  trackByResultId(index: number, result: MediaReadModel): string {
-    return result.id;
+  @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLDivElement>;
+
+  onCardClick(): void {
+    this.cardClick.emit();
   }
 
-  getCastTooltip(result: MediaReadModel): string {
-    if (!result.cast || result.cast.length === 0) {
-      return 'No cast information available';
+  getTooltip(result: MediaReadModel): string {
+    let tooltip = result.title;
+
+    if (result.duration) {
+      tooltip += `\nDuration: ${ReadonlyInfoSectionComponent.formatDuration(result.duration)}`;
     }
-    return `Cast: ${result.cast.join(', ')}`;
+    
+    if (result.userStarRating) {
+      tooltip += `\nRating: ${result.userStarRating} star(s)`;
+    }
+
+    if (result.cast && result.cast.length > 0) {
+      tooltip += `\nCast: ${result.cast.join(', ')}`;
+    }
+
+    return tooltip;
   }
 
   onScroll(event: Event): void {
     this.scroll.emit(event);
   }
 
-  onCardClick(): void {
-    this.cardClick.emit();
+  trackByResultId(index: number, result: MediaReadModel): string {
+    return result.id;
   }
 }
