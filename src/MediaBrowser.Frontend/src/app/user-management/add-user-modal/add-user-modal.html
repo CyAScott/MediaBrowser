@@ -1,0 +1,78 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Add New User</h3>
+      <button class="close-btn" (click)="onClose()" title="Close">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="modal-body">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          [(ngModel)]="username"
+          name="username"
+          class="form-input"
+          placeholder="Enter username"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          [(ngModel)]="password"
+          name="password"
+          class="form-input"
+          placeholder="Enter password"
+          required>
+      </div>
+
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          [(ngModel)]="confirmPassword"
+          name="confirmPassword"
+          class="form-input"
+          placeholder="Confirm password"
+          required>
+      </div>
+
+      <div class="message-area">
+        <div class="error-message" *ngIf="errorMessage">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          {{errorMessage}}
+        </div>
+        <div class="success-message" *ngIf="successMessage">
+          <i class="fa-solid fa-check-circle"></i>
+          {{successMessage}}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="onClose()">
+          Cancel
+        </button>
+        <button 
+          type="submit" 
+          class="btn btn-primary" 
+          [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Adding...
+          </span>
+          <span *ngIf="!isSubmitting">
+            <i class="fa-solid fa-user-plus"></i>
+            Add User
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,5 +1,13 @@
 namespace MediaBrowser.Users;
 
+public class ChangePasswordRequest
+{
+    [Required, MinLength(6), MaxLength(50)]
+    public required string OldPassword { get; init; }
+    [Required, Password]
+    public required string NewPassword { get; init; }
+}
+
 public class UserRegisterRequest
 {
     [Required, RegularExpression(@"^[a-z][\w\-\._]{0,48}[a-z\d]$")]

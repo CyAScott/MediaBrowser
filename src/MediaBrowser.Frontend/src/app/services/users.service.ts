@@ -2,6 +2,11 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 
+export interface ChangePasswordRequest {
+  oldPassword: string;
+  newPassword: string;
+}
+
 export interface UserReadModel {
   id: string;
   username: string;
@@ -24,6 +29,10 @@ export class UsersService {
 
   constructor(private apiService: ApiService) {}
 
+  changePassword(request: ChangePasswordRequest): Observable<void> {
+    return this.apiService.put<void>('/users/me/password', request);
+  }
+
   register(request: UserRegisterRequest): Observable<UserReadModel> {
     return this.apiService.post<UserReadModel>('/users/register', request);
   }
@@ -41,6 +50,14 @@ export class UsersService {
   }
 
   isAuthenticated(): boolean {
-    return /(^|;\s*)mb_auth=/.test(document.cookie);
+    return /(^|;)\s*mb_auth\s*=/.test(document.cookie);
+  }
+
+  getUsers(): Observable<UserReadModel[]> {
+    return this.apiService.get<UserReadModel[]>('/users');
+  }
+
+  deleteUser(userId: string): Observable<void> {
+    return this.apiService.delete<void>(`/users/${userId}`);
   }
 }

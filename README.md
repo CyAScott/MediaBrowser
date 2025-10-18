@@ -66,7 +66,6 @@ The best way to configure the service is through environment variables. Here are
 
 # TODO - Features
 
-* User management.
 * Cast, director, genre, producer, and writer management.
 * Audio and image support.
 * M3u playlist support.

@@ -38,6 +38,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   { 
+    path: 'user-management', 
+    loadComponent: () => import('./user-management/user-management').then(m => m.UserManagementComponent),
+    canActivate: [authGuard]
+  },
+  { 
     path: '**', 
     redirectTo: '/login'
   }

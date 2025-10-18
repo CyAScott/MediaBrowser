@@ -1,0 +1,76 @@
+<div class="user-management-container">
+  <!-- Header with action buttons -->
+  <div class="header-section">
+    <h2>User Management</h2>
+    <div class="action-buttons">
+      <button 
+        class="action-btn change-password-btn"
+        (click)="openChangePasswordModal()"
+        title="Change my password">
+        <i class="fa-solid fa-key"></i>
+        Change Password
+      </button>
+      <button 
+        class="action-btn add-user-btn"
+        (click)="openAddUserModal()"
+        title="Add new user">
+        <i class="fa-solid fa-user-plus"></i>
+        Add User
+      </button>
+    </div>
+  </div>
+
+  <!-- Users table section -->
+  <div class="users-section" *ngIf="!isLoading && users.length > 0">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td class="username">{{user.username}}</td>
+          <td class="action">
+            <button 
+              class="delete-btn"
+              (click)="deleteUser(user.id)"
+              title="Delete this user">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="isLoading">
+    <p>Loading users...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!isLoading && users.length === 0">
+    <p>No users found.</p>
+  </div>
+
+  <!-- Modals -->
+  <app-change-password-modal 
+    *ngIf="isChangePasswordModalOpen"
+    (close)="closeChangePasswordModal()"
+    (userUpdating)="isLoading = true"
+    (userUpdatingFailed)="isLoading = false">
+  </app-change-password-modal>
+
+  <app-add-user-modal 
+    *ngIf="isAddUserModalOpen"
+    (close)="closeAddUserModal()"
+    (userAdded)="onUserAdded()"
+    (userAdding)="isLoading = true"
+    (userAddingFailed)="isLoading = false">
+  </app-add-user-modal>
+
+  <!-- Full screen spinner overlay -->
+  <app-spinner [isLoading]="isLoading"></app-spinner>
+</div>

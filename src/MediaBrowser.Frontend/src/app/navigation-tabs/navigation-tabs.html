@@ -10,6 +10,12 @@
   </div>
   <div class="tab-footer">
     <button 
+      class="tab-button"
+      (click)="navigateToRoute('/user-management')"
+      title="User Management">
+      <span class="tab-icon"><i class="fa fa-user-cog"></i></span>
+    </button>
+    <button 
       class="tab-button logout-button"
       (click)="logout()"
       title="Logout">

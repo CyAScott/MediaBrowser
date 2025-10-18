@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ImportMediaRequest, ImportService } from '../services/import.service';
+import { ImportService } from '../services/import.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { MediaReadModel } from '../services';
 

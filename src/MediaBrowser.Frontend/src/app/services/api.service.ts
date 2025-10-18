@@ -23,6 +23,17 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
+  delete<T>(endpoint: string, params?: any): Observable<T> {
+    const url = `${this.baseUrl}${endpoint}`;
+    const httpParams = this.buildHttpParams(params);
+    
+    return this.http.delete<T>(url, { 
+      params: httpParams
+    }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   get<T>(endpoint: string, params?: any): Observable<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const httpParams = this.buildHttpParams(params);

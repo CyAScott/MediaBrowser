@@ -50,7 +50,7 @@ public static class UserInstaller
             {
                 var user = new UserEntity
                 {
-                    Id = Guid.NewGuid(),
+                    Id = Guid.CreateVersion7(),
                     Username = userConfig.InitialUsername,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(userConfig.InitialPassword)
                 };
