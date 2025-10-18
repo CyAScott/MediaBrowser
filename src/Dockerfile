@@ -50,6 +50,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS runtime
 
 WORKDIR /app
 
+# Install ffmpeg and ffprobe
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user
 RUN useradd -r -s /bin/false appuser
 
