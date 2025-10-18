@@ -177,7 +177,59 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
     [HttpPost("{id:guid}/file/thumbnail")]
     public Task<ActionResult> UpdateThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
         WriteFile(id, ".jpg", request.At, true);
-    
+
+    [HttpPost("{id:guid}/file/thumbnail/file")]
+    public async Task<ActionResult> UpdateThumbnail(Guid id, [FromForm] UploadThumbnailRequest request)
+    {
+        var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
+        if (media == null)
+        {
+            return NotFound();
+        }
+        
+        if (media.Mime.StartsWith("image/"))
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable);
+        }
+
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            await using (var stream = System.IO.File.Create(tempFile))
+            {
+                await request.Thumbnail.CopyToAsync(stream);
+            }
+
+            if (request.IsPrimary)
+            {
+                media.Thumbnail = null;
+            }
+            
+            var extension = request.IsPrimary ? ".jpg" : "-fanart.jpg";
+
+            var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
+
+            if (!await ffmpeg.TryExtractThumbnail(tempFile,
+                    outputPath: thumbnailLocation))
+            {
+                return StatusCode(StatusCodes.Status406NotAcceptable);
+            }
+
+            return Ok();
+        }
+        catch (Exception error)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempFile))
+            {
+                System.IO.File.Delete(tempFile);
+            }
+        }
+    }
+
     async Task<ActionResult> ReadFile(Guid id,
         Func<MediaEntity, string> extension,
         Func<MediaEntity, string> mime,

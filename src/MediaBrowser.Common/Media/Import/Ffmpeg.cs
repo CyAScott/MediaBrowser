@@ -5,7 +5,7 @@ namespace MediaBrowser.Media.Import;
 public interface IFfmpeg
 {
     Task<(FfprobeResponse response, string mime)?> GetMediaInfo(string path, CancellationToken cancellationToken = default);
-    Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan at, CancellationToken cancellationToken = default);
+    Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan? at = null, CancellationToken cancellationToken = default);
 }
 
 public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
@@ -47,8 +47,9 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
         }
     }
 
-    public async Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan at, CancellationToken cancellationToken = default)
+    public async Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan? at = null, CancellationToken cancellationToken = default)
     {
+        var timeAt = at?.ToString(@"hh\:mm\:ss\.fff");
         try
         {
             if (File.Exists(outputPath))
@@ -56,12 +57,20 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
                 File.Delete(outputPath);
             }
 
-            using var ffprobe = Process.Start("ffmpeg", [
-                "-ss", at.ToString(@"hh\:mm\:ss\.fff"),
+            var args = new List<string>();
+            
+            if (timeAt != null)
+            {
+                args.AddRange(["-ss", timeAt]);
+            }
+            
+            args.AddRange([
                 "-i", inputPath,
                 "-vframes", "1",
                 outputPath
             ]);
+
+            using var ffprobe = Process.Start("ffmpeg", args);
 
             await ffprobe.WaitForExitAsync(cancellationToken);
             
@@ -74,7 +83,7 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
         }
         catch (Exception error)
         {
-            log.LogError("Failed to extract thumbnail for {Path} at {At}: {error}", inputPath, at, error);
+            log.LogError("Failed to extract thumbnail for {Path} at {timeAt}: {error}", inputPath, timeAt, error);
             return false;
         }
     }

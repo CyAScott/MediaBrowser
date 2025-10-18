@@ -57,7 +57,7 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
     }
 
     [HttpPost("file/{name}")]
-    public async Task<ActionResult> Import(string name, [FromBody] ImportMediaRequest request)
+    public async Task<ActionResult<MediaReadModel>> Import(string name, [FromBody] ImportMediaRequest request)
     {
         if (!FileExists(name, out var filePath, out _))
         {
@@ -106,17 +106,20 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         
         await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{hash}.nfo"));
 
-        var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{hash}.jpg");
-        if (!await ffmpeg.TryExtractThumbnail(filePath,
-            outputPath: thumbnailLocation,
-            at: TimeSpan.FromSeconds(request.Thumbnail)))
+        if (request.Thumbnail != null)
         {
-            return StatusCode(StatusCodes.Status406NotAcceptable);
+            var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{hash}.jpg");
+            if (!await ffmpeg.TryExtractThumbnail(filePath,
+                    outputPath: thumbnailLocation,
+                    at: TimeSpan.FromSeconds(request.Thumbnail.Value)))
+            {
+                return StatusCode(StatusCodes.Status406NotAcceptable);
+            }
+        
+            System.IO.File.Copy(thumbnailLocation, 
+                destFileName: Path.Combine(mediaConfig.MediaDirectory, $"{hash}-fanart.jpg"), true);
         }
-        
-        System.IO.File.Copy(thumbnailLocation, 
-            destFileName: Path.Combine(mediaConfig.MediaDirectory, $"{hash}-fanart.jpg"), true);
-        
+
         await context.SaveChangesAsync();
         
         var newFilePath = Path.Combine(mediaConfig.MediaDirectory,
@@ -124,6 +127,6 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         
         System.IO.File.Move(filePath, newFilePath);
 
-        return Ok();
+        return media.ToReadModel(mediaConfig);
     }
 }

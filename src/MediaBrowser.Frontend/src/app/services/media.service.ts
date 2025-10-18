@@ -108,7 +108,14 @@ export class MediaService {
     return this.apiService.post<void>(`/media/${id}/file/thumbnail-fanart`, request);
   }
 
-  updateThumbnail(id: string, request: UpdateThumbnailRequest): Observable<void> {
-    return this.apiService.post<void>(`/media/${id}/file/thumbnail`, request);
+  updateThumbnail(id: string, request: UpdateThumbnailRequest | File): Observable<void> {
+    if (request instanceof File) {
+      const formData = new FormData();
+      formData.append('thumbnail', request);
+      formData.append('is_primary', 'true');
+      return this.apiService.post<void>(`/media/${id}/file/thumbnail/file`, formData);
+    } else {
+      return this.apiService.post<void>(`/media/${id}/file/thumbnail`, request);
+    }
   }
 }
