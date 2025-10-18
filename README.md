@@ -50,8 +50,8 @@ The best way to configure the service is through environment variables. Here are
 * `db__sqlServerConnectionString` (string) - required if `db__type` is `sqlServer`.
 * `jwt__audience` (string) - this is the audience value for the authentication JWT. The default is `mediaBrowserAudience`.
 * `jwt__expiryMinutes` (integer) - this is the number of minutes that the authentication JWT is set to expire and is also used to set the expiration for the cookie that contains the JWT. The default is `60`.
-* `jwt__mediaBrowserIssuer` (string) - this is the issuer value for the authentication JWT. The default is `mediaBrowserIssuer`.
-* `jwt__mediaBrowserSecretKey` (string) - it is important to set this value to a randomized long string (like a password). It is used for the JWT signing algorithm `HS256`. The default is `mediaBrowserSecretKey`.
+* `jwt__issuer` (string) - this is the issuer value for the authentication JWT. The default is `mediaBrowserIssuer`.
+* `jwt__secretKey` (string) - it is important to set this value to a randomized long string (like a password). It is used for the JWT signing algorithm `HS256`. The default is `mediaBrowserSecretKey`.
 * `initial__username` (string) - when the system boots it will create a user with this name (if the user doesn't already exists). The default is `admin`.
 * `initial__password` (string) - the password to give for `initial__username`. The default is `admin`.
 * `media__castDirectory` (string) - the directory path where cast member JPG files are stored. The file name should match name in the DB (i.e. `John Doe.jpg` should match `John Doe`). The default is `/cast`.
