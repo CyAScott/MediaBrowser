@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { MediaReadModel, MediaService, UpdateMediaRequest } from '../services';
 import { firstValueFrom } from 'rxjs';
 import { ImportService } from '../services/import.service';
@@ -16,6 +17,7 @@ import { SpinnerComponent } from '../spinner/spinner';
 export class MediaEditorComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private importService = inject(ImportService);
+  private location = inject(Location);
   private mediaService = inject(MediaService);
   private navigation: Navigation | null = null;
   private route = inject(ActivatedRoute);
@@ -116,17 +118,17 @@ export class MediaEditorComponent implements OnInit {
 
     this.isSaving = true;
     try {
-      if (this.mediaId) {
-        await firstValueFrom(this.mediaService.update(this.mediaId, this.editableData));
-        // Navigate back to player
-        this.router.navigate(['/player', this.mediaId]);
-      } else if (this.filename) {
+      if (this.filename) {
         await firstValueFrom(this.importService.import(this.filename, {
           ...this.editableData,
           thumbnail: this.thumbnail ?? 0
         }));
-        this.router.navigate(['/import']);
+      } else if (this.mediaId) {
+        await firstValueFrom(this.mediaService.update(this.mediaId, {
+          ...this.editableData
+        }));
       }
+      this.location.back();
     } catch (error) {
       console.error('Error saving media changes:', error);
     } finally {
@@ -136,11 +138,7 @@ export class MediaEditorComponent implements OnInit {
   }
 
   cancel(): void {
-    if (this.mediaId) {
-      this.router.navigate(['/player', this.mediaId]);
-    } else {
-      this.router.navigate(['/import']);
-    }
+    this.location.back();
   }
 
   // Helper methods for formatted display
