@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MediaReadModel, MediaService, SearchMediaRequest } from '../services/media.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
-import { SpinnerComponent } from '../spinner/spinner';
+import { SearchContentComponent } from './search-content';
 
 /**
  * SearchComponent that uses URL query parameters for search state management.
@@ -24,7 +24,7 @@ import { SpinnerComponent } from '../spinner/spinner';
  */
 @Component({
   selector: 'app-search',
-  imports: [CommonModule, FormsModule, RouterModule, SpinnerComponent],
+  imports: [CommonModule, FormsModule, RouterModule, SearchContentComponent],
   templateUrl: './search.html',
   styleUrls: ['./search.css']
 })
@@ -32,7 +32,7 @@ export class SearchComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
 
-  @ViewChild('searchResults', { static: false }) searchResultsElement!: ElementRef<HTMLDivElement>;
+  @ViewChild('searchContent', { static: false }) searchContentComponent!: SearchContentComponent;
   
   // Search parameters that match SearchMediaRequest
   readonly pageSize: number = 25;
@@ -105,21 +105,12 @@ export class SearchComponent implements OnInit {
   clearScrollPosition(): void {
     this.scrollPosition = 0;
     sessionStorage.removeItem(this.SCROLL_KEY);
-    if (this.searchResultsElement) {
-      this.searchResultsElement.nativeElement.scrollTop = 0;
+    if (this.searchContentComponent?.searchResultsElement) {
+      this.searchContentComponent.searchResultsElement.nativeElement.scrollTop = 0;
     }
   }
 
-  trackByResultId(index: number, result: MediaReadModel): string {
-    return result.id;
-  }
 
-  getCastTooltip(result: MediaReadModel): string {
-    if (!result.cast || result.cast.length === 0) {
-      return 'No cast information available';
-    }
-    return `Cast: ${result.cast.join(', ')}`;
-  }
 
   async ngOnInit(): Promise<void> {
     // Load initial state from query parameters
@@ -225,11 +216,11 @@ export class SearchComponent implements OnInit {
       this.cdr.detectChanges();
       
       // Restore scroll position after content is loaded and rendered (only once per component lifecycle)
-      if (this.searchResultsElement && this.scrollPosition > 0) {
+      if (this.searchContentComponent?.searchResultsElement && this.scrollPosition > 0) {
         this.pendingScrollUpdate = true;
         // Use requestAnimationFrame to ensure DOM is fully updated
         requestAnimationFrame(() => {
-          this.searchResultsElement.nativeElement.scrollTop = this.scrollPosition;
+          this.searchContentComponent.searchResultsElement.nativeElement.scrollTop = this.scrollPosition;
           setTimeout(() => {
             this.pendingScrollUpdate = false;
           }, 100);
@@ -309,8 +300,8 @@ export class SearchComponent implements OnInit {
 
   private saveScrollPosition(): void {
     try {
-      if (this.searchResultsElement) {
-        this.scrollPosition = this.searchResultsElement.nativeElement.scrollTop;
+      if (this.searchContentComponent?.searchResultsElement) {
+        this.scrollPosition = this.searchContentComponent.searchResultsElement.nativeElement.scrollTop;
         sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
       } else {
         this.clearScrollPosition();

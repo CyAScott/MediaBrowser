@@ -1,0 +1,27 @@
+<div class="search-content" #searchResults (scroll)="onScroll($event)">
+  <div class="search-grid" *ngIf="results.length > 0">
+    <a class="result-card" 
+         *ngFor="let result of results; trackBy: trackByResultId" 
+         [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
+         [title]="getCastTooltip(result)"
+         [routerLink]="['/player', result.id]"
+         (mousedown)="onCardClick()">
+      <div class="card-overlay">
+        <div class="play-icon">▶</div>
+      </div>
+    </a>
+  </div>
+  
+  <!-- No more results indicator -->
+  <div class="no-more-results" *ngIf="!hasMoreResults && results.length > 0 && !isLoading">
+    <span>No more results to load</span>
+  </div>
+  
+  <!-- Empty state -->
+  <div class="empty-state" *ngIf="!isLoading && results.length === 0">
+    <span>No results found</span>
+  </div>
+</div>
+
+<!-- Full screen spinner overlay -->
+<app-spinner [isLoading]="isLoading"></app-spinner>
