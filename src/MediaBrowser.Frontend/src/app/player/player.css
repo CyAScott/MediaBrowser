@@ -78,7 +78,7 @@
   transform: scale(1.1);
 }
 
-.video-player {
+.player {
   position: absolute;
   top: 0;
   left: 0;
@@ -90,6 +90,8 @@
   background: black;
 }
 
+.audio-element,
+.image-element,
 .video-element {
   width: 100%;
   height: 100%;

@@ -13,11 +13,27 @@
     </button>
   </div>
   
-  <div class="video-player" *ngIf="mediaData">
-    <video controls autoplay [poster]="mediaData.fanartUrl" class="video-element">
-      <source [src]="mediaData.url" type="video/mp4">
+  <div class="player">
+    <video controls autoplay 
+      *ngIf="mediaData && mediaData.mime.startsWith('video/')"
+      [poster]="mediaData.thumbnailUrl"
+      class="video-element">
+      <source [src]="mediaData.url" type="{{ mediaData.mime }}">
       Your browser does not support the video tag.
     </video>
+
+    <audio controls autoplay 
+      *ngIf="mediaData && mediaData.mime.startsWith('audio/')"
+      class="audio-element">
+      <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+      Your browser does not support the audio element.
+    </audio>
+
+    <img 
+      *ngIf="mediaData && mediaData.mime.startsWith('image/')"
+      [src]="mediaData.url"
+      alt="{{ mediaData.title }}"
+      class="image-element" />
   </div>
   
   <div class="no-media" *ngIf="!mediaData">
