@@ -18,265 +18,35 @@
 
   <div class="editor-content" *ngIf="mediaData">
     <div>
-      <!-- Title Section -->
-      <div class="form-section">
-        <h3>Title Information</h3>
+      <app-title-section
+        (titleDataChange)="onTitleDataChange($event)"
+        [titleData]="getTitleData()">
+      </app-title-section>
 
-        <div class="form-group">
-          <label for="title">Title</label>
-          <input
-            id="title"
-            type="text"
-            [(ngModel)]="editableData.title"
-            class="form-input">
-        </div>
+      <app-rating-section
+        (ratingChange)="onRatingChange($event)"
+        [rating]="editableData.userStarRating ?? null">
+      </app-rating-section>
 
-        <div class="form-group">
-          <label for="originalTitle">Original Title</label>
-          <input
-            id="originalTitle"
-            type="text"
-            [(ngModel)]="editableData.originalTitle"
-            class="form-input">
-        </div>
+      <app-people-section
+        (peopleDataChange)="onPeopleDataChange($event)"
+        [peopleData]="getPeopleData()">
+      </app-people-section>
 
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea
-            id="description"
-            [(ngModel)]="editableData.description"
-            class="form-textarea"
-            rows="4"></textarea>
-        </div>
-      </div>
+      <app-readonly-info-section
+        [mediaData]="getReadOnlyData()"
+        [showSection]="!filename">
+      </app-readonly-info-section>
 
-      <!-- Rating Section -->
-      <div class="form-section">
-        <h3>Rating</h3>
-
-        <div class="form-group">
-          <div class="star-rating">
-            <button
-              *ngFor="let star of [1,2,3,4,5]"
-              type="button"
-              class="star-button"
-              (click)="setRating(star)">
-              <i [class]="getStarClass(star)"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- People Section -->
-      <div class="form-section">
-        <h3>People</h3>
-
-        <!-- Cast -->
-        <div class="form-group">
-          <label>Cast</label>
-          <div class="array-input">
-            <div *ngFor="let member of editableData.cast; let i = index; trackBy: trackByIndex" class="array-item">
-              <input
-                type="text"
-                [(ngModel)]="editableData.cast[i]"
-                class="form-input array-field"
-                placeholder="Cast member name">
-              <button
-                type="button"
-                class="remove-button"
-                (click)="removeArrayItem('cast', i)">
-                <i class="fa-solid fa-times"></i>
-              </button>
-            </div>
-            <button
-              type="button"
-              class="add-button"
-              (click)="addArrayItem('cast')">
-              <i class="fa-solid fa-plus"></i> Add Cast Member
-            </button>
-          </div>
-        </div>
-
-        <!-- Directors -->
-        <div class="form-group">
-          <label>Directors</label>
-          <div class="array-input">
-            <div *ngFor="let director of editableData.directors; let i = index; trackBy: trackByIndex" class="array-item">
-              <input
-                type="text"
-                [(ngModel)]="editableData.directors[i]"
-                class="form-input array-field"
-                placeholder="Director name">
-              <button
-                type="button"
-                class="remove-button"
-                (click)="removeArrayItem('directors', i)">
-                <i class="fa-solid fa-times"></i>
-              </button>
-            </div>
-            <button
-              type="button"
-              class="add-button"
-              (click)="addArrayItem('directors')">
-              <i class="fa-solid fa-plus"></i> Add Director
-            </button>
-          </div>
-        </div>
-
-        <!-- Producers -->
-        <div class="form-group">
-          <label>Producers</label>
-          <div class="array-input">
-            <div *ngFor="let producer of editableData.producers; let i = index; trackBy: trackByIndex" class="array-item">
-              <input
-                type="text"
-                [(ngModel)]="editableData.producers[i]"
-                class="form-input array-field"
-                placeholder="Producer name">
-              <button
-                type="button"
-                class="remove-button"
-                (click)="removeArrayItem('producers', i)">
-                <i class="fa-solid fa-times"></i>
-              </button>
-            </div>
-            <button
-              type="button"
-              class="add-button"
-              (click)="addArrayItem('producers')">
-              <i class="fa-solid fa-plus"></i> Add Producer
-            </button>
-          </div>
-        </div>
-
-        <!-- Writers -->
-        <div class="form-group">
-          <label>Writers</label>
-          <div class="array-input">
-            <div *ngFor="let writer of editableData.writers; let i = index; trackBy: trackByIndex" class="array-item">
-              <input
-                type="text"
-                [(ngModel)]="editableData.writers[i]"
-                class="form-input array-field"
-                placeholder="Writer name">
-              <button
-                type="button"
-                class="remove-button"
-                (click)="removeArrayItem('writers', i)">
-                <i class="fa-solid fa-times"></i>
-              </button>
-            </div>
-            <button
-              type="button"
-              class="add-button"
-              (click)="addArrayItem('writers')">
-              <i class="fa-solid fa-plus"></i> Add Writer
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Read-only Information -->
-      <div class="form-section" *ngIf="!filename">
-        <h3>Media Information (Read Only)</h3>
-
-        <div class="readonly-grid">
-          <div class="readonly-item">
-            <label>ID</label>
-            <span>{{ mediaData.id }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>Duration</label>
-            <span>{{ formatDuration(mediaData.duration) }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>File Size</label>
-            <span>{{ formatFileSize(mediaData.size) }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>MD5 Hash</label>
-            <span>{{ mediaData.md5 }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>Created</label>
-            <span>{{ formatDateTime(mediaData.ctimeMs) }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>Modified</label>
-            <span>{{ formatDateTime(mediaData.mtimeMs) }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>Resolution</label>
-            <span>{{ mediaData.width }} × {{ mediaData.height }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>MIME Type</label>
-            <span>{{ mediaData.mime }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>Rating</label>
-            <span>{{ mediaData.rating }}</span>
-          </div>
-
-          <div class="readonly-item">
-            <label>Published</label>
-            <span>{{ mediaData.published }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Video Player Section -->
-      <div class="form-section video-section">
-        <h3>Video Preview & Thumbnail Creation</h3>
-
-        <div class="video-thumbnail-container">
-          <div class="video-container">
-            <video
-              id="video-player"
-              (loadedmetadata)="onVideoMetadataLoaded($event)"
-              [src]="getVideoUrl()"
-              controls
-              preload="metadata"
-              class="video-player">
-              Your browser does not support the video tag.
-            </video>
-          </div>
-
-          <div class="thumbnail-preview-container">
-            <div class="result-card thumbnail-preview" 
-                 [style.background-image]="thumbnailPreviewUrl ? 'url(' + thumbnailPreviewUrl + ')' : 'none'">
-            </div>
-          </div>
-        </div>
-
-        <div class="video-controls">
-          <button
-            class="thumbnail-button"
-            (click)="setThumbnailPreview()"
-            [disabled]="isCreatingThumbnail || !mediaData">
-            <i class="fa-solid fa-eye" *ngIf="!isCreatingThumbnail"></i>
-            <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
-            {{ isCreatingThumbnail ? 'Updating Preview...' : 'Set Preview Image' }}
-          </button>
-          <button
-            class="thumbnail-button save-thumbnail-button"
-            *ngIf="mediaId"
-            (click)="createThumbnailFromVideo()"
-            [disabled]="isCreatingThumbnail || !mediaData || !thumbnail">
-            <i class="fa-solid fa-camera" *ngIf="!isCreatingThumbnail"></i>
-            <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
-            {{ isCreatingThumbnail ? 'Saving Thumbnail...' : 'Save Thumbnail' }}
-          </button>
-        </div>
-      </div>
+      <app-thumbnail-section
+        (saveThumbnailEvent)="onSaveThumbnail()"
+        (setPreview)="onSetThumbnailPreview()"
+        (thumbnailDataChange)="onThumbnailDataChange($event)"
+        [isCreatingThumbnail]="isCreatingThumbnail"
+        [mediaData]="getThumbnailMediaData()"
+        [showSaveThumbnail]="!!mediaId"
+        [thumbnailData]="getThumbnailData()">
+      </app-thumbnail-section>
     </div>
   </div>
 

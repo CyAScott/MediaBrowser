@@ -1,0 +1,43 @@
+.add-button {
+  background: var(--success1-bg);
+  color: var(--fg1);
+  border-radius: var(--radius2);
+  padding: 0.5rem 1rem;
+  gap: 0.5rem;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.add-button:hover {
+  opacity: 0.8;
+}
+
+.array-field {
+  flex: 1;
+}
+
+.array-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.array-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.remove-button {
+  background: var(--danger1-bg);
+  color: var(--fg1);
+  border-radius: var(--radius2);
+  padding: 0.5rem;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+} 
+
+.remove-button:hover {
+  opacity: 0.8;
+}

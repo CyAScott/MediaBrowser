@@ -1,0 +1,55 @@
+<div class="form-section" *ngIf="showSection">
+  <h3>Media Information (Read Only)</h3>
+
+  <div class="readonly-grid">
+    <div class="readonly-item">
+      <label>ID</label>
+      <span>{{ mediaData.id }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>Duration</label>
+      <span>{{ formatDuration(mediaData.duration) }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>File Size</label>
+      <span>{{ formatFileSize(mediaData.size) }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>MD5 Hash</label>
+      <span>{{ mediaData.md5 }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>Created</label>
+      <span>{{ formatDateTime(mediaData.ctimeMs) }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>Modified</label>
+      <span>{{ formatDateTime(mediaData.mtimeMs) }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>Resolution</label>
+      <span>{{ mediaData.width }} × {{ mediaData.height }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>MIME Type</label>
+      <span>{{ mediaData.mime }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>Rating</label>
+      <span>{{ mediaData.rating }}</span>
+    </div>
+
+    <div class="readonly-item">
+      <label>Published</label>
+      <span>{{ mediaData.published }}</span>
+    </div>
+  </div>
+</div>

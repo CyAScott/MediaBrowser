@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -7,12 +7,26 @@ import { MediaReadModel, MediaService, UpdateMediaRequest } from '../services';
 import { firstValueFrom } from 'rxjs';
 import { ImportService } from '../services/import.service';
 import { SpinnerComponent } from '../spinner/spinner';
+import { TitleSectionComponent, TitleData } from './title-section/title-section.component';
+import { RatingSectionComponent } from './rating-section/rating-section.component';
+import { PeopleSectionComponent, PeopleData } from './people-section/people-section.component';
+import { ReadonlyInfoSectionComponent, MediaReadOnlyData } from './readonly-info-section/readonly-info-section.component';
+import { ThumbnailSectionComponent, ThumbnailData, MediaThumbnailData } from './thumbnail-section/thumbnail-section.component';
 
 @Component({
   selector: 'app-media-editor',
-  imports: [CommonModule, FormsModule, SpinnerComponent],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    SpinnerComponent,
+    TitleSectionComponent,
+    RatingSectionComponent,
+    PeopleSectionComponent,
+    ReadonlyInfoSectionComponent,
+    ThumbnailSectionComponent
+  ],
   templateUrl: './media-editor.html',
-  styleUrls: ['./media-editor.css']
+  styleUrl: './media-editor.css'
 })
 export class MediaEditorComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
@@ -32,6 +46,7 @@ export class MediaEditorComponent implements OnInit {
   isSaving: boolean = false;
   mediaData: MediaReadModel | null = null;
   mediaId: string | null = null;
+  selectedImageFile: File | null = null;
   thumbnail: number | null = null;
   thumbnailPreviewUrl: string = '';
 
@@ -119,10 +134,20 @@ export class MediaEditorComponent implements OnInit {
     this.isSaving = true;
     try {
       if (this.filename) {
-        await firstValueFrom(this.importService.import(this.filename, {
+
+        let thumbnail = this.thumbnail ?? undefined;
+        if (!this.selectedImageFile) {
+          thumbnail = 0;
+        }
+
+        const media = await firstValueFrom(this.importService.import(this.filename, {
           ...this.editableData,
-          thumbnail: this.thumbnail ?? 0
+          thumbnail: thumbnail
         }));
+
+        if (this.selectedImageFile) {
+          await firstValueFrom(this.mediaService.updateThumbnail(media.id, this.selectedImageFile));
+        }
       } else if (this.mediaId) {
         await firstValueFrom(this.mediaService.update(this.mediaId, {
           ...this.editableData
@@ -162,95 +187,102 @@ export class MediaEditorComponent implements OnInit {
     return `${mb.toFixed(2)} MB`;
   }
 
-  // Array manipulation methods
-  addArrayItem(arrayName: keyof Pick<typeof this.editableData, 'cast' | 'directors' | 'producers' | 'writers'>): void {
-    this.editableData[arrayName].push('');
+  // Component data getters
+  getTitleData(): TitleData {
+    return {
+      title: this.editableData.title,
+      originalTitle: this.editableData.originalTitle,
+      description: this.editableData.description
+    };
   }
 
-  removeArrayItem(arrayName: keyof Pick<typeof this.editableData, 'cast' | 'directors' | 'producers' | 'writers'>, index: number): void {
-    this.editableData[arrayName].splice(index, 1);
+  getPeopleData(): PeopleData {
+    return {
+      cast: this.editableData.cast,
+      directors: this.editableData.directors,
+      producers: this.editableData.producers,
+      writers: this.editableData.writers
+    };
   }
 
-  trackByIndex(index: number): number {
-    return index;
+  getReadOnlyData(): MediaReadOnlyData {
+    return {
+      id: this.mediaData!.id,
+      duration: this.mediaData!.duration,
+      size: this.mediaData!.size,
+      md5: this.mediaData!.md5,
+      ctimeMs: this.mediaData!.ctimeMs,
+      mtimeMs: this.mediaData!.mtimeMs,
+      width: this.mediaData!.width,
+      height: this.mediaData!.height,
+      mime: this.mediaData!.mime,
+      rating: this.mediaData!.rating,
+      published: this.mediaData!.published
+    };
   }
 
-  // Star rating methods
-  setRating(rating: number): void {
+  getThumbnailData(): ThumbnailData {
+    return {
+      thumbnail: this.thumbnail,
+      thumbnailPreviewUrl: this.thumbnailPreviewUrl,
+      selectedImageFile: this.selectedImageFile
+    };
+  }
+
+  getThumbnailMediaData(): MediaThumbnailData {
+    return {
+      mime: this.mediaData!.mime,
+      url: this.mediaData!.url
+    };
+  }
+
+  // Component event handlers
+  onTitleDataChange(titleData: TitleData): void {
+    this.editableData.title = titleData.title;
+    this.editableData.originalTitle = titleData.originalTitle;
+    this.editableData.description = titleData.description;
+  }
+
+  onRatingChange(rating: number): void {
     this.editableData.userStarRating = rating;
   }
 
-  getStarClass(starNumber: number): string {
-    return starNumber <= (this.editableData.userStarRating ?? 0) ? 'fa-solid fa-star' : 'fa-regular fa-star';
+  onPeopleDataChange(peopleData: PeopleData): void {
+    this.editableData.cast = peopleData.cast;
+    this.editableData.directors = peopleData.directors;
+    this.editableData.producers = peopleData.producers;
+    this.editableData.writers = peopleData.writers;
   }
 
-  // Video player and thumbnail methods
-  setThumbnailPreview(): void {
-    const videoElement = document.querySelector('#video-player') as HTMLVideoElement;
-    if (!videoElement) {
-      console.error('Video player not found');
+  onThumbnailDataChange(thumbnailData: ThumbnailData): void {
+    this.thumbnail = thumbnailData.thumbnail;
+    this.thumbnailPreviewUrl = thumbnailData.thumbnailPreviewUrl;
+    this.selectedImageFile = thumbnailData.selectedImageFile;
+  }
+
+  onSetThumbnailPreview(): void {
+    // The thumbnail component handles the preview generation internally
+    // This method can be used for any additional logic if needed
+  }
+
+  async onSaveThumbnail(): Promise<void> {
+    if (!this.mediaId) {
       return;
     }
 
-    this.thumbnail = videoElement.currentTime;
-    this.thumbnailPreviewUrl = this.generateThumbnailPreview(videoElement);
-  }
-
-  private generateThumbnailPreview(videoElement: HTMLVideoElement): string {
     try {
-      // Create a canvas element to capture the video frame
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) {
-        console.error('Could not get canvas context');
-        return '';
-      }
+      this.isCreatingThumbnail = true;
 
-      // Set canvas dimensions to match video
-      canvas.width = videoElement.videoWidth;
-      canvas.height = videoElement.videoHeight;
-
-      // Draw the current video frame to the canvas
-      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-      // Convert canvas to base64 data URL
-      return canvas.toDataURL('image/jpeg', 0.8);
-    } catch (error) {
-      console.error('Error generating thumbnail preview:', error);
-      return '';
-    }
-  }
-
-  async createThumbnailFromVideo(): Promise<void> {
-    const videoElement = document.querySelector('#video-player') as HTMLVideoElement;
-    if (!videoElement) {
-      console.error('Video player not found');
-      return;
-    }
-
-    this.isCreatingThumbnail = true;
-    try {
-      this.thumbnail = videoElement.currentTime;
-
-      if (this.mediaId) {
+      if (this.selectedImageFile) {
+        await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, this.selectedImageFile));
+      } else if (this.thumbnail !== null) {
         await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, { at: this.thumbnail }));
       }
     } catch (error) {
       console.error('Error creating thumbnail:', error);
     } finally {
       this.isCreatingThumbnail = false;
-    }
-    this.cdr.detectChanges();
-  }
-
-  getVideoUrl(): string {
-    return this.mediaData?.url || '';
-  }
-
-  onVideoMetadataLoaded(event: Event): void {
-    if (this.thumbnail !== null) {
-      (event.target as HTMLVideoElement).currentTime = this.thumbnail;
+      this.cdr.detectChanges();
     }
   }
 }

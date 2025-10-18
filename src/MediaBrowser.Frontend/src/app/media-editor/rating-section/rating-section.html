@@ -1,0 +1,15 @@
+<div class="form-section">
+  <h3>Rating</h3>
+
+  <div class="form-group">
+    <div class="star-rating">
+      <button
+        *ngFor="let star of [1,2,3,4,5]"
+        (click)="setRating(star)"
+        class="star-button"
+        type="button">
+        <i [class]="getStarClass(star)"></i>
+      </button>
+    </div>
+  </div>
+</div>

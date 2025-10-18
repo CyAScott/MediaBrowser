@@ -1,0 +1,111 @@
+<div class="form-section">
+  <h3>People</h3>
+
+  <!-- Cast -->
+  <div class="form-group">
+    <label>Cast</label>
+    <div class="array-input">
+      <div *ngFor="let member of peopleData.cast; let i = index; trackBy: trackByIndex" class="array-item">
+        <input
+          (ngModelChange)="onPeopleChange()"
+          [(ngModel)]="peopleData.cast[i]"
+          class="form-input array-field"
+          placeholder="Cast member name"
+          type="text">
+        <button
+          (click)="removeArrayItem('cast', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('cast')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Cast Member
+      </button>
+    </div>
+  </div>
+
+  <!-- Directors -->
+  <div class="form-group">
+    <label>Directors</label>
+    <div class="array-input">
+      <div *ngFor="let director of peopleData.directors; let i = index; trackBy: trackByIndex" class="array-item">
+        <input
+          (ngModelChange)="onPeopleChange()"
+          [(ngModel)]="peopleData.directors[i]"
+          class="form-input array-field"
+          placeholder="Director name"
+          type="text">
+        <button
+          (click)="removeArrayItem('directors', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('directors')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Director
+      </button>
+    </div>
+  </div>
+
+  <!-- Producers -->
+  <div class="form-group">
+    <label>Producers</label>
+    <div class="array-input">
+      <div *ngFor="let producer of peopleData.producers; let i = index; trackBy: trackByIndex" class="array-item">
+        <input
+          (ngModelChange)="onPeopleChange()"
+          [(ngModel)]="peopleData.producers[i]"
+          class="form-input array-field"
+          placeholder="Producer name"
+          type="text">
+        <button
+          (click)="removeArrayItem('producers', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('producers')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Producer
+      </button>
+    </div>
+  </div>
+
+  <!-- Writers -->
+  <div class="form-group">
+    <label>Writers</label>
+    <div class="array-input">
+      <div *ngFor="let writer of peopleData.writers; let i = index; trackBy: trackByIndex" class="array-item">
+        <input
+          (ngModelChange)="onPeopleChange()"
+          [(ngModel)]="peopleData.writers[i]"
+          class="form-input array-field"
+          placeholder="Writer name"
+          type="text">
+        <button
+          (click)="removeArrayItem('writers', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('writers')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Writer
+      </button>
+    </div>
+  </div>
+</div>
