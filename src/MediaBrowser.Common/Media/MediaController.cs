@@ -164,7 +164,9 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
     
     [HttpGet("{id:guid}/file/thumbnail-fanart")]
     public Task<ActionResult> StreamFanartThumbnail(Guid id) =>
-        ReadFile(id, _ => "-fanart.jpg", _ => "image/jpeg");
+        ReadFile(id, 
+            media => media.Mime.StartsWith("image/") ? $".{mediaConfig.GetExtensionFromMime(media.Mime)}" : "-fanart.jpg", 
+            media => media.Mime.StartsWith("image/") ? media.Mime : "image/jpeg");
 
     [HttpPost("{id:guid}/file/thumbnail-fanart")]
     public Task<ActionResult> UpdateFanartThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
@@ -172,7 +174,9 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
 
     [HttpGet("{id:guid}/file/thumbnail")]
     public Task<ActionResult> StreamThumbnail(Guid id) =>
-        ReadFile(id, _ => ".jpg", _ => "image/jpeg");
+        ReadFile(id, 
+            media => media.Mime.StartsWith("image/") ? $".{mediaConfig.GetExtensionFromMime(media.Mime)}" : ".jpg", 
+            media => media.Mime.StartsWith("image/") ? media.Mime : "image/jpeg");
 
     [HttpPost("{id:guid}/file/thumbnail")]
     public Task<ActionResult> UpdateThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
