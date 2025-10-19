@@ -6,17 +6,13 @@ namespace MediaBrowser.Media.Import;
 public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
 {
     [HttpGet("files")]
-    public ActionResult<IReadOnlyList<string>> GetFiles() =>
+    public ActionResult<IReadOnlyList<ImportFileInfo>> GetFiles() =>
         !Directory.Exists(mediaConfig.ImportDirectory)
             ? []
             : Directory.GetFiles(mediaConfig.ImportDirectory!, "*.*", SearchOption.TopDirectoryOnly)
-                .Select(Path.GetFileName)
-                .OfType<string>()
-                .Where(name =>
-                    !name.StartsWith(".") &&
-                    name.Contains('.') &&
-                    mediaConfig.ImportExtensions.ContainsKey(Path.GetExtension(name).Substring(1)))
-                .OrderBy(name => name)
+                .Select(path => ImportFileInfo.Create(mediaConfig, path))
+                .OfType<ImportFileInfo>()
+                .OrderBy(it => it.Name)
                 .ToList();
 
     bool FileExists(string name, out string filePath, out FileExtensionInfo fileExtension)
@@ -106,7 +102,7 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         
         await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{hash}.nfo"));
 
-        if (request.Thumbnail != null)
+        if (request.Thumbnail != null && ffprobe.Value.mime.StartsWith("video/"))
         {
             var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{hash}.jpg");
             if (!await ffmpeg.TryExtractThumbnail(filePath,

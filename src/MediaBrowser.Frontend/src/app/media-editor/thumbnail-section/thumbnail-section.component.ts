@@ -22,6 +22,7 @@ export class ThumbnailSectionComponent {
   @Input() isCreatingThumbnail: boolean = false;
   @Input() mediaData!: MediaThumbnailData;
   @Input() showSaveThumbnail: boolean = false;
+  @Input() showSetThumbnail: boolean = false;
   @Input() thumbnailData: ThumbnailData = {
     thumbnail: null,
     thumbnailPreviewUrl: '',
@@ -73,13 +74,11 @@ export class ThumbnailSectionComponent {
       return;
     }
 
-
-    this.thumbnailData.thumbnail = null;
-    this.thumbnailData.selectedImageFile = file;
-
     // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {
+      this.thumbnailData.selectedImageFile = file;
+      this.thumbnailData.thumbnail = null;
       this.thumbnailData.thumbnailPreviewUrl = e.target?.result as string;
       this.onThumbnailDataChange();
       this.cdr.detectChanges();
@@ -128,9 +127,9 @@ export class ThumbnailSectionComponent {
     }
   }
 
-  onVideoMetadataLoaded(event: Event): void {
+  onVideoMetadataLoaded(): void {
     if (this.thumbnailData.thumbnail !== null) {
-      (event.target as HTMLVideoElement).currentTime = this.thumbnailData.thumbnail;
+      this.videoPlayer!.nativeElement.currentTime = this.thumbnailData.thumbnail;
     }
   }
 
@@ -139,7 +138,6 @@ export class ThumbnailSectionComponent {
   }
 
   saveThumbnail(): void {
-    this.thumbnailData.thumbnail = this.videoPlayer?.nativeElement.currentTime || null;
     this.onThumbnailDataChange();
     this.saveThumbnailEvent.emit();
   }

@@ -50,9 +50,6 @@ export class ApiService {
     const httpParams = this.buildHttpParams(params);
 
     return this.http.put<T>(url, body, { 
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      }),
       params: httpParams
     }).pipe(
       catchError(this.handleError)
@@ -63,10 +60,7 @@ export class ApiService {
     const url = `${this.baseUrl}${endpoint}`;
     const httpParams = this.buildHttpParams(params);
     
-    return this.http.post<T>(url, body, {
-      headers: new HttpHeaders({
-        'Content-Type': body instanceof FormData ? 'multipart/form-data' : 'application/json'
-      }),
+    return this.http.post<T>(url, body, { 
       params: httpParams
     }).pipe(
       catchError(this.handleError)

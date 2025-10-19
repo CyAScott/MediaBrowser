@@ -23,6 +23,7 @@
     </video>
 
     <audio controls autoplay 
+      [ngStyle]="{'backgroundImage':'url(' + mediaData.thumbnailUrl + ')'}"
       *ngIf="mediaData && mediaData.mime.startsWith('audio/')"
       class="audio-element">
       <source [src]="mediaData.url" type="{{ mediaData.mime }}">

@@ -76,8 +76,6 @@ export class MediaEditorComponent implements OnInit {
   }
 
   async loadMediaById(id: string): Promise<void> {
-    console.log('Loading media by ID:', id);
-
     this.isLoading = true;
 
     this.filename = null;
@@ -92,8 +90,6 @@ export class MediaEditorComponent implements OnInit {
   }
 
   async loadMediaByState(): Promise<void> {
-    console.log('Loading media by state');
-
     const navigationState = this.navigation?.extras.state;
 
     if (!navigationState) {
@@ -102,7 +98,7 @@ export class MediaEditorComponent implements OnInit {
 
     this.filename = navigationState['filename'];
     this.mediaData = navigationState?.['mediaData'];
-    this.thumbnail = 0;
+    this.thumbnail = this.mediaData?.mime.startsWith('video/') ? 0 : null;
     this.thumbnailPreviewUrl = '';
 
     if (!this.mediaData || !this.filename) {
@@ -136,7 +132,7 @@ export class MediaEditorComponent implements OnInit {
       if (this.filename) {
 
         let thumbnail = this.thumbnail ?? undefined;
-        if (!this.selectedImageFile) {
+        if (!this.selectedImageFile && this.mediaData.mime.startsWith('video/')) {
           thumbnail = 0;
         }
 

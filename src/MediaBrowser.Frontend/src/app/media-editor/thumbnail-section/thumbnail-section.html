@@ -5,7 +5,7 @@
   <div class="thumbnail-container">
     <div class="thumbnail-selection-container">
       <video
-        (loadedmetadata)="onVideoMetadataLoaded($event)"
+        (loadedmetadata)="onVideoMetadataLoaded()"
         [src]="getVideoUrl()"
         *ngIf="mediaData.mime.startsWith('video/')"
         #videoPlayer
@@ -21,7 +21,7 @@
         (dragover)="onDragOver($event)"
         (drop)="onDrop($event)"
         [class.drag-over]="isDragOver"
-        *ngIf="mediaData && mediaData.mime.startsWith('audio/')" 
+        *ngIf="mediaData.mime.startsWith('audio/')" 
         class="thumbnail-drop">
         <div class="drop-content">
           <i class="fa-solid fa-cloud-upload-alt drop-icon"></i>
@@ -48,6 +48,7 @@
     <button
       (click)="setThumbnailPreview()"
       [disabled]="isCreatingThumbnail || !mediaData"
+      *ngIf="showSetThumbnail"
       class="thumbnail-button">
       <i class="fa-solid fa-eye" *ngIf="!isCreatingThumbnail"></i>
       <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
@@ -55,7 +56,7 @@
     </button>
     <button
       (click)="saveThumbnail()"
-      [disabled]="isCreatingThumbnail || !mediaData || !thumbnailData.thumbnail"
+      [disabled]="isCreatingThumbnail || (!thumbnailData.thumbnail && !thumbnailData.selectedImageFile)"
       *ngIf="showSaveThumbnail"
       class="thumbnail-button save-thumbnail-button">
       <i class="fa-solid fa-camera" *ngIf="!isCreatingThumbnail"></i>

@@ -106,9 +106,9 @@ public class MediaEntity
         Writers = Writers.Select(it => it.Name).ToList(),
         Url = $"/api/Media/{Id}/file",
         Thumbnail = Thumbnail,
-        ThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
+        ThumbnailUrl = Mime.StartsWith("image/") || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
             ? $"/api/Media/{Id}/file/thumbnail" : null,
-        FanartThumbnailUrl = File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
+        FanartThumbnailUrl = Mime.StartsWith("image/") || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
             ? $"/api/Media/{Id}/file/thumbnail-fanart" : null
     };
 
@@ -147,8 +147,8 @@ public class MediaEntity
             Description = request.Description,
             Mime = mime,
             Size = fileInfo.Length,
-            Width = width ?? ffprobe.Streams?.Select(it => it.Width).OfType<int>().First(),
-            Height = height ?? ffprobe.Streams?.Select(it => it.Height).OfType<int>().First(),
+            Width = width ?? ffprobe.Streams?.Select(it => it.Width).OfType<int>().Cast<int?>().FirstOrDefault(),
+            Height = height ?? ffprobe.Streams?.Select(it => it.Height).OfType<int>().Cast<int?>().FirstOrDefault(),
             Duration = double.Parse(ffprobe.Format?.Duration ?? "0"),
             Md5 = hash,
             Rating = request.Rating,

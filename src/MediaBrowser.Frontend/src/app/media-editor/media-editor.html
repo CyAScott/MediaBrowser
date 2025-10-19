@@ -44,7 +44,8 @@
         (thumbnailDataChange)="onThumbnailDataChange($event)"
         [isCreatingThumbnail]="isCreatingThumbnail"
         [mediaData]="getThumbnailMediaData()"
-        [showSaveThumbnail]="!!mediaId"
+        [showSaveThumbnail]="mediaData.mime.startsWith('video/') && mediaId !== null"
+        [showSetThumbnail]="mediaData.mime.startsWith('video/')"
         [thumbnailData]="getThumbnailData()">
       </app-thumbnail-section>
     </div>

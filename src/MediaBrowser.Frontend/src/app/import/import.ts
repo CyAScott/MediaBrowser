@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ImportService } from '../services/import.service';
+import { ImportFileInfo, ImportService } from '../services/import.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { MediaReadModel } from '../services';
 
@@ -16,8 +16,7 @@ export class ImportComponent implements OnInit {
   private router = inject(Router);
   private importService = inject(ImportService);
 
-  directoryPath: string | null = null;
-  files: string[] = [];
+  files: ImportFileInfo[] = [];
 
   ngOnInit(): Promise<void> {
     return this.scanDirectory();
@@ -26,15 +25,15 @@ export class ImportComponent implements OnInit {
   private async scanDirectory(): Promise<void> {
     try {
       this.files = await firstValueFrom(this.importService.files());
-      this.cdr.detectChanges();
     } catch (error) {
       console.error('Error scanning directory:', error);
       this.files = [];
+    } finally {
       this.cdr.detectChanges();
     }
   }
 
-  async importFile(filename: string): Promise<void> {
+  async importFile(file: ImportFileInfo): Promise<void> {
     try {
 
       /* Create a temporary MediaReadModel for the file to pass to the editor 
@@ -42,31 +41,31 @@ export class ImportComponent implements OnInit {
        */
       const mediaData: MediaReadModel = {
         cast: [],
-        createdOn: new Date(),
-        ctimeMs: '',
+        createdOn: file.createdOn,
+        ctimeMs: file.ctimeMs.toString(),
         description: '',
         directors: [],
         ffprobe: {},
         genres: [],
         id: '',
         md5: '',
-        mime: '',
-        mtimeMs: '',
-        originalTitle: filename,
+        mime: file.mime,
+        mtimeMs: file.mtimeMs.toString(),
+        originalTitle: file.name,
         path: '',
         producers: [],
         published: '',
         rating: 0,
-        title: filename,
-        updatedOn: new Date(),
-        url: `/api/import/file/${encodeURIComponent(filename)}`,
+        title: file.name,
+        updatedOn: file.updatedOn,
+        url: file.url,
         userStarRating: 0,
         writers: [],
       };
 
       const state = { 
         mediaData,
-        filename
+        filename: file.name
       };
 
       this.router.navigate(['/edit'], { state });

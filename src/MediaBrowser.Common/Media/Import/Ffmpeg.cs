@@ -36,9 +36,17 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
                 .Where(it => mediaConfig.ImportExtensions.ContainsKey(it))
                 .Select(it => mediaConfig.ImportExtensions[it])
                 .OrderBy(it => it.Order)
-                .FirstOrDefault()?.Mime ?? throw new ArgumentException("Unable to determine mime type");
+                .FirstOrDefault()?.Mime;
 
-            return (response, mime);
+            if (mime == null
+                && response.Streams?.Count == 1
+                && _imageCodecs.TryGetValue(response.Streams[0].CodecName ?? String.Empty,
+                    out var imageMime))
+            {
+                mime = imageMime;
+            }
+
+            return (response, mime ?? throw new ArgumentException("Unable to determine mime type"));
         }
         catch (Exception error)
         {
@@ -46,10 +54,20 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
             return null;
         }
     }
+    static readonly IReadOnlyDictionary<string, string> _imageCodecs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["png"] = "image/png",
+        ["mjpeg"] = "image/jpeg",
+        ["jpeg"] = "image/jpeg",
+        ["gif"] = "image/gif",
+        ["bmp"] = "image/bmp",
+        ["tiff"] = "image/tiff",
+        ["webp"] = "image/webp",
+    };
 
     public async Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan? at = null, CancellationToken cancellationToken = default)
     {
-        var timeAt = at?.ToString(@"hh\:mm\:ss\.fff");
+        var timeAt = at?.ToString(@"hh\:mm\:ss\.f");
         try
         {
             if (File.Exists(outputPath))
