@@ -1,4 +1,4 @@
-.cast-container {
+.meta-container {
   padding: 0.25em;
   display: flex;
   flex-direction: column;
@@ -7,26 +7,27 @@
   width: calc(100% - (var(--sidebar-width) / 2));
 }
 
-.cast-header {
+.meta-header {
   padding-bottom: 0.25rem;
   flex-shrink: 0;
 }
 
-.cast-content {
+.meta-content {
   flex: 1;
   overflow-y: auto;
   min-height: 0;
   padding-top: 1rem;
 }
 
-.cast-header h2 {
+.meta-header h2 {
   margin: 0;
   color: var(--fg2);
   font-size: 1.5rem;
   font-weight: 600;
+  text-transform: capitalize;
 }
 
-.cast-grid {
+.meta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
@@ -34,17 +35,17 @@
   padding-bottom: 1rem;
 }
 
-.cast-grid .result-card {
+.meta-grid .result-card {
   width: 100%;
   height: auto;
 }
 
-.cast-info {
+.meta-info {
   text-align: center;
   width: 100%;
 }
 
-.cast-name {
+.meta-name {
   color: var(--fg1);
   font-size: 2.5rem;
   font-weight: bold;
@@ -58,7 +59,7 @@
   align-items: center;
   justify-content: center;
   padding: 4rem;
-  color: var(--fg4);
+  color: var(--fg2);
   font-size: 1rem;
   font-style: italic;
   flex: 1;
@@ -71,21 +72,21 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .cast-container {
+  .meta-container {
     height: 100%;
     width: calc(100% - 2rem);
   }
 
-  .cast-grid {
+  .meta-grid {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 0.75rem;
   }
   
-  .cast-name {
+  .meta-name {
     font-size: 1.8rem;
   }
 
-  .cast-header {
+  .meta-header {
     display: none;
   }
 }

@@ -196,6 +196,7 @@ export class MediaEditorComponent implements OnInit {
     return {
       cast: this.editableData.cast,
       directors: this.editableData.directors,
+      genres: this.editableData.genres,
       producers: this.editableData.producers,
       writers: this.editableData.writers
     };
@@ -246,6 +247,7 @@ export class MediaEditorComponent implements OnInit {
   onPeopleDataChange(peopleData: PeopleData): void {
     this.editableData.cast = peopleData.cast;
     this.editableData.directors = peopleData.directors;
+    this.editableData.genres = peopleData.genres;
     this.editableData.producers = peopleData.producers;
     this.editableData.writers = peopleData.writers;
   }

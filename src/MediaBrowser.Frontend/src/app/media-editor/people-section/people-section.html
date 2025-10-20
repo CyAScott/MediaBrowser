@@ -55,6 +55,33 @@
     </div>
   </div>
 
+  <!-- Genres -->
+  <div class="form-group">
+    <label>Genres</label>
+    <div class="array-input">
+      <div *ngFor="let genre of peopleData.genres; let i = index; trackBy: trackByIndex" class="array-item">
+        <input
+          (ngModelChange)="onPeopleChange()"
+          [(ngModel)]="peopleData.genres[i]"
+          class="form-input array-field"
+          placeholder="Genre name"
+          type="text">
+        <button
+          (click)="removeArrayItem('genres', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('genres')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Director
+      </button>
+    </div>
+  </div>
+
   <!-- Producers -->
   <div class="form-group">
     <label>Producers</label>

@@ -38,9 +38,12 @@ export class SearchComponent implements OnInit {
   readonly pageSize: number = 25;
   cast: string[] = [];
   descending: boolean = false;
+  directors: string[] = [];
   genres: string[] = [];
   keywords: string = '';
+  producers: string[] = [];
   sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = 'title';
+  writers: string[] = [];
   
   readonly sortOptions = [
     { value: 'title', label: 'Title' },
@@ -75,14 +78,23 @@ export class SearchComponent implements OnInit {
     if (params.cast && params.cast.length > 0) {
       queryParams['cast'] = params.cast;
     }
+    if (params.directors && params.directors.length > 0) {
+      queryParams['directors'] = params.directors;
+    }
     if (params.genres && params.genres.length > 0) {
       queryParams['genres'] = params.genres;
+    }
+    if (params.producers && params.producers.length > 0) {
+      queryParams['producers'] = params.producers;
     }
     if (params.sort) {
       queryParams['sort'] = params.sort;
     }
     if (params.descending) {
       queryParams['descending'] = 'true';
+    }
+    if (params.writers && params.writers.length > 0) {
+      queryParams['writers'] = params.writers;
     }
     queryParams['pageIndex'] = pageIndex.toString();
     
@@ -113,10 +125,28 @@ export class SearchComponent implements OnInit {
       this.cast = [];
     }
     
+    if (params['directors']) {
+      this.directors = Array.isArray(params['directors']) ? params['directors'] : [params['directors']];
+    } else {
+      this.directors = [];
+    }
+    
     if (params['genres']) {
       this.genres = Array.isArray(params['genres']) ? params['genres'] : [params['genres']];
     } else {
       this.genres = [];
+    }
+
+    if (params['producers']) {
+      this.producers = Array.isArray(params['producers']) ? params['producers'] : [params['producers']];
+    } else {
+      this.producers = [];
+    }
+
+    if (params['writers']) {
+      this.writers = Array.isArray(params['writers']) ? params['writers'] : [params['writers']];
+    } else {
+      this.writers = [];
     }
   }
 
@@ -143,8 +173,17 @@ export class SearchComponent implements OnInit {
     if (this.cast.length > 0) {
       queryParams['cast'] = this.cast;
     }
+    if (this.directors.length > 0) {
+      queryParams['directors'] = this.directors;
+    }
     if (this.genres.length > 0) {
       queryParams['genres'] = this.genres;
+    }
+    if (this.producers.length > 0) {
+      queryParams['producers'] = this.producers;
+    }
+    if (this.writers.length > 0) {
+      queryParams['writers'] = this.writers;
     }
     queryParams['sort'] = this.sort;
     if (this.descending) {
@@ -199,11 +238,20 @@ export class SearchComponent implements OnInit {
       if (this.cast.length > 0) {
         searchRequest.cast = [...this.cast];
       }
+      if (this.directors.length > 0) {
+        searchRequest.directors = [...this.directors];
+      }
       if (this.genres.length > 0) {
         searchRequest.genres = [...this.genres];
       }
       if (this.descending) {
         searchRequest.descending = this.descending;
+      }
+      if (this.producers.length > 0) {
+        searchRequest.producers = [...this.producers];
+      }
+      if (this.writers.length > 0) {
+        searchRequest.writers = [...this.writers];
       }
 
       const response = await firstValueFrom(this.mediaService.search(searchRequest));

@@ -5,11 +5,14 @@ import { ApiService } from './api.service';
 export interface SearchMediaRequest {
   cast?: string[];
   descending?: boolean;
+  directors?: string[];
   genres?: string[];
   keywords?: string;
+  producers?: string[];
   sort: 'title' | 'createdOn' | 'duration' | 'userStarRating';
   skip?: number;
   take?: number;
+  writers?: string[];
 }
 
 export interface MediaReadModel {

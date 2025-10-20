@@ -45,42 +45,8 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
     [HttpGet("search")]
     public async Task<SearchResponse> Search([FromQuery] SearchRequest request)
     {
-        var query = context.MediaJoined;
+        var query = request.Apply(context.MediaJoined);
 
-        var castQuery = request.Cast?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Distinct()
-            .ToArray();
-        if (castQuery is {Length: > 0})
-        {
-            query = query
-                .Where(m => castQuery.Any(n => m.Cast.Any(c => c.Name == n)));
-        }
-        
-        var genresQuery = request.Genres?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Distinct()
-            .ToArray();
-        if (genresQuery is {Length: > 0})
-        {
-            query = query
-                .Where(m => genresQuery.Any(n => m.Genres.Any(g => g.Name == n)));
-        }
-        
-        if (!string.IsNullOrEmpty(request.Keywords))
-        {
-            query = query.Where(it =>
-                    it.Title.Contains(request.Keywords)
-                    || it.OriginalTitle.Contains(request.Keywords)
-                    || it.Description.Contains(request.Keywords)
-                    || it.Published.Contains(request.Keywords)
-                    || it.Md5.Contains(request.Keywords)
-                    || it.Path.Contains(request.Keywords)
-                    || it.Cast.Any(c => c.Name.Contains(request.Keywords))
-                    || it.Directors.Any(d => d.Name.Contains(request.Keywords))
-                    || it.Genres.Any(g => g.Name.Contains(request.Keywords))
-                    || it.Producers.Any(p => p.Name.Contains(request.Keywords))
-                    || it.Writers.Any(w => w.Name.Contains(request.Keywords)));
-        }
-        
         var count = await query.CountAsync();
         
         switch (request.Sort)

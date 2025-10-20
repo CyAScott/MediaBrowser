@@ -1,13 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsersService } from '../services/users.service';
 import { firstValueFrom } from 'rxjs';
-
-interface TabItem {
-  route: string;
-  icon: string;
-}
 
 @Component({
   selector: 'app-navigation-tabs',
@@ -19,21 +14,7 @@ interface TabItem {
 export class NavigationTabsComponent {
   private router = inject(Router);
   protected usersService = inject(UsersService);
-
-  tabs: TabItem[] = [
-    {
-      route: '/search',
-      icon: '<i class="fa fa-film"></i>'
-    },
-    {
-      route: '/import',
-      icon: '<i class="fa fa-upload"></i>'
-    },
-    {
-      route: '/cast',
-      icon: '<i class="fa fa-users"></i>'
-    }
-  ];
+  isDropdownOpen = false;
 
   constructor() {}
 
@@ -48,5 +29,26 @@ export class NavigationTabsComponent {
   async logout(): Promise<void> {
     await firstValueFrom(this.usersService.logout());
     this.router.navigate(['/login']);
+  }
+
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  navigateToMeta(option: string): void {
+    this.isDropdownOpen = false;
+    this.router.navigate([`/meta/${option}`]);
+  }
+
+  isMetaRouteActive(): boolean {
+    return this.router.url.startsWith('/meta/');
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-container')) {
+      this.isDropdownOpen = false;
+    }
   }
 }

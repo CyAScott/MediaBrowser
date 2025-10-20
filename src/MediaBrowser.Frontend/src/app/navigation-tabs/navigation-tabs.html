@@ -1,11 +1,58 @@
 <nav class="navigation-tabs" *ngIf="usersService.isAuthenticated()">
   <div class="tab-list">
     <button 
-      *ngFor="let tab of tabs" 
       class="tab-button"
-      [class.active]="isActiveRoute(tab.route)"
-      (click)="navigateToRoute(tab.route)">
-      <span class="tab-icon" [innerHTML]="tab.icon"></span>
+      [class.active]="isActiveRoute('/search')"
+      (click)="navigateToRoute('/search')">
+      <span class="tab-icon"><i class="fa fa-film"></i></span>
+    </button>
+    <div class="dropdown-container">
+      <button 
+        class="tab-button dropdown-toggle"
+        [class.active]="isMetaRouteActive()"
+        (click)="toggleDropdown()"
+        title="Browse metadata">
+        <span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span>
+        <span class="dropdown-arrow"><i class="fa fa-chevron-down"></i></span>
+      </button>
+      <div class="dropdown-menu" [class.show]="isDropdownOpen">
+        <button 
+          class="dropdown-item"
+          (click)="navigateToMeta('cast')"
+          title="Cast">
+          <i class="fa fa-user"></i> Cast
+        </button>
+        <button 
+          class="dropdown-item"
+          (click)="navigateToMeta('directors')"
+          title="Directors">
+          <i class="fa fa-video-camera"></i> Directors
+        </button>
+        <button 
+          class="dropdown-item"
+          (click)="navigateToMeta('genres')"
+          title="Genres">
+          <i class="fa fa-tag"></i> Genres
+        </button>
+        <button 
+          class="dropdown-item"
+          (click)="navigateToMeta('producers')"
+          title="Producers">
+          <i class="fa fa-briefcase"></i> Producers
+        </button>
+        <button 
+          class="dropdown-item"
+          (click)="navigateToMeta('writers')"
+          title="Writers">
+          <i class="fa fa-pencil"></i> Writers
+        </button>
+      </div>
+    </div>
+    <button 
+      class="tab-button"
+      [class.active]="isActiveRoute('/import')"
+      (click)="navigateToRoute('/import')">
+      <span class="tab-icon"><i class="fa fa-upload"></i></span>
     </button>
   </div>
   <div class="tab-footer">

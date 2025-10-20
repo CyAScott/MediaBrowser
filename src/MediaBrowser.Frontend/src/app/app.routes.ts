@@ -33,8 +33,8 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   { 
-    path: 'cast', 
-    loadComponent: () => import('./cast/cast').then(m => m.CastComponent),
+    path: 'meta/:type', 
+    loadComponent: () => import('./meta/meta').then(m => m.MetaComponent),
     canActivate: [authGuard]
   },
   { 

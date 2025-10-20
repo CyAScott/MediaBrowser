@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 export interface PeopleData {
   cast: string[];
   directors: string[];
+  genres: string[];
   producers: string[];
   writers: string[];
 }
@@ -19,6 +20,7 @@ export class PeopleSectionComponent {
   @Input() peopleData: PeopleData = {
     cast: [],
     directors: [],
+    genres: [],
     producers: [],
     writers: []
   };
