@@ -132,7 +132,7 @@ export class MediaEditorComponent implements OnInit {
       if (this.filename) {
 
         let thumbnail = this.thumbnail ?? undefined;
-        if (!this.selectedImageFile && this.mediaData.mime.startsWith('video/')) {
+        if (!this.thumbnail && !this.selectedImageFile && this.mediaData.mime.startsWith('video/')) {
           thumbnail = 0;
         }
 
