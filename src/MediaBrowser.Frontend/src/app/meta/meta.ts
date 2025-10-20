@@ -101,29 +101,35 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
     
     try {
 
+      let routePreFix = '';
       let results: string[] = [];
 
       switch (this.type) {
         case 'cast':
           results = await firstValueFrom(this.mediaService.getAllCast());
+          routePreFix = 'cast';
           break;
         case 'directors':
           results = await firstValueFrom(this.mediaService.getAllDirectors());
+          routePreFix = 'director';
           break;
         case 'genres':
           results = await firstValueFrom(this.mediaService.getAllGenres());
+          routePreFix = 'genre';
           break;
         case 'producers':
           results = await firstValueFrom(this.mediaService.getAllProducers());
+          routePreFix = 'producer';
           break;
         case 'writers':
           results = await firstValueFrom(this.mediaService.getAllWriters());
+          routePreFix = 'writer';
           break;
       }
 
       this.metaMembers = results.map(name => ({
         name,
-        imageUrl: `/api/media/${encodeURIComponent(this.type)}/${encodeURIComponent(name)}/thumbnail`,
+        imageUrl: `/api/media/${encodeURIComponent(routePreFix)}/${encodeURIComponent(name)}/thumbnail`,
         searchPath: '/search',
         searchParams: SearchComponent.createSearchQueryParams({ [this.type]: [name] }, 0)
       }));
