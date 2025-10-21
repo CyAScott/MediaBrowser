@@ -40,6 +40,22 @@ export class SearchContentComponent {
       tooltip += `\nCast: ${result.cast.join(', ')}`;
     }
 
+    if (result.genres && result.genres.length > 0) {
+      tooltip += `\nGenres: ${result.genres.join(', ')}`;
+    }
+
+    if (result.directors && result.directors.length > 0) {
+      tooltip += `\nDirectors: ${result.directors.join(', ')}`;
+    }
+
+    if (result.producers && result.producers.length > 0) {
+      tooltip += `\nProducers: ${result.producers.join(', ')}`;
+    }
+
+    if (result.writers && result.writers.length > 0) {
+      tooltip += `\nWriters: ${result.writers.join(', ')}`;
+    }
+
     return tooltip;
   }
 
