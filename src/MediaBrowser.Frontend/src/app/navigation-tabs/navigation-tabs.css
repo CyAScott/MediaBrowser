@@ -37,6 +37,11 @@
   justify-content: center;
   transition: all 0.3s ease;
   position: relative;
+  text-decoration: none;
+}
+
+.tab-button:visited {
+  color: var(--fg2);
 }
 
 .tab-icon {
@@ -99,7 +104,6 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
   padding: 8px 12px;
   border: none;
   background: transparent;
@@ -108,6 +112,11 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  text-decoration: none;
+}
+
+.dropdown-item:visited {
+  color: var(--fg2);
 }
 
 .dropdown-item:first-child {

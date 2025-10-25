@@ -15,21 +15,11 @@ import { SearchComponent } from '../search/search';
 export class NavigationTabsComponent {
   private router = inject(Router);
   protected usersService = inject(UsersService);
+
+  defaultSort = SearchComponent.DEFAULT_SORT;
   isDropdownOpen = false;
 
   constructor() {}
-
-  navigateToRoute(route: string, queryParams: { [key: string]: any } = {}): void {
-    this.router.navigate([route], {
-      queryParams: queryParams,
-      queryParamsHandling: 'replace'
-    });
-  }
-
-  navigateToSearch(): void {
-    SearchComponent.clearPagePositionState();
-    this.navigateToRoute('/search', { sort: SearchComponent.DEFAULT_SORT });
-  }
 
   isActiveRoute(route: string): boolean {
     return this.router.url === route;

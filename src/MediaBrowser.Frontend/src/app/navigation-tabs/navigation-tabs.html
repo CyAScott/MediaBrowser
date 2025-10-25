@@ -1,72 +1,78 @@
 <nav class="navigation-tabs" *ngIf="usersService.isAuthenticated()">
   <div class="tab-list">
-    <button 
-      class="tab-button"
+    <a 
       [class.active]="isActiveRoute('/search')"
-      (click)="navigateToSearch()">
+      [queryParams]="{ sort: defaultSort }"
+      [routerLink]="['/search']"
+      class="tab-button">
       <span class="tab-icon"><i class="fa fa-film"></i></span>
-    </button>
+    </a>
     <div class="dropdown-container">
-      <button 
-        class="tab-button dropdown-toggle"
-        [class.active]="isMetaRouteActive()"
+      <a 
         (click)="toggleDropdown()"
+        [class.active]="isMetaRouteActive()"
+        class="tab-button dropdown-toggle"
         title="Browse metadata">
         <span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span>
         <span class="dropdown-arrow"><i class="fa fa-chevron-down"></i></span>
-      </button>
+      </a>
       <div class="dropdown-menu" [class.show]="isDropdownOpen">
-        <button 
-          class="dropdown-item"
+        <a 
           (click)="navigateToMeta('cast')"
+          [routerLink]="['/meta/cast']"
+          class="dropdown-item"
           title="Cast">
           <i class="fa fa-user"></i> Cast
-        </button>
-        <button 
-          class="dropdown-item"
+        </a>
+        <a 
           (click)="navigateToMeta('directors')"
+          [routerLink]="['/meta/directors']"
+          class="dropdown-item"
           title="Directors">
           <i class="fa fa-video-camera"></i> Directors
-        </button>
-        <button 
-          class="dropdown-item"
+        </a>
+        <a 
           (click)="navigateToMeta('genres')"
+          [routerLink]="['/meta/genres']"
+          class="dropdown-item"
           title="Genres">
           <i class="fa fa-tag"></i> Genres
-        </button>
-        <button 
-          class="dropdown-item"
+        </a>
+        <a 
           (click)="navigateToMeta('producers')"
+          [routerLink]="['/meta/producers']"
+          class="dropdown-item"
           title="Producers">
           <i class="fa fa-briefcase"></i> Producers
-        </button>
-        <button 
-          class="dropdown-item"
+        </a>
+        <a 
           (click)="navigateToMeta('writers')"
+          [routerLink]="['/meta/writers']"
+          class="dropdown-item"
           title="Writers">
           <i class="fa fa-pencil"></i> Writers
-        </button>
+        </a>
       </div>
     </div>
-    <button 
-      class="tab-button"
+    <a 
       [class.active]="isActiveRoute('/import')"
-      (click)="navigateToRoute('/import')">
+      [routerLink]="['/import']"
+      class="tab-button">
       <span class="tab-icon"><i class="fa fa-upload"></i></span>
-    </button>
+    </a>
   </div>
   <div class="tab-footer">
-    <button 
+    <a 
+      [routerLink]="['/user-management']"
       class="tab-button"
-      (click)="navigateToRoute('/user-management')"
       title="User Management">
       <span class="tab-icon"><i class="fa fa-user-cog"></i></span>
-    </button>
-    <button 
-      class="tab-button logout-button"
+    </a>
+    <a 
       (click)="logout()"
+      class="tab-button logout-button"
       title="Logout">
       <span class="tab-icon"><i class="fa fa-sign-out"></i></span>
-    </button>
+    </a>
   </div>
 </nav>
