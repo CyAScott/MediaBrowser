@@ -109,7 +109,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onMouseLeave(): void {
-    this.startHideTimer(); // Start hiding when mouse leaves
+    this.startHideTimer();
   }
 
   onMouseMove(): void {
@@ -117,7 +117,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
       this.headerVisible = true;
       this.cdr.detectChanges();
     }
-    this.startHideTimer(); // Reset the timer
+    this.startHideTimer();
   }
 
   onVolumeChange(event: Event): void {
