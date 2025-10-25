@@ -1,5 +1,4 @@
 <div class="import-container">
-  <!-- Files table section -->
   <div class="files-section" *ngIf="files.length > 0">
     <table class="files-table">
       <thead>
@@ -10,14 +9,15 @@
       </thead>
       <tbody>
         <tr *ngFor="let file of files">
-          <td class="filename">{{file.name}}</td>
+          <td class="filename">{{file.title}}</td>
           <td class="action">
-            <button 
+            <a 
               class="import-btn"
-              (click)="importFile(file)"
-              title="Import this file">
+              title="Import this file"
+              [routerLink]="['/import', file.title]"
+              [state]="{ mediaData: file }">
               <i class="fa-solid fa-upload"></i>
-            </button>
+            </a>
           </td>
         </tr>
       </tbody>

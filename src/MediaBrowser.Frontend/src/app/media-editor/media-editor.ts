@@ -12,6 +12,7 @@ import { RatingSectionComponent } from './rating-section/rating-section.componen
 import { PeopleSectionComponent, PeopleData } from './people-section/people-section.component';
 import { ReadonlyInfoSectionComponent, MediaReadOnlyData } from './readonly-info-section/readonly-info-section.component';
 import { ThumbnailSectionComponent, ThumbnailData, MediaThumbnailData } from './thumbnail-section/thumbnail-section.component';
+import { ImportComponent } from '../import/import';
 
 @Component({
   selector: 'app-media-editor',
@@ -64,48 +65,39 @@ export class MediaEditorComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     try {
+      this.isLoading = true;
       this.mediaId = this.route.snapshot.paramMap.get('id');
       if (this.mediaId) {
         await this.loadMediaById(this.mediaId);
       } else {
-        await this.loadMediaByState();
+        await this.loadMediaToImport();
       }
+      this.setEditableData(this.mediaData!);
     } catch (error) {
       console.error('Error during initialization:', error);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
   async loadMediaById(id: string): Promise<void> {
-    this.isLoading = true;
-
     this.filename = null;
     this.mediaData = this.navigation?.extras.state?.['mediaData'] ?? await firstValueFrom(this.mediaService.get(id));
-    this.setEditableData(this.mediaData!);
     this.thumbnail = this.mediaData!.thumbnail ?? 0;
     this.thumbnailPreviewUrl = this.mediaData!.thumbnailUrl || '';
-
-    this.isLoading = false;
-
-    this.cdr.detectChanges();
   }
 
-  async loadMediaByState(): Promise<void> {
-    const navigationState = this.navigation?.extras.state;
-
-    if (!navigationState) {
-      throw new Error('No navigation state found');
-    }
-
-    this.filename = navigationState?.['filename'];
-    this.mediaData = navigationState?.['mediaData'];
+  async loadMediaToImport(): Promise<void> {
+    this.filename = this.route.snapshot.paramMap.get('fileName');
+    this.mediaData = this.navigation?.extras.state?.['mediaData'] ??
+      ImportComponent.convertToMediaReadModel(await firstValueFrom(this.importService.readFileInfo(this.filename!)));
     this.thumbnail = this.mediaData?.mime.startsWith('video/') ? 0 : null;
     this.thumbnailPreviewUrl = '';
 
     if (!this.mediaData || !this.filename) {
       throw new Error('No media data or filename found');
     }
-
-    this.setEditableData(this.mediaData);
   }
 
   setEditableData(mediaData: MediaReadModel): void {

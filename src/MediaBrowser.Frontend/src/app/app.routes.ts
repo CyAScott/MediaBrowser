@@ -29,6 +29,11 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   { 
+    path: 'import/:fileName', 
+    loadComponent: () => import('./media-editor/media-editor').then(m => m.MediaEditorComponent),
+    canActivate: [authGuard]
+  },
+  { 
     path: 'edit', 
     loadComponent: () => import('./media-editor/media-editor').then(m => m.MediaEditorComponent),
     canActivate: [authGuard]

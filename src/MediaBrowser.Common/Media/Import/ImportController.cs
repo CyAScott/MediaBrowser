@@ -52,6 +52,17 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             enableRangeProcessing: true);
     }
 
+    [HttpGet("file/{name}/info")]
+    public ActionResult<ImportFileInfo> ReadFileInfo(string name)
+    {
+        if (!FileExists(name, out var filePath, out _))
+        {
+            return NotFound();
+        }
+
+        return ImportFileInfo.Create(mediaConfig, filePath)!;
+    }
+
     [HttpPost("file/{name}")]
     public async Task<ActionResult<MediaReadModel>> Import(string name, [FromBody] ImportMediaRequest request)
     {

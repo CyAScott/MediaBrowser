@@ -29,6 +29,10 @@ export class ImportService {
     return this.apiService.get<ImportFileInfo[]>('/import/files');
   }
 
+  readFileInfo(fileName: string): Observable<ImportFileInfo> {
+    return this.apiService.get<ImportFileInfo>(`/import/file/${encodeURIComponent(fileName)}/info`);
+  }
+
   import(name: string, request: ImportMediaRequest): Observable<MediaReadModel> {
     return this.apiService.post<MediaReadModel>(`/import/file/${encodeURIComponent(name)}`, request);
   }
