@@ -1,3 +1,11 @@
+.desktop-only {
+  display: none !important;
+}
+
+.mobile-only {
+  display: flex !important;
+}
+
 .navigation-tabs {
   background: var(--surface2-bg);
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -140,6 +148,14 @@
 
 /* Desktop */
 @media (min-width: 769px) {
+  .desktop-only {
+    display: flex !important;
+  }
+
+  .mobile-only {
+    display: none !important;
+  }
+
   .navigation-tabs {
     width: var(--sidebar-width);
     height: 100vh;

@@ -7,15 +7,54 @@
       class="tab-button">
       <span class="tab-icon"><i class="fa fa-film"></i></span>
     </a>
-    <div class="dropdown-container">
-      <a 
+
+    <!-- Desktop metadata links -->
+    <a 
+      [class.active]="isActiveRoute('/meta/cast')"
+      [routerLink]="['/meta/cast']"
+      class="tab-button desktop-only"
+      title="Cast">
+      <span class="tab-icon"><i class="fa fa-user"></i></span>
+    </a>
+    <a 
+      [class.active]="isActiveRoute('/meta/directors')"
+      [routerLink]="['/meta/directors']"
+      class="tab-button desktop-only"
+      title="Directors">
+      <span class="tab-icon"><i class="fa fa-video-camera"></i></span>
+    </a>
+    <a 
+      [class.active]="isActiveRoute('/meta/genres')"
+      [routerLink]="['/meta/genres']"
+      class="tab-button desktop-only"
+      title="Genres">
+      <span class="tab-icon"><i class="fa fa-tag"></i></span>
+    </a>
+    <a 
+      [class.active]="isActiveRoute('/meta/producers')"
+      [routerLink]="['/meta/producers']"
+      class="tab-button desktop-only"
+      title="Producers">
+      <span class="tab-icon"><i class="fa fa-briefcase"></i></span>
+    </a>
+    <a 
+      [class.active]="isActiveRoute('/meta/writers')"
+      [routerLink]="['/meta/writers']"
+      class="tab-button desktop-only"
+      title="Writers">
+      <span class="tab-icon"><i class="fa fa-pencil"></i></span>
+    </a>
+
+    <!-- Mobile dropdown container -->
+    <div class="dropdown-container mobile-only">
+      <button 
         (click)="toggleDropdown()"
         [class.active]="isMetaRouteActive()"
         class="tab-button dropdown-toggle"
         title="Browse metadata">
         <span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span>
         <span class="dropdown-arrow"><i class="fa fa-chevron-down"></i></span>
-      </a>
+      </button>
       <div class="dropdown-menu" [class.show]="isDropdownOpen">
         <a 
           (click)="navigateToMeta('cast')"

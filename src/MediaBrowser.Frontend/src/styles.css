@@ -98,3 +98,9 @@ body {
 .result-card:hover .card-overlay {
   opacity: 1;
 }
+
+@media (min-width: 768px) {
+  body {
+    min-height: 500px;
+  }
+}
