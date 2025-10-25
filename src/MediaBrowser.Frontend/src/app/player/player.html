@@ -1,43 +1,54 @@
 <div class="player-container">
-  <div class="player-header" 
-    *ngIf="mediaData"
-    [class.fade-out]="!headerVisible"
+  <div 
+    (mouseleave)="onMouseLeave()"
     (mousemove)="onMouseMove()"
-    (mouseleave)="onMouseLeave()">
-    <button class="back-button" *ngIf="hasHistory" (click)="goBack()">
+    [class.fade-out]="!headerVisible"
+    *ngIf="mediaData"
+    class="player-header">
+    <button (click)="goBack()" *ngIf="hasHistory" class="back-button">
       <i class="fa-solid fa-chevron-left"></i>
     </button>
     <h2>{{ mediaData.title }}</h2>
-    <button class="edit-button" (click)="editMedia()">
+    <button (click)="editMedia()" class="edit-button">
       <i class="fa-solid fa-pencil"></i>
     </button>
   </div>
   
   <div class="player">
-    <video controls autoplay 
-      *ngIf="mediaData && mediaData.mime.startsWith('video/')"
+    <video 
+      (loadedmetadata)="applySavedVolume()"
+      (volumechange)="onVolumeChange($event)"
       [poster]="mediaData.thumbnailUrl"
-      class="video-element">
+      *ngIf="mediaData && mediaData.mime.startsWith('video/')"
+      #videoElement
+      autoplay
+      class="video-element"
+      controls>
       <source [src]="mediaData.url" type="{{ mediaData.mime }}">
       Your browser does not support the video tag.
     </video>
 
-    <audio controls autoplay 
+    <audio 
+      (loadedmetadata)="applySavedVolume()"
+      (volumechange)="onVolumeChange($event)"
       [ngStyle]="{'backgroundImage':'url(' + mediaData.thumbnailUrl + ')'}"
       *ngIf="mediaData && mediaData.mime.startsWith('audio/')"
-      class="audio-element">
+      #audioElement
+      autoplay
+      class="audio-element"
+      controls>
       <source [src]="mediaData.url" type="{{ mediaData.mime }}">
       Your browser does not support the audio element.
     </audio>
 
     <img 
-      *ngIf="mediaData && mediaData.mime.startsWith('image/')"
       [src]="mediaData.url"
+      *ngIf="mediaData && mediaData.mime.startsWith('image/')"
       alt="{{ mediaData.title }}"
-      class="image-element" />
+      class="image-element"/>
   </div>
   
-  <div class="no-media" *ngIf="!mediaData">
+  <div *ngIf="!mediaData" class="no-media">
     <p>No media data available</p>
     <button (click)="goBack()">Return to Search</button>
   </div>

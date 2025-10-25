@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
 
 export interface ThumbnailData {
   thumbnail: number | null;
@@ -18,7 +18,7 @@ export interface MediaThumbnailData {
   templateUrl: './thumbnail-section.html',
   styleUrls: ['../media-editor.css', './thumbnail-section.css']
 })
-export class ThumbnailSectionComponent {
+export class ThumbnailSectionComponent implements AfterViewInit {
   @Input() isCreatingThumbnail: boolean = false;
   @Input() mediaData!: MediaThumbnailData;
   @Input() showSaveThumbnail: boolean = false;
@@ -37,6 +37,17 @@ export class ThumbnailSectionComponent {
   @ViewChild('videoPlayer') videoPlayer?: ElementRef<HTMLVideoElement>;
 
   private cdr = inject(ChangeDetectorRef);
+  
+  ngAfterViewInit(): void {
+    // Ensure video is muted when view initializes
+    setTimeout(() => {
+      if (this.videoPlayer) {
+        this.videoPlayer.nativeElement.muted = true;
+        this.videoPlayer.nativeElement.volume = 0;
+      }
+    }, 0);
+  }
+  
   private generateThumbnailPreview(videoElement: HTMLVideoElement): string {
     try {
       // Create a canvas element to capture the video frame
@@ -128,8 +139,14 @@ export class ThumbnailSectionComponent {
   }
 
   onVideoMetadataLoaded(): void {
-    if (this.thumbnailData.thumbnail !== null) {
-      this.videoPlayer!.nativeElement.currentTime = this.thumbnailData.thumbnail;
+    if (this.videoPlayer) {
+      // Ensure video is muted
+      this.videoPlayer.nativeElement.muted = true;
+      this.videoPlayer.nativeElement.volume = 0;
+      
+      if (this.thumbnailData.thumbnail !== null) {
+        this.videoPlayer.nativeElement.currentTime = this.thumbnailData.thumbnail;
+      }
     }
   }
 
