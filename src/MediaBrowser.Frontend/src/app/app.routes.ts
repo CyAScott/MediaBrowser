@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { SearchComponent } from './search/search';
 
 export const routes: Routes = [
   
@@ -44,6 +45,6 @@ export const routes: Routes = [
   },
   { 
     path: '**', 
-    redirectTo: '/login'
+    redirectTo: '/search?sort=' + SearchComponent.DEFAULT_SORT
   }
 ];

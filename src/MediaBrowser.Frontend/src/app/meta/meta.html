@@ -9,8 +9,9 @@
            *ngFor="let metaMember of metaMembers;" 
            [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}"
            [title]="metaMember.name"
-           [routerLink]="metaMember.searchPath"
-           [queryParams]="metaMember.searchParams">
+           [routerLink]="'/search'"
+           [queryParams]="metaMember.queryParams"
+           (click)="clearPagePositionState()">
         <div class="card-overlay">
           <div class="meta-info">
             <div class="meta-name">{{ metaMember.name }}</div>

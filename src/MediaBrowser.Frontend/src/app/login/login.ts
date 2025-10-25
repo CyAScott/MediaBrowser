@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UsersService } from '../services/users.service';
 import { firstValueFrom } from 'rxjs';
+import { SearchComponent } from '../search/search';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +36,13 @@ export class LoginComponent {
         username: this.username.trim(),
         password: this.password
       }));
-      this.router.navigate(['/search']);
+      SearchComponent.clearPagePositionState();
+      this.router.navigate(['/search'], {
+        queryParams: {
+          sort: SearchComponent.DEFAULT_SORT
+        },
+        queryParamsHandling: 'replace'
+      });
     } catch (error) {
       console.error('Login error:', error);
       this.errorMessage = 'An error occurred during login. Please try again.';

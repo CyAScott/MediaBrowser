@@ -3,6 +3,7 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsersService } from '../services/users.service';
 import { firstValueFrom } from 'rxjs';
+import { SearchComponent } from '../search/search';
 
 @Component({
   selector: 'app-navigation-tabs',
@@ -18,8 +19,16 @@ export class NavigationTabsComponent {
 
   constructor() {}
 
-  navigateToRoute(route: string): void {
-    this.router.navigate([route]);
+  navigateToRoute(route: string, queryParams: { [key: string]: any } = {}): void {
+    this.router.navigate([route], {
+      queryParams: queryParams,
+      queryParamsHandling: 'replace'
+    });
+  }
+
+  navigateToSearch(): void {
+    SearchComponent.clearPagePositionState();
+    this.navigateToRoute('/search', { sort: SearchComponent.DEFAULT_SORT });
   }
 
   isActiveRoute(route: string): boolean {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MediaService } from '../services';
 import { SearchComponent } from '../search/search';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -9,8 +9,7 @@ import { SpinnerComponent } from '../spinner/spinner';
 interface MetaMember {
   name: string;
   imageUrl: string;
-  searchPath: string;
-  searchParams: { [key: string]: string | string[] };
+  queryParams: { [key: string]: string | string[] };
 }
 
 @Component({
@@ -23,6 +22,7 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private mediaService = inject(MediaService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   @ViewChild('metaGrid', { static: false }) metaGrid!: ElementRef<HTMLDivElement>;
 
@@ -130,8 +130,7 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
       this.metaMembers = results.map(name => ({
         name,
         imageUrl: `/api/media/${encodeURIComponent(routePreFix)}/${encodeURIComponent(name)}/thumbnail`,
-        searchPath: '/search',
-        searchParams: SearchComponent.createSearchQueryParams({ [this.type]: [name] }, 0)
+        queryParams: { [this.type]: [name], sort: SearchComponent.DEFAULT_SORT }
       }));
       
       // Restore scroll position after content is loaded and rendered
@@ -147,5 +146,9 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  clearPagePositionState(): void {
+    SearchComponent.clearPagePositionState();
   }
 }

@@ -16,7 +16,6 @@ import { SearchContentComponent } from './search-content';
  * - genres: array of genre names  
  * - sort: sort field ('title' | 'createdOn' | 'duration' | 'userStarRating')
  * - descending: boolean for sort direction
- * - pageIndex: current page index (0-based)
  * 
  * Example URLs:
  * /search?keywords=action&sort=createdOn&descending=true
@@ -34,6 +33,14 @@ export class SearchComponent implements OnInit {
 
   @ViewChild('searchContent', { static: false }) searchContentComponent!: SearchContentComponent;
   
+  readonly sortOptions = [
+    { value: 'title', label: 'Title' },
+    { value: 'createdOn', label: 'Created On' },
+    { value: 'duration', label: 'Duration' },
+    { value: 'userStarRating', label: 'Rating' }
+  ] as const;
+  static readonly DEFAULT_SORT = 'title';
+  
   // Search parameters that match SearchMediaRequest
   readonly pageSize: number = 25;
   cast: string[] = [];
@@ -42,70 +49,31 @@ export class SearchComponent implements OnInit {
   genres: string[] = [];
   keywords: string = '';
   producers: string[] = [];
-  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = 'title';
+  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = SearchComponent.DEFAULT_SORT;
   writers: string[] = [];
-  
-  readonly sortOptions = [
-    { value: 'title', label: 'Title' },
-    { value: 'createdOn', label: 'Created On' },
-    { value: 'duration', label: 'Duration' },
-    { value: 'userStarRating', label: 'Rating' }
-  ] as const;
   
   // UI state
   results: MediaReadModel[] = [];
   hasMoreResults: boolean = true;
   isLoading: boolean = false;
-  pageIndex: number = 0;
   showSortModal: boolean = false;
 
-  // Scroll management
+  // Page management
+  private pageIndex: number = 0;
   private pendingScrollUpdate: boolean = false;
   private scrollPosition: number = 0;
-  private readonly SCROLL_KEY = 'search-scroll-position';  
+  static readonly PAGE_KEY = 'search-page-position';
 
-  /**
-   * Helper method to create search query parameters for navigation
-   * @param params Search parameters that match SearchMediaRequest interface
-   * @returns Query parameters object for router navigation
-   */
-  static createSearchQueryParams(params: Partial<SearchMediaRequest>, pageIndex: number): { [key: string]: string | string[] } {
-    const queryParams: { [key: string]: string | string[] } = {};
-    
-    if (params.keywords?.trim()) {
-      queryParams['keywords'] = params.keywords.trim();
-    }
-    if (params.cast && params.cast.length > 0) {
-      queryParams['cast'] = params.cast;
-    }
-    if (params.directors && params.directors.length > 0) {
-      queryParams['directors'] = params.directors;
-    }
-    if (params.genres && params.genres.length > 0) {
-      queryParams['genres'] = params.genres;
-    }
-    if (params.producers && params.producers.length > 0) {
-      queryParams['producers'] = params.producers;
-    }
-    if (params.sort) {
-      queryParams['sort'] = params.sort;
-    }
-    if (params.descending) {
-      queryParams['descending'] = 'true';
-    }
-    if (params.writers && params.writers.length > 0) {
-      queryParams['writers'] = params.writers;
-    }
-    queryParams['pageIndex'] = pageIndex.toString();
-    
-    return queryParams;
+  static clearPagePositionState(): void {
+    sessionStorage.removeItem(SearchComponent.PAGE_KEY);
   }
 
   constructor(private router: Router, private mediaService: MediaService) {
-    // Load saved scroll position from session storage
-    const savedScrollPosition = sessionStorage.getItem(this.SCROLL_KEY);
-    if (savedScrollPosition) {
-      this.scrollPosition = parseInt(savedScrollPosition, 10);
+    // Load saved page position from session storage
+    const savedPagePosition = new URLSearchParams(sessionStorage.getItem(SearchComponent.PAGE_KEY) || '');
+    if (savedPagePosition) {
+      this.scrollPosition = parseInt(savedPagePosition.get('scroll') || '0', 10);
+      this.pageIndex = parseInt(savedPagePosition.get('pageIndex') || '0', 10);
     }
   }
 
@@ -114,9 +82,8 @@ export class SearchComponent implements OnInit {
     
     // Load search parameters from URL
     this.keywords = params['keywords'] || '';
-    this.sort = params['sort'] || 'title';
+    this.sort = params['sort'] || SearchComponent.DEFAULT_SORT;
     this.descending = params['descending'] === 'true';
-    this.pageIndex = parseInt(params['pageIndex']) || 0;
     
     // Handle array parameters
     if (params['cast']) {
@@ -150,13 +117,13 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  private saveScrollPosition(): void {
+  private savePagePosition(): void {
     try {
       if (this.searchContentComponent?.searchResultsElement) {
         this.scrollPosition = this.searchContentComponent.searchResultsElement.nativeElement.scrollTop;
-        sessionStorage.setItem(this.SCROLL_KEY, this.scrollPosition.toString());
+        sessionStorage.setItem(SearchComponent.PAGE_KEY, `scroll=${this.scrollPosition}&pageIndex=${this.pageIndex}`);
       } else {
-        this.clearScrollPosition();
+        this.clearPagePosition();
       }
     } catch (error) {
       console.error('Error saving scroll position:', error);
@@ -189,9 +156,6 @@ export class SearchComponent implements OnInit {
     if (this.descending) {
       queryParams['descending'] = 'true';
     }
-    if (this.pageIndex) {
-      queryParams['pageIndex'] = this.pageIndex.toString();
-    }
 
     // Update URL without triggering navigation
     this.router.navigate([], {
@@ -201,9 +165,10 @@ export class SearchComponent implements OnInit {
     });
   }
 
-  clearScrollPosition(): void {
+  clearPagePosition(): void {
+    this.pageIndex = 0;
     this.scrollPosition = 0;
-    sessionStorage.removeItem(this.SCROLL_KEY);
+    SearchComponent.clearPagePositionState();
     if (this.searchContentComponent?.searchResultsElement) {
       this.searchContentComponent.searchResultsElement.nativeElement.scrollTop = 0;
     }
@@ -278,6 +243,7 @@ export class SearchComponent implements OnInit {
           this.searchContentComponent.searchResultsElement.nativeElement.scrollTop = this.scrollPosition;
           setTimeout(() => {
             this.pendingScrollUpdate = false;
+            this.savePagePosition();
           }, 100);
         });
       }
@@ -294,7 +260,7 @@ export class SearchComponent implements OnInit {
     // Load initial state from query parameters
     this.loadFromQueryParams();
     if (this.pageIndex === 0) {
-      this.clearScrollPosition();
+      this.clearPagePosition();
     }
 
     // Always perform search based on current parameters
@@ -306,7 +272,7 @@ export class SearchComponent implements OnInit {
   }
 
   onCardClick(): void {
-    this.saveScrollPosition();
+    this.savePagePosition();
     this.updateQueryParams();
   }
 
@@ -319,16 +285,15 @@ export class SearchComponent implements OnInit {
     const threshold = 100; // Load more when 100px from bottom
 
     if (!this.isLoading && !this.pendingScrollUpdate && element.scrollHeight - element.scrollTop - element.clientHeight < threshold) {
-      this.saveScrollPosition();
+      this.savePagePosition();
       this.loadResults();
     }
   }
 
   async onSearch(): Promise<void> {
     // Reset pagination for new search
-    this.clearScrollPosition();
+    this.clearPagePosition();
     this.hasMoreResults = true;
-    this.pageIndex = 0;
     this.results = [];
     
     // Update URL with current search parameters
