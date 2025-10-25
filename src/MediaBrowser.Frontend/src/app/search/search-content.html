@@ -7,6 +7,7 @@
         (mousedown)="onCardClick()"
         [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
         [routerLink]="['/player', result.id]"
+        [state]="{ mediaData: result }"
         [title]="getTooltip(result)"
         *ngFor="let result of results; trackBy: trackByResultId" 
         class="result-card" >

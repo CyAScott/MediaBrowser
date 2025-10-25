@@ -79,10 +79,10 @@ export class MediaEditorComponent implements OnInit {
     this.isLoading = true;
 
     this.filename = null;
-    this.mediaData = await firstValueFrom(this.mediaService.get(id));
-    this.setEditableData(this.mediaData);
-    this.thumbnail = this.mediaData.thumbnail ?? 0;
-    this.thumbnailPreviewUrl = this.mediaData.thumbnailUrl || '';
+    this.mediaData = this.navigation?.extras.state?.['mediaData'] ?? await firstValueFrom(this.mediaService.get(id));
+    this.setEditableData(this.mediaData!);
+    this.thumbnail = this.mediaData!.thumbnail ?? 0;
+    this.thumbnailPreviewUrl = this.mediaData!.thumbnailUrl || '';
 
     this.isLoading = false;
 
@@ -96,7 +96,7 @@ export class MediaEditorComponent implements OnInit {
       throw new Error('No navigation state found');
     }
 
-    this.filename = navigationState['filename'];
+    this.filename = navigationState?.['filename'];
     this.mediaData = navigationState?.['mediaData'];
     this.thumbnail = this.mediaData?.mime.startsWith('video/') ? 0 : null;
     this.thumbnailPreviewUrl = '';

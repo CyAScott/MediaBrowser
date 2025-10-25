@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { MediaReadModel, MediaService } from '../services';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
@@ -15,8 +15,12 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
   private location = inject(Location);
   private mediaService = inject(MediaService);
+  private navigation: Navigation | null = null;
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
+
+  constructor(private router: Router) {
+    this.navigation = this.router.currentNavigation();
+  }
   
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('audioElement', { static: false }) audioElement!: ElementRef<HTMLAudioElement>;
@@ -69,7 +73,9 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async loadMediaById(id: string): Promise<void> {
     try { 
-      const response = await firstValueFrom(this.mediaService.get(id));
+      console.log('Loading media by ID:', id);
+      console.log('Navigation state:', this.navigation);
+      const response = this.navigation?.extras.state?.['mediaData'] ?? await firstValueFrom(this.mediaService.get(id));
       this.mediaData = response;
       this.cdr.detectChanges();
     } catch (error) {
@@ -83,7 +89,9 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
   editMedia(): void {
     if (this.mediaId) {
-      this.router.navigate(['/edit', this.mediaId]);
+      this.router.navigate(['/edit', this.mediaId],
+        { state: { mediaData: this.mediaData } }
+      );
     }
   }
 
