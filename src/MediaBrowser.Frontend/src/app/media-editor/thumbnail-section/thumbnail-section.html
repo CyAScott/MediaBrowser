@@ -1,8 +1,10 @@
 <div *ngIf="mediaData && !mediaData.mime.startsWith('image/')"
   class="form-section thumbnail-section">
   <h3>Thumbnail Creation</h3>
-
+  <p>Select one or more thumbnails and navigate through the thumbnails to select the final thumbnail:</p>
+  <br/>
   <div class="thumbnail-container">
+
     <div class="thumbnail-selection-container">
       <video
         (loadedmetadata)="onVideoMetadataLoaded()"
@@ -39,8 +41,23 @@
     </div>
 
     <div class="thumbnail-preview-container">
-      <div class="result-card thumbnail-preview" 
-            [style.background-image]="thumbnailData.thumbnailPreviewUrl ? 'url(' + thumbnailData.thumbnailPreviewUrl + ')' : 'none'">
+      <div 
+        [style.background-image]="selectedThumbnail?.thumbnailPreviewUrl ? 'url(' + selectedThumbnail!.thumbnailPreviewUrl + ')' : 'none'"
+        class="result-card thumbnail-preview">
+      </div>
+      <div class="thumbnail-navigation">
+        <button 
+          (click)="previousThumbnail()"
+          [disabled]="thumbnails.length == 0 || selectedThumbnailIndex == 0"
+          class="nav-button nav-button-left">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button 
+          (click)="nextThumbnail()"
+          [disabled]="thumbnails.length == 0 || selectedThumbnailIndex >= thumbnails.length - 1"
+          class="nav-button nav-button-right">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -57,7 +74,7 @@
     </button>
     <button
       (click)="saveThumbnail()"
-      [disabled]="isCreatingThumbnail || (!thumbnailData.thumbnail && !thumbnailData.selectedImageFile)"
+      [disabled]="isCreatingThumbnail || !selectedThumbnail"
       *ngIf="showSaveThumbnail"
       class="thumbnail-button save-thumbnail-button">
       <i class="fa-solid fa-camera" *ngIf="!isCreatingThumbnail"></i>

@@ -109,7 +109,42 @@
 .thumbnail-preview-container {
   flex: 1;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.thumbnail-navigation {
+  display: flex;
+  gap: 0.5rem;
   justify-content: center;
+}
+
+.nav-button {
+  background: var(--surface3-bg);
+  color: var(--fg2);
+  border: 1px solid var(--surface4-bg);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+
+.nav-button:hover:not(:disabled) {
+  background: var(--primary3-bg);
+  color: var(--fg1);
+  transform: translateY(-1px);
+}
+
+.nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .thumbnail-section {

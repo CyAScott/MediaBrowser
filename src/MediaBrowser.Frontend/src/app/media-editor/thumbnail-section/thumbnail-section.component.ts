@@ -19,35 +19,20 @@ export interface MediaThumbnailData {
   styleUrls: ['../media-editor.css', './thumbnail-section.css']
 })
 export class ThumbnailSectionComponent implements AfterViewInit {
+  @Input() initialThumbnail: ThumbnailData | null = null;
   @Input() isCreatingThumbnail: boolean = false;
   @Input() mediaData!: MediaThumbnailData;
   @Input() showSaveThumbnail: boolean = false;
   @Input() showSetThumbnail: boolean = false;
-  @Input() thumbnailData: ThumbnailData = {
-    thumbnail: null,
-    thumbnailPreviewUrl: '',
-    selectedImageFile: null
-  };
 
   @Output() saveThumbnailEvent = new EventEmitter<void>();
   @Output() setPreview = new EventEmitter<void>();
-  @Output() thumbnailDataChange = new EventEmitter<ThumbnailData>();
+  @Output() thumbnailChange = new EventEmitter<ThumbnailData>();
 
   @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
   @ViewChild('videoPlayer') videoPlayer?: ElementRef<HTMLVideoElement>;
 
   private cdr = inject(ChangeDetectorRef);
-  
-  ngAfterViewInit(): void {
-    // Ensure video is muted when view initializes
-    setTimeout(() => {
-      if (this.videoPlayer) {
-        this.videoPlayer.nativeElement.muted = true;
-        this.videoPlayer.nativeElement.volume = 0;
-      }
-    }, 0);
-  }
-  
   private generateThumbnailPreview(videoElement: HTMLVideoElement): string {
     try {
       // Create a canvas element to capture the video frame
@@ -88,22 +73,43 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {
-      this.thumbnailData.selectedImageFile = file;
-      this.thumbnailData.thumbnail = null;
-      this.thumbnailData.thumbnailPreviewUrl = e.target?.result as string;
-      this.onThumbnailDataChange();
+      this.selectedThumbnailIndex = this.thumbnails.length;
+      this.selectedThumbnail = {
+        selectedImageFile: file,
+        thumbnail: null,
+        thumbnailPreviewUrl: e.target?.result as string,
+      };
+      this.thumbnails.push(this.selectedThumbnail);
+      this.onThumbnailChange();
       this.cdr.detectChanges();
     };
     reader.readAsDataURL(file);
   }
-  private onThumbnailDataChange(): void {
-    this.thumbnailDataChange.emit(this.thumbnailData);
+  private onThumbnailChange(): void {
+    if (this.selectedThumbnail) {
+      this.thumbnailChange.emit(this.selectedThumbnail);
+    }
   }
 
   isDragOver: boolean = false;
+  selectedThumbnail: ThumbnailData | null = null;
+  selectedThumbnailIndex: number = -1;
+  thumbnails: ThumbnailData[] = [];
 
   getVideoUrl(): string {
     return this.mediaData?.url || '';
+  }
+  
+  ngAfterViewInit(): void {
+    // Ensure video is muted when view initializes
+    setTimeout(() => {
+      if (this.initialThumbnail) {
+        this.thumbnails = [this.initialThumbnail];
+        this.selectedThumbnail = this.initialThumbnail;
+        this.selectedThumbnailIndex = 0;
+        this.onThumbnailChange();
+      }
+    }, 0);
   }
 
   onDragLeave(event: DragEvent): void {
@@ -143,9 +149,9 @@ export class ThumbnailSectionComponent implements AfterViewInit {
       // Ensure video is muted
       this.videoPlayer.nativeElement.muted = true;
       this.videoPlayer.nativeElement.volume = 0;
-      
-      if (this.thumbnailData.thumbnail !== null) {
-        this.videoPlayer.nativeElement.currentTime = this.thumbnailData.thumbnail;
+
+      if (typeof this.selectedThumbnail?.thumbnail === 'number') {
+        this.videoPlayer.nativeElement.currentTime = this.selectedThumbnail!.thumbnail!;
       }
     }
   }
@@ -154,16 +160,33 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     this.fileInput?.nativeElement.click();
   }
 
+  nextThumbnail(): void {
+    this.selectedThumbnailIndex++;
+    this.selectedThumbnail = this.thumbnails[this.selectedThumbnailIndex];
+    this.onThumbnailChange();
+  }
+
+  previousThumbnail(): void {
+    this.selectedThumbnailIndex--;
+    this.selectedThumbnail = this.thumbnails[this.selectedThumbnailIndex];
+    this.onThumbnailChange();
+  }
+
   saveThumbnail(): void {
-    this.onThumbnailDataChange();
+    this.onThumbnailChange();
     this.saveThumbnailEvent.emit();
   }
 
   setThumbnailPreview(): void {
     if (this.videoPlayer) {
-      this.thumbnailData.thumbnail = this.videoPlayer.nativeElement.currentTime;
-      this.thumbnailData.thumbnailPreviewUrl = this.generateThumbnailPreview(this.videoPlayer.nativeElement);
-      this.onThumbnailDataChange();
+      this.selectedThumbnailIndex = this.thumbnails.length;
+      this.selectedThumbnail = {
+        selectedImageFile: null,
+        thumbnail: this.videoPlayer.nativeElement.currentTime,
+        thumbnailPreviewUrl: this.generateThumbnailPreview(this.videoPlayer.nativeElement),
+      };
+      this.thumbnails.push(this.selectedThumbnail);
+      this.onThumbnailChange();
     } else if (this.fileInput) {
       this.fileInput.nativeElement.click();
     }

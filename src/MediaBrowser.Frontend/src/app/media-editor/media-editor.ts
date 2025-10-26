@@ -47,9 +47,7 @@ export class MediaEditorComponent implements OnInit {
   isSaving: boolean = false;
   mediaData: MediaReadModel | null = null;
   mediaId: string | null = null;
-  selectedImageFile: File | null = null;
-  thumbnail: number | null = null;
-  thumbnailPreviewUrl: string = '';
+  thumbnail: ThumbnailData | null = null;
 
   // Form fields for editable properties
   editableData: UpdateMediaRequest = {
@@ -84,16 +82,18 @@ export class MediaEditorComponent implements OnInit {
   async loadMediaById(id: string): Promise<void> {
     this.filename = null;
     this.mediaData = this.navigation?.extras.state?.['mediaData'] ?? await firstValueFrom(this.mediaService.get(id));
-    this.thumbnail = this.mediaData!.thumbnail ?? 0;
-    this.thumbnailPreviewUrl = this.mediaData!.thumbnailUrl || '';
+    this.thumbnail = {
+      selectedImageFile: null,
+      thumbnail: this.mediaData!.thumbnail!,
+      thumbnailPreviewUrl: this.mediaData!.thumbnailUrl || ''
+    };
   }
 
   async loadMediaToImport(): Promise<void> {
     this.filename = this.route.snapshot.paramMap.get('fileName');
     this.mediaData = this.navigation?.extras.state?.['mediaData'] ??
       ImportComponent.convertToMediaReadModel(await firstValueFrom(this.importService.readFileInfo(this.filename!)));
-    this.thumbnail = this.mediaData?.mime.startsWith('video/') ? 0 : null;
-    this.thumbnailPreviewUrl = '';
+    this.thumbnail = null;
 
     if (!this.mediaData || !this.filename) {
       throw new Error('No media data or filename found');
@@ -123,8 +123,10 @@ export class MediaEditorComponent implements OnInit {
     try {
       if (this.filename) {
 
-        let thumbnail = this.thumbnail ?? undefined;
-        if (!this.thumbnail && !this.selectedImageFile && this.mediaData.mime.startsWith('video/')) {
+        let thumbnail = this.thumbnail?.thumbnail ?? undefined;
+        if (!this.thumbnail?.selectedImageFile 
+          && typeof thumbnail !== 'number'
+          && this.mediaData.mime.startsWith('video/')) {
           thumbnail = 0;
         }
 
@@ -133,8 +135,8 @@ export class MediaEditorComponent implements OnInit {
           thumbnail: thumbnail
         }));
 
-        if (this.selectedImageFile) {
-          await firstValueFrom(this.mediaService.updateThumbnail(media.id, this.selectedImageFile));
+        if (this.thumbnail?.selectedImageFile) {
+          await firstValueFrom(this.mediaService.updateThumbnail(media.id, this.thumbnail.selectedImageFile));
         }
       } else if (this.mediaId) {
         await firstValueFrom(this.mediaService.update(this.mediaId, {
@@ -210,14 +212,6 @@ export class MediaEditorComponent implements OnInit {
     };
   }
 
-  getThumbnailData(): ThumbnailData {
-    return {
-      thumbnail: this.thumbnail,
-      thumbnailPreviewUrl: this.thumbnailPreviewUrl,
-      selectedImageFile: this.selectedImageFile
-    };
-  }
-
   getThumbnailMediaData(): MediaThumbnailData {
     return {
       mime: this.mediaData!.mime,
@@ -244,10 +238,8 @@ export class MediaEditorComponent implements OnInit {
     this.editableData.writers = peopleData.writers;
   }
 
-  onThumbnailDataChange(thumbnailData: ThumbnailData): void {
-    this.thumbnail = thumbnailData.thumbnail;
-    this.thumbnailPreviewUrl = thumbnailData.thumbnailPreviewUrl;
-    this.selectedImageFile = thumbnailData.selectedImageFile;
+  onThumbnailChange(thumbnail: ThumbnailData): void {
+    this.thumbnail = thumbnail;
   }
 
   onSetThumbnailPreview(): void {
@@ -263,10 +255,10 @@ export class MediaEditorComponent implements OnInit {
     try {
       this.isCreatingThumbnail = true;
 
-      if (this.selectedImageFile) {
-        await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, this.selectedImageFile));
-      } else if (this.thumbnail !== null) {
-        await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, { at: this.thumbnail }));
+      if (this.thumbnail?.selectedImageFile) {
+        await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, this.thumbnail.selectedImageFile));
+      } else if (this.thumbnail?.thumbnail !== null) {
+        await firstValueFrom(this.mediaService.updateThumbnail(this.mediaId, { at: this.thumbnail!.thumbnail }));
       }
     } catch (error) {
       console.error('Error creating thumbnail:', error);

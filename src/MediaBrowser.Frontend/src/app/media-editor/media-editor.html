@@ -41,12 +41,12 @@
       <app-thumbnail-section
         (saveThumbnailEvent)="onSaveThumbnail()"
         (setPreview)="onSetThumbnailPreview()"
-        (thumbnailDataChange)="onThumbnailDataChange($event)"
+        (thumbnailChange)="onThumbnailChange($event)"
+        [initialThumbnail]="thumbnail"
         [isCreatingThumbnail]="isCreatingThumbnail"
         [mediaData]="getThumbnailMediaData()"
         [showSaveThumbnail]="mediaData.mime.startsWith('video/') && mediaId !== null"
-        [showSetThumbnail]="mediaData.mime.startsWith('video/')"
-        [thumbnailData]="getThumbnailData()">
+        [showSetThumbnail]="mediaData.mime.startsWith('video/')">
       </app-thumbnail-section>
     </div>
   </div>
