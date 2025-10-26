@@ -6,17 +6,19 @@
   <div class="thumbnail-container">
 
     <div class="thumbnail-selection-container">
-      <video
-        (loadedmetadata)="onVideoMetadataLoaded()"
-        [src]="getVideoUrl()"
-        *ngIf="mediaData.mime.startsWith('video/')"
-        #videoPlayer
-        class="video-player"
-        controls
-        muted
-        preload="metadata">
-        Your browser does not support the video tag.
-      </video>
+      <div class="video-container" *ngIf="mediaData.mime.startsWith('video/')">
+        <video
+          (loadedmetadata)="onVideoMetadataLoaded()"
+          [src]="getVideoUrl()"
+          #videoPlayer
+          class="video-player"
+          controls
+          muted
+          preload="metadata">
+          Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+      </div>
 
       <div
         (click)="openFileBrowser()"
