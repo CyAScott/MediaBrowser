@@ -153,6 +153,8 @@ export class ThumbnailSectionComponent implements AfterViewInit {
       if (typeof this.selectedThumbnail?.thumbnail === 'number') {
         this.videoPlayer.nativeElement.currentTime = this.selectedThumbnail!.thumbnail!;
       }
+
+      this.videoPlayer.nativeElement.focus();
     }
   }
 
@@ -164,17 +166,20 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     this.selectedThumbnailIndex++;
     this.selectedThumbnail = this.thumbnails[this.selectedThumbnailIndex];
     this.onThumbnailChange();
+    this.videoPlayer?.nativeElement.focus();
   }
 
   previousThumbnail(): void {
     this.selectedThumbnailIndex--;
     this.selectedThumbnail = this.thumbnails[this.selectedThumbnailIndex];
     this.onThumbnailChange();
+    this.videoPlayer?.nativeElement.focus();
   }
 
   saveThumbnail(): void {
     this.onThumbnailChange();
     this.saveThumbnailEvent.emit();
+    this.videoPlayer?.nativeElement.focus();
   }
 
   setThumbnailPreview(): void {
@@ -187,6 +192,7 @@ export class ThumbnailSectionComponent implements AfterViewInit {
       };
       this.thumbnails.push(this.selectedThumbnail);
       this.onThumbnailChange();
+      this.videoPlayer.nativeElement.focus();
     } else if (this.fileInput) {
       this.fileInput.nativeElement.click();
     }
