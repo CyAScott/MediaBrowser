@@ -13,6 +13,14 @@
         class="result-card" >
       <div class="card-overlay">
         <i class="fa-solid fa-play"></i>
+        <a 
+          (click)="$event.stopPropagation()"
+          [routerLink]="['/edit', result.id]"
+          [state]="{ mediaData: result }"
+          class="settings-icon"
+          title="Edit media">
+          <i class="fa-solid fa-file-pen"></i>
+        </a>
       </div>
     </a>
   </div>

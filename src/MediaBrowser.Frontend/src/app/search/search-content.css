@@ -25,6 +25,7 @@
 }
 
 .card-overlay i {
+  text-shadow: 0.25rem 0.25rem 1rem black;
   opacity: 0.7;
 }
 
@@ -46,6 +47,19 @@
 .search-grid .result-card {
   width: 100%;
   height: auto;
+}
+
+.settings-icon {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  color: var(--fg1);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 1.25rem;
+  z-index: 10;
+  opacity: 0.7;
+  text-shadow: 0.25rem 0.25rem 1rem black;
 }
 
 /* Responsive adjustments */
