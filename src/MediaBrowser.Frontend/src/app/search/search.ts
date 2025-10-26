@@ -231,7 +231,6 @@ export class SearchComponent implements OnInit {
       }
 
       const cachedDataValue = sessionStorage.getItem(SearchComponent.CACHE_KEY);
-      console.log('Cached data value:', cachedDataValue);
       const cachedData: CacheData | null = cachedDataValue && !autoIncrementPage ? JSON.parse(cachedDataValue) : null;
 
       const searchRequestWithoutPageSettings = { ...searchRequest };
