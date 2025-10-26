@@ -183,6 +183,10 @@ export class ThumbnailSectionComponent implements AfterViewInit {
   }
 
   setThumbnailPreview(): void {
+    if (this.isCreatingThumbnail || !this.mediaData) {
+      return;
+    }
+
     if (this.videoPlayer) {
       this.selectedThumbnailIndex = this.thumbnails.length;
       this.selectedThumbnail = {

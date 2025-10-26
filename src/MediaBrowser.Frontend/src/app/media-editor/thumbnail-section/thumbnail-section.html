@@ -9,6 +9,7 @@
       <div class="video-container" *ngIf="mediaData.mime.startsWith('video/')">
         <video
           (loadedmetadata)="onVideoMetadataLoaded()"
+          (keydown.enter)="setThumbnailPreview()"
           [src]="getVideoUrl()"
           #videoPlayer
           class="video-player"
