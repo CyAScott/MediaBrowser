@@ -13,6 +13,7 @@ import { PeopleSectionComponent, PeopleData } from './people-section/people-sect
 import { ReadonlyInfoSectionComponent, MediaReadOnlyData } from './readonly-info-section/readonly-info-section.component';
 import { ThumbnailSectionComponent, ThumbnailData, MediaThumbnailData } from './thumbnail-section/thumbnail-section.component';
 import { ImportComponent } from '../import/import';
+import { SearchComponent } from '../search/search';
 
 @Component({
   selector: 'app-media-editor',
@@ -143,6 +144,7 @@ export class MediaEditorComponent implements OnInit {
           ...this.editableData
         }));
       }
+      SearchComponent.clearCachedResults();
       this.location.back();
     } catch (error) {
       console.error('Error saving media changes:', error);

@@ -6,6 +6,12 @@ import { MediaReadModel, MediaService, SearchMediaRequest } from '../services/me
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { SearchContentComponent } from './search-content';
 
+interface CacheData {
+  hasMoreResults: boolean;
+  request: SearchMediaRequest;
+  results: MediaReadModel[];
+}
+
 /**
  * SearchComponent that uses URL query parameters for search state management.
  * This allows for bookmarkable search results and proper browser navigation.
@@ -62,7 +68,12 @@ export class SearchComponent implements OnInit {
   private pageIndex: number = 0;
   private pendingScrollUpdate: boolean = false;
   private scrollPosition: number = 0;
+  static readonly CACHE_KEY = 'cached-results';
   static readonly PAGE_KEY = 'search-page-position';
+
+  static clearCachedResults(): void {
+    sessionStorage.removeItem(SearchComponent.CACHE_KEY);
+  }
 
   static clearPagePositionState(): void {
     sessionStorage.removeItem(SearchComponent.PAGE_KEY);
@@ -219,16 +230,38 @@ export class SearchComponent implements OnInit {
         searchRequest.writers = [...this.writers];
       }
 
-      const response = await firstValueFrom(this.mediaService.search(searchRequest));
+      const cachedDataValue = sessionStorage.getItem(SearchComponent.CACHE_KEY);
+      console.log('Cached data value:', cachedDataValue);
+      const cachedData: CacheData | null = cachedDataValue && !autoIncrementPage ? JSON.parse(cachedDataValue) : null;
 
-      this.results = [...this.results, ...response.results];
+      const searchRequestWithoutPageSettings = { ...searchRequest };
+      delete searchRequestWithoutPageSettings.skip;
+      delete searchRequestWithoutPageSettings.take;
 
-      // Check if we have more results
-      this.hasMoreResults = response.results.length === take;
-      
-      // Increment for next load
-      if (autoIncrementPage && response.results.length > 0) {
-        this.pageIndex++;
+      if (cachedData && JSON.stringify(cachedData.request) === JSON.stringify(searchRequestWithoutPageSettings)) {
+        this.hasMoreResults = cachedData.hasMoreResults;
+        this.results = cachedData.results;
+      } else {
+        const response = await firstValueFrom(this.mediaService.search(searchRequest));
+
+        this.results = [...this.results, ...response.results];
+
+        // Check if we have more results
+        this.hasMoreResults = response.results.length === take;
+        
+        // Increment for next load
+        if (autoIncrementPage && response.results.length > 0) {
+          this.pageIndex++;
+        }
+
+        delete searchRequest.skip;
+        delete searchRequest.take;
+
+        sessionStorage.setItem(SearchComponent.CACHE_KEY, JSON.stringify({
+          hasMoreResults: this.hasMoreResults,
+          request: searchRequest,
+          results: this.results,
+        }));
       }
 
       this.updateQueryParams();
