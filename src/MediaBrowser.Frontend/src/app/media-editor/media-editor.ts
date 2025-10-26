@@ -145,6 +145,7 @@ export class MediaEditorComponent implements OnInit {
         }));
       }
       SearchComponent.clearCachedResults();
+      PeopleSectionComponent.clearCacheIfStale(this.getPeopleData());
       this.location.back();
     } catch (error) {
       console.error('Error saving media changes:', error);

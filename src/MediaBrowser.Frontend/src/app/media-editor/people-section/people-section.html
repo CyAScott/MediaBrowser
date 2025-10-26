@@ -6,12 +6,13 @@
     <label>Cast</label>
     <div class="array-input">
       <div *ngFor="let member of peopleData.cast; let i = index; trackBy: trackByIndex" class="array-item">
-        <input
-          (ngModelChange)="onPeopleChange()"
+        <app-typeahead-input
           [(ngModel)]="peopleData.cast[i]"
-          class="form-input array-field"
+          [suggestions]="getCastSuggestions()"
           placeholder="Cast member name"
-          type="text">
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('cast', i, $event)"
+        ></app-typeahead-input>
         <button
           (click)="removeArrayItem('cast', i)"
           class="remove-button"
@@ -33,12 +34,13 @@
     <label>Directors</label>
     <div class="array-input">
       <div *ngFor="let director of peopleData.directors; let i = index; trackBy: trackByIndex" class="array-item">
-        <input
-          (ngModelChange)="onPeopleChange()"
+        <app-typeahead-input
           [(ngModel)]="peopleData.directors[i]"
-          class="form-input array-field"
+          [suggestions]="getDirectorsSuggestions()"
           placeholder="Director name"
-          type="text">
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('directors', i, $event)"
+        ></app-typeahead-input>
         <button
           (click)="removeArrayItem('directors', i)"
           class="remove-button"
@@ -60,12 +62,13 @@
     <label>Genres</label>
     <div class="array-input">
       <div *ngFor="let genre of peopleData.genres; let i = index; trackBy: trackByIndex" class="array-item">
-        <input
-          (ngModelChange)="onPeopleChange()"
+        <app-typeahead-input
           [(ngModel)]="peopleData.genres[i]"
-          class="form-input array-field"
+          [suggestions]="getGenresSuggestions()"
           placeholder="Genre name"
-          type="text">
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('genres', i, $event)"
+        ></app-typeahead-input>
         <button
           (click)="removeArrayItem('genres', i)"
           class="remove-button"
@@ -87,12 +90,13 @@
     <label>Producers</label>
     <div class="array-input">
       <div *ngFor="let producer of peopleData.producers; let i = index; trackBy: trackByIndex" class="array-item">
-        <input
-          (ngModelChange)="onPeopleChange()"
+        <app-typeahead-input
           [(ngModel)]="peopleData.producers[i]"
-          class="form-input array-field"
+          [suggestions]="getProducersSuggestions()"
           placeholder="Producer name"
-          type="text">
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('producers', i, $event)"
+        ></app-typeahead-input>
         <button
           (click)="removeArrayItem('producers', i)"
           class="remove-button"
@@ -114,12 +118,13 @@
     <label>Writers</label>
     <div class="array-input">
       <div *ngFor="let writer of peopleData.writers; let i = index; trackBy: trackByIndex" class="array-item">
-        <input
-          (ngModelChange)="onPeopleChange()"
+        <app-typeahead-input
           [(ngModel)]="peopleData.writers[i]"
-          class="form-input array-field"
+          [suggestions]="getWritersSuggestions()"
           placeholder="Writer name"
-          type="text">
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('writers', i, $event)"
+        ></app-typeahead-input>
         <button
           (click)="removeArrayItem('writers', i)"
           class="remove-button"

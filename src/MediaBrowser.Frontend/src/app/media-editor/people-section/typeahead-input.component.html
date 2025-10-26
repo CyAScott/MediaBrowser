@@ -1,0 +1,23 @@
+<div class="typeahead-container">
+  <input
+    (blur)="onBlur()"
+    (focus)="onFocus()"
+    (input)="onInput($event)"
+    (keydown)="onKeyDown($event)"
+    [placeholder]="placeholder"
+    [value]="displayValue"
+    #inputElement
+    autocomplete="off"
+    class="form-input array-field"
+    type="text"/>
+  <div *ngIf="showDropdown && filteredSuggestions.length > 0" class="typeahead-dropdown">
+    <div
+      (mousedown)="selectSuggestion(suggestion)"
+      (mouseenter)="highlightedIndex = i"
+      [class.highlighted]="i === highlightedIndex"
+      *ngFor="let suggestion of filteredSuggestions; let i = index"
+      class="typeahead-option">
+      {{ suggestion }}
+    </div>
+  </div>
+</div>

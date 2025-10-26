@@ -1,0 +1,32 @@
+.typeahead-container {
+  position: relative;
+  width: 100%;
+}
+
+.typeahead-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--surface3-bg);
+  border: none;
+  border-radius: var(--radius2);
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  max-height: 200px;
+  overflow-y: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.typeahead-option {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  color: var(--fg1);
+}
+
+.typeahead-option:hover,
+.typeahead-option.highlighted {
+  background: var(--primary3-bg);
+  color: var(--fg4);
+}
