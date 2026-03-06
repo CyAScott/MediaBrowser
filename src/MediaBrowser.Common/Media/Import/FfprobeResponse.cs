@@ -1,5 +1,6 @@
 namespace MediaBrowser.Media.Import;
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class FfprobeResponse
 {
     [JsonPropertyName("streams")]
@@ -8,6 +9,7 @@ public class FfprobeResponse
     public required Format? Format { get; init; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public record Stream
 {
     [JsonPropertyName("index")]
@@ -102,6 +104,7 @@ public record Stream
     public int? InitialPadding { get; set; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public record Disposition
 {
     [JsonPropertyName("default")]
@@ -144,6 +147,7 @@ public record Disposition
     public int? Multilayer { get; set; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public record StreamTags
 {
     [JsonPropertyName("creation_time")]
@@ -156,6 +160,7 @@ public record StreamTags
     public string? VendorId { get; set; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public record Format
 {
     [JsonPropertyName("filename")]
@@ -184,6 +189,7 @@ public record Format
     public FormatTags? Tags { get; set; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public record FormatTags
 {
     [JsonPropertyName("major_brand")]
@@ -195,4 +201,3 @@ public record FormatTags
     [JsonPropertyName("creation_time")]
     public string? CreationTime { get; set; }
 }
-

@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-
 namespace MediaBrowser.Users;
 
 [ApiController, Route("api/[controller]")]
@@ -26,13 +24,13 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         var key = Encoding.UTF8.GetBytes(userConfig.JwtSecretKey);
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(
+            Subject = new(
             [
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new(ClaimTypes.Name, user.Username),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString())
             ]),
             Expires = DateTime.UtcNow.AddMinutes(userConfig.JwtExpiryMinutes),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+            SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             Issuer = userConfig.JwtIssuer,
             Audience = userConfig.JwtAudience
         };
@@ -40,7 +38,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         var token = tokenHandler.CreateToken(tokenDescriptor);
         var tokenString = tokenHandler.WriteToken(token);
 
-        Response.Cookies.Append(JwtCookieMiddleware.CookieName, tokenString, new CookieOptions
+        Response.Cookies.Append(JwtCookieMiddleware.CookieName, tokenString, new()
         {
             HttpOnly = false,
             Expires = tokenDescriptor.Expires,
@@ -52,7 +50,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpPost("logout")]
     public ActionResult Logout()
     {
-        Response.Cookies.Append(JwtCookieMiddleware.CookieName, "", new CookieOptions
+        Response.Cookies.Append(JwtCookieMiddleware.CookieName, "", new()
         {
             HttpOnly = false,
             Expires = DateTime.UtcNow.AddDays(-1),
@@ -93,7 +91,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
 
         return user.ToReadModel();
     }
-    
+
     [HttpPut("me/password")]
     public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
@@ -108,16 +106,16 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
 
         return Ok();
     }
-    
+
     [HttpGet("")]
     public async Task<ActionResult<IReadOnlyList<UserReadModel>>> GetUsers()
     {
         var users = await context.Users.ToListAsync();
-        
+
         return users.Select(u => u.ToReadModel()).ToList();
     }
-    
-    [HttpDelete("{id}")]
+
+    [HttpDelete("{id:guid}")]
     public async Task<ActionResult> DeleteUser(Guid id)
     {
         var user = await context.Users.FindAsync(id);

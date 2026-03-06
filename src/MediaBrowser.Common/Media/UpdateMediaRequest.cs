@@ -1,5 +1,6 @@
 namespace MediaBrowser.Media;
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class UpdateMediaRequest
 {
     public required string Title { get; init; }
@@ -13,14 +14,14 @@ public class UpdateMediaRequest
 
     [Range(0, 5)]
     public int? UserStarRating { get; init; }
-    
+
     public required IReadOnlyList<string> Cast { get; init; }
-    
+
     public required IReadOnlyList<string> Directors { get; init; }
-    
+
     public required IReadOnlyList<string> Genres { get; init; }
-    
+
     public required IReadOnlyList<string> Producers { get; init; }
-    
+
     public required IReadOnlyList<string> Writers { get; init; }
 }

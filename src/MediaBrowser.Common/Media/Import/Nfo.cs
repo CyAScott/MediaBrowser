@@ -1,7 +1,3 @@
-using System.Xml;
-using HandlebarsDotNet;
-using HandlebarsDotNet.Extension.Json;
-
 namespace MediaBrowser.Media.Import;
 
 public class Nfo(MediaConfig mediaConfig)
@@ -10,7 +6,7 @@ public class Nfo(MediaConfig mediaConfig)
     {
         using var stream = typeof(Nfo).Assembly.GetManifestResourceStream("MediaBrowser.Media.Import.Nfo.xml");
         using var reader = new StreamReader(stream!, Encoding.UTF8);
-        
+
         var template = reader.ReadToEnd();
 
         var handlebars = Handlebars.Create();
@@ -24,14 +20,14 @@ public class Nfo(MediaConfig mediaConfig)
         var json = JsonSerializer.Serialize(mediaEntity);
 
         using var document = JsonDocument.Parse(json);
-        
+
         var contents = _template(document);
 
         if (File.Exists(fileLocation))
         {
             File.Delete(fileLocation);
         }
-        
+
         await File.WriteAllTextAsync(fileLocation, contents);
     }
 
@@ -44,7 +40,7 @@ public class Nfo(MediaConfig mediaConfig)
         {
             throw new ParseNfoException(1, "Invalid or missing media ID");
         }
-        
+
         var hash = xmlDoc.SelectSingleNode("//md5")?.InnerText;
         if (string.IsNullOrWhiteSpace(hash) || hash.Length != 32)
         {
@@ -57,7 +53,7 @@ public class Nfo(MediaConfig mediaConfig)
         {
             throw new ParseNfoException(3, "Invalid or missing mime type");
         }
-        
+
         var fileInfo = new FileInfo(Path.Combine(mediaConfig.MediaDirectory, $"{hash}.{extension}"));
         if (!fileInfo.Exists)
         {
@@ -68,14 +64,14 @@ public class Nfo(MediaConfig mediaConfig)
         try
         {
             var json = Guard.Against.NullOrEmpty(xmlDoc.SelectSingleNode("//ffprobe")?.InnerText);
-            
+
             ffprobeResponse = Guard.Against.Null(JsonSerializer.Deserialize<FfprobeResponse>(json));
         }
         catch (Exception error)
         {
             throw new ParseNfoException(5, "Error getting reading ffprobe info.", error);
         }
-        
+
         var request = new ImportMediaRequest
         {
             Title = xmlDoc.SelectSingleNode("//title")?.InnerText ?? string.Empty,
@@ -101,7 +97,7 @@ public class Nfo(MediaConfig mediaConfig)
                 ? thumbnail
                 : 0
         };
-        
+
         var media = MediaEntity.Create(
             mediaId: mediaId,
             fileInfo: fileInfo,
@@ -123,17 +119,12 @@ public class Nfo(MediaConfig mediaConfig)
     }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class ParseNfoException : Exception
 {
-    public ParseNfoException(int errorCode, string message) : base(message)
-    {
-        ErrorCode = errorCode;
-    }
+    public ParseNfoException(int errorCode, string message) : base(message) => ErrorCode = errorCode;
 
-    public ParseNfoException(int errorCode, string message, Exception innerException) : base(message, innerException)
-    {
-        ErrorCode = errorCode;
-    }
-    
+    public ParseNfoException(int errorCode, string message, Exception innerException) : base(message, innerException) => ErrorCode = errorCode;
+
     public int ErrorCode { get; }
 }

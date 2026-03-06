@@ -1,5 +1,3 @@
-using MediaBrowser;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -10,7 +8,7 @@ builder.Configuration
 
 Installer.OnBoot(builder);
 
-using var app = builder.Build();
+await using var app = builder.Build();
 using var cancelTokenSource = new CancellationTokenSource();
 
 await Installer.OnStartup(app, cancelTokenSource);

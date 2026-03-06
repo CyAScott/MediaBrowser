@@ -1,5 +1,6 @@
 namespace MediaBrowser;
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class DbConfig(IConfiguration configuration)
 {
     public bool MigrateOnBoot { get; } = bool.Parse(configuration["db:migrateOnBoot"]!);

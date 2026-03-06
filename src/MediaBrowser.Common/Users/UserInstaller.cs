@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-
 namespace MediaBrowser.Users;
 
 public static class UserInstaller
@@ -10,11 +7,11 @@ public static class UserInstaller
         // Configure JWT authentication
         var userConfig = new UserConfig(builder.Configuration);
         builder.Services.AddSingleton(userConfig);
-        
+
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new()
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -25,15 +22,13 @@ public static class UserInstaller
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userConfig.JwtSecretKey))
                 };
             });
-        builder.Services.AddAuthorization(options =>
-        {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        builder.Services.AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
-                .Build();
-        });
+                .Build());
     }
-    
-    public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
+
+    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
         if (source.IsCancellationRequested)
         {

@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace MediaBrowser;
 
 public class IndexController(IWebHostEnvironment env) : Controller
@@ -17,8 +14,8 @@ public class IndexController(IWebHostEnvironment env) : Controller
     public IActionResult Index(string? catchAll = null)
     {
         // Don't handle API routes or swagger routes - these should be handled by other controllers
-        if (Request.Path.StartsWithSegments("/api") || 
-            Request.Path.StartsWithSegments("/swagger"))
+        if (Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase) ||
+            Request.Path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase))
         {
             return NotFound();
         }

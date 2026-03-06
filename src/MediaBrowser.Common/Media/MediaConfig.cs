@@ -12,7 +12,7 @@ public class MediaConfig(IConfiguration configuration)
     /// </summary>
     public IReadOnlyDictionary<string, FileExtensionInfo> ImportExtensions { get; } =
         configuration.GetSection("media:importExtensions").Get<Dictionary<string, FileExtensionInfo>>()!;
-    
+
     public bool TryToGetExtensionFromMime(string? mime, out string ext)
     {
         ext = ImportExtensions.Values
@@ -33,11 +33,12 @@ public class MediaConfig(IConfiguration configuration)
     public bool SyncOnBoot { get; } = bool.Parse(configuration["media:syncOnBoot"] ?? "false");
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class FileExtensionInfo
 {
     public required string Ext { get; init; }
     public required string Mime { get; init; }
-    
+
     /// <summary>
     /// This sort lets some file extensions take precedence
     /// over others when multiple extensions map to the same MIME type.

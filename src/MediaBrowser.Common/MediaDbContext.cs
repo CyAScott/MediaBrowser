@@ -15,7 +15,7 @@ public abstract class MediaDbContext(DbType type, DbContextOptions options) : Db
     public DbSet<ProducerEntity> Producers { get; init; }
     public DbSet<WriterEntity> Writers { get; init; }
     public DbSet<UserEntity> Users { get; init; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new CastEntityConfiguration());
@@ -26,7 +26,7 @@ public abstract class MediaDbContext(DbType type, DbContextOptions options) : Db
         modelBuilder.ApplyConfiguration(new UserEntityConfiguration());
 
         modelBuilder.ApplyConfiguration(new MediaEntityConfiguration(type));
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }

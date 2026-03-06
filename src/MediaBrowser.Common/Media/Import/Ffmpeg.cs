@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace MediaBrowser.Media.Import;
 
 public interface IFfmpeg
@@ -26,9 +24,9 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
             })!;
 
             await ffprobe.WaitForExitAsync(cancellationToken);
-        
+
             var json = await ffprobe.StandardOutput.ReadToEndAsync(cancellationToken);
-        
+
             var response = JsonSerializer.Deserialize<FfprobeResponse>(json)!;
 
             var mime = response.Format?.FormatName
@@ -40,8 +38,7 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
 
             if (mime == null
                 && response.Streams?.Count == 1
-                && _imageCodecs.TryGetValue(response.Streams[0].CodecName ?? String.Empty,
-                    out var imageMime))
+                && _imageCodecs.TryGetValue(response.Streams[0].CodecName ?? string.Empty, out var imageMime))
             {
                 mime = imageMime;
             }
@@ -54,7 +51,7 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
             return null;
         }
     }
-    static readonly IReadOnlyDictionary<string, string> _imageCodecs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    static readonly Dictionary<string, string> _imageCodecs = new(StringComparer.OrdinalIgnoreCase)
     {
         ["png"] = "image/png",
         ["mjpeg"] = "image/jpeg",
@@ -62,12 +59,12 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
         ["gif"] = "image/gif",
         ["bmp"] = "image/bmp",
         ["tiff"] = "image/tiff",
-        ["webp"] = "image/webp",
+        ["webp"] = "image/webp"
     };
 
     public async Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan? at = null, CancellationToken cancellationToken = default)
     {
-        var timeAt = at?.ToString(@"hh\:mm\:ss\.f");
+        var timeAt = at?.ToString(@"hh\:mm\:ss\.f", CultureInfo.InvariantCulture);
         try
         {
             if (File.Exists(outputPath))
@@ -76,12 +73,12 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
             }
 
             var args = new List<string>();
-            
+
             if (timeAt != null)
             {
                 args.AddRange(["-ss", timeAt]);
             }
-            
+
             args.AddRange([
                 "-i", inputPath,
                 "-vframes", "1",
@@ -91,13 +88,10 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
             using var ffprobe = Process.Start("ffmpeg", args);
 
             await ffprobe.WaitForExitAsync(cancellationToken);
-            
-            if (!File.Exists(outputPath))
-            {
-                throw new FileNotFoundException("Failed to extract thumbnail for {Path}", outputPath);
-            }
 
-            return true;
+            return !File.Exists(outputPath)
+                ? throw new FileNotFoundException("Failed to extract thumbnail for {Path}", outputPath)
+                : true;
         }
         catch (Exception error)
         {

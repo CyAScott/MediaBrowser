@@ -1,11 +1,11 @@
 namespace MediaBrowser.Media.Directors;
 
-[Table("media_directors")]
+[Table("media_directors"), ExcludeFromCodeCoverage(Justification = "POCO")]
 public class DirectorEntity
 {
     [Column("id"), JsonPropertyName("id"), Key, Required,
      DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required int Id { get; set; } 
+    public required int Id { get; set; }
     [Column("media_id"), JsonPropertyName("mediaId"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
     [Column("director"), JsonPropertyName("name"), Required, MaxLength(50)]

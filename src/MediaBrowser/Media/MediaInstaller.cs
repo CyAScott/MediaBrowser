@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace MediaBrowser.Media;
 
 static class MediaInstaller
@@ -34,7 +32,7 @@ static class MediaInstaller
         }
     }
 
-    public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
         var dbConfig = app.Services.GetRequiredService<DbConfig>();
         if (dbConfig.MigrateOnBoot)

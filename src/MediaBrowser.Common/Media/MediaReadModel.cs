@@ -1,5 +1,6 @@
 namespace MediaBrowser.Media;
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class MediaReadModel
 {
     public required Guid Id { get; init; }
@@ -39,22 +40,22 @@ public class MediaReadModel
     public required DateTime? UpdatedOn { get; init; }
 
     public required FfprobeResponse Ffprobe { get; init; }
-    
+
     public required IReadOnlyList<string> Cast { get; init; }
-    
+
     public required IReadOnlyList<string> Directors { get; init; }
-    
+
     public required IReadOnlyList<string> Genres { get; init; }
-    
+
     public required IReadOnlyList<string> Producers { get; init; }
-    
+
     public required IReadOnlyList<string> Writers { get; init; }
-    
+
     public required string Url { get; init; }
 
     public required double? Thumbnail { get; init; }
-    
+
     public required string? ThumbnailUrl { get; init; }
-    
+
     public required string? FanartThumbnailUrl { get; init; }
 }

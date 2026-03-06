@@ -1,10 +1,8 @@
-using System.Text.RegularExpressions;
-
 namespace MediaBrowser.Media;
 
-public static class ValidationTools
+public static partial class ValidationTools
 {
-    public static bool IsNameValid(string name) => Regex.IsMatch(name,
-        @"^([a-z\d]+ )*[a-z\d]+$",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase) && name.Length <= 50;
+    public static bool IsNameValid(string name) => ValidNameRegex().IsMatch(name) && name.Length <= 50;
+    [GeneratedRegex(@"^([a-z\d]+ )*[a-z\d]+$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
+    static private partial Regex ValidNameRegex();
 }

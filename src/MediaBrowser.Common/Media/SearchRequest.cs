@@ -34,7 +34,7 @@ public class SearchRequest
             query = query
                 .Where(m => directorsQuery.Any(n => m.Directors.Any(c => c.Name == n)));
         }
-        
+
         var genresQuery = Genres?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct()
             .ToArray();
@@ -43,7 +43,7 @@ public class SearchRequest
             query = query
                 .Where(m => genresQuery.Any(n => m.Genres.Any(g => g.Name == n)));
         }
-        
+
         if (!string.IsNullOrEmpty(Keywords))
         {
             query = query.Where(it =>
@@ -77,7 +77,7 @@ public class SearchRequest
             query = query
                 .Where(m => writersQuery.Any(n => m.Writers.Any(c => c.Name == n)));
         }
-        
+
         return query;
     }
 }
@@ -90,6 +90,7 @@ public enum Sort
     UserStarRating
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class SearchResponse
 {
     public required IReadOnlyList<MediaReadModel> Results { get; init; }

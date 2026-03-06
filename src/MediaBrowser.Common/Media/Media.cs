@@ -1,6 +1,6 @@
 namespace MediaBrowser.Media;
 
-[Table("media")]
+[Table("media"), ExcludeFromCodeCoverage(Justification = "POCO")]
 public class MediaEntity
 {
     [Column("id"), JsonPropertyName("id"), Key]
@@ -62,22 +62,22 @@ public class MediaEntity
 
     [Column("thumbnail"), JsonPropertyName("thumbnail")]
     public double? Thumbnail { get; set; }
-    
+
     [JsonPropertyName("cast")]
     public ICollection<CastEntity> Cast { get; set; } = [];
-    
+
     [JsonPropertyName("directors")]
     public ICollection<DirectorEntity> Directors { get; set; } = [];
-    
+
     [JsonPropertyName("genres")]
     public ICollection<GenreEntity> Genres { get; set; } = [];
-    
+
     [JsonPropertyName("producers")]
     public ICollection<ProducerEntity> Producers { get; set; } = [];
-    
+
     [JsonPropertyName("writers")]
     public ICollection<WriterEntity> Writers { get; set; } = [];
-    
+
     public MediaReadModel ToReadModel(MediaConfig config) => new()
     {
         Id = Id,
@@ -106,9 +106,9 @@ public class MediaEntity
         Writers = Writers.Select(it => it.Name).ToList(),
         Url = $"/api/Media/{Id}/file",
         Thumbnail = Thumbnail,
-        ThumbnailUrl = Mime.StartsWith("image/") || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
+        ThumbnailUrl = Mime.StartsWith("image/", StringComparison.InvariantCulture) || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
             ? $"/api/Media/{Id}/file/thumbnail" : null,
-        FanartThumbnailUrl = Mime.StartsWith("image/") || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
+        FanartThumbnailUrl = Mime.StartsWith("image/", StringComparison.InvariantCulture) || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
             ? $"/api/Media/{Id}/file/thumbnail-fanart" : null
     };
 
@@ -134,7 +134,7 @@ public class MediaEntity
         var writerEntities = new List<WriterEntity>();
 
         var createdOn = ctimeMs == null ? fileInfo.CreationTimeUtc : DateTime.UnixEpoch.AddMilliseconds(ctimeMs.Value);
-        
+
         var media = new MediaEntity
         {
             Id = mediaId ?? Guid.CreateVersion7(),
@@ -149,15 +149,15 @@ public class MediaEntity
             Size = fileInfo.Length,
             Width = width ?? ffprobe.Streams?.Select(it => it.Width).OfType<int>().Cast<int?>().FirstOrDefault(),
             Height = height ?? ffprobe.Streams?.Select(it => it.Height).OfType<int>().Cast<int?>().FirstOrDefault(),
-            Duration = double.Parse(ffprobe.Format?.Duration ?? "0"),
+            Duration = double.Parse(ffprobe.Format?.Duration ?? "0", CultureInfo.InvariantCulture),
             Md5 = hash,
             Rating = request.Rating,
             UserStarRating = request.UserStarRating,
-            Published = createdOn.ToString("yyyy-MM-dd"),
+            Published = createdOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             MtimeMs = mtimeMs ?? Convert.ToInt64((fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
             Ffprobe = ffprobe,
             Thumbnail = thumbnail,
-            
+
             Cast = castEntities,
             Directors = directorEntities,
             Genres = genreEntities,
@@ -234,7 +234,7 @@ public class MediaEntityConfiguration(DbType type) : IEntityTypeConfiguration<Me
         builder.Property(m => m.Description).HasMaxLength(2000);
         builder.Property(m => m.Mime).HasMaxLength(100);
         builder.Property(m => m.Published).HasMaxLength(100);
-        
+
         // Ensure MD5 is exactly 32 characters
         builder.Property(m => m.Md5).HasMaxLength(32);
 

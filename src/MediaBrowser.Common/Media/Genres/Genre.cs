@@ -1,11 +1,11 @@
 namespace MediaBrowser.Media.Genres;
 
-[Table("media_genres")]
+[Table("media_genres"), ExcludeFromCodeCoverage(Justification = "POCO")]
 public class GenreEntity
 {
     [Column("id"), JsonPropertyName("id"), Key, Required,
      DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required int Id { get; set; } 
+    public required int Id { get; set; }
     [Column("media_id"), JsonPropertyName("mediaId"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
     [Column("genre"), JsonPropertyName("name"), Required, MaxLength(50)]

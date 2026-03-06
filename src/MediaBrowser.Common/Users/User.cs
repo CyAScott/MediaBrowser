@@ -1,6 +1,6 @@
 namespace MediaBrowser.Users;
 
-[Table("users")]
+[Table("users"), ExcludeFromCodeCoverage(Justification = "POCO")]
 public class UserEntity
 {
     [Column("id"), Key]
@@ -11,7 +11,7 @@ public class UserEntity
 
     [Column("password_hash"), MaxLength(50)]
     public required string PasswordHash { get; set; }
-    
+
     public UserReadModel ToReadModel() => new()
     {
         Id = Id,
@@ -29,6 +29,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
     }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class UserReadModel
 {
     public Guid Id { get; init; }

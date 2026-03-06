@@ -1,5 +1,3 @@
-using System.Web;
-
 namespace MediaBrowser.Media.Import;
 
 public class ImportFileInfo
@@ -7,16 +5,16 @@ public class ImportFileInfo
     public static ImportFileInfo? Create(MediaConfig mediaConfig, string path)
     {
         var name = Path.GetFileName(path);
-        if (name.StartsWith(".")
+        if (name.StartsWith('.')
             || !name.Contains('.')
-            || !mediaConfig.ImportExtensions.TryGetValue(Path.GetExtension(name).Substring(1).ToLowerInvariant(), 
+            || !mediaConfig.ImportExtensions.TryGetValue(Path.GetExtension(name)[1..].ToLowerInvariant(),
                 out var ext))
         {
             return null;
         }
 
         var fileInfo = new FileInfo(path);
-        
+
         return new()
         {
             CreatedOn = fileInfo.CreationTime,
@@ -26,7 +24,7 @@ public class ImportFileInfo
             Name = name,
             Size = fileInfo.Length,
             UpdatedOn = fileInfo.LastWriteTime,
-            Url = $"/api/import/file/{HttpUtility.UrlPathEncode(name)}",
+            Url = $"/api/import/file/{HttpUtility.UrlPathEncode(name)}"
         };
     }
 

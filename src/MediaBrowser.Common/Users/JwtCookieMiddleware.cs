@@ -8,7 +8,7 @@ public class JwtCookieMiddleware(RequestDelegate next)
     {
         if (context.Request.Cookies.TryGetValue(CookieName, out var token))
         {
-            context.Request.Headers["Authorization"] = $"Bearer {token}";
+            context.Request.Headers.Authorization = $"Bearer {token}";
         }
         await next(context);
     }

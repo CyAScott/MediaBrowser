@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace MediaBrowser.Media.Import;
 
 [ApiController, Route("api/[controller]")]
@@ -17,7 +15,7 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
 
     bool FileExists(string name, out string filePath, out FileExtensionInfo fileExtension)
     {
-        if (name.StartsWith(".") 
+        if (name.StartsWith('.')
             || !name.Contains('.')
             || name.Contains(Path.DirectorySeparatorChar)
             || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
@@ -27,10 +25,10 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             return false;
         }
         filePath = Path.Combine(mediaConfig.ImportDirectory!, name);
-        return mediaConfig.ImportExtensions.TryGetValue(Path.GetExtension(name).Substring(1).ToLower(), out fileExtension!)
+        return mediaConfig.ImportExtensions.TryGetValue(Path.GetExtension(name)[1..].ToLowerInvariant(), out fileExtension!)
                && System.IO.File.Exists(filePath);
     }
-    
+
     [HttpGet("file/{name}")]
     public IActionResult ReadFile(string name)
     {
@@ -40,13 +38,13 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         }
 
         var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
-        if (Request.Headers.ContainsKey("If-Modified-Since") &&
-            DateTime.TryParse(Request.Headers["If-Modified-Since"], out var ifModifiedSince) &&
+        if (Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValue) &&
+            DateTime.TryParse(ifModifiedSinceValue, out var ifModifiedSince) &&
             Math.Abs((lastModified - ifModifiedSince.ToUniversalTime()).TotalSeconds) < 2)
         {
             return StatusCode(StatusCodes.Status304NotModified);
         }
-        Response.Headers["Last-Modified"] = lastModified.ToString("R");
+        Response.Headers.LastModified = lastModified.ToString("R");
 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), fileExtension.Mime,
             enableRangeProcessing: true);
@@ -70,7 +68,7 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         {
             return NotFound();
         }
-        
+
         var cast = request.Cast.Distinct().ToList();
         var directors = request.Directors.Distinct().ToList();
         var genres = request.Genres.Distinct().ToList();
@@ -82,22 +80,22 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         {
             return StatusCode(StatusCodes.Status417ExpectationFailed);
         }
-        
+
         var ffprobe = await ffmpeg.GetMediaInfo(filePath);
         if (ffprobe == null)
         {
             return StatusCode(StatusCodes.Status406NotAcceptable);
         }
-        
+
         var fileInfo = new FileInfo(filePath);
 
         string hash;
         using (var md5 = MD5.Create())
-        using (var stream = fileInfo.OpenRead())
+        await using (var stream = fileInfo.OpenRead())
         {
-            hash = BitConverter.ToString(await md5.ComputeHashAsync(stream)).Replace("-", "").ToLowerInvariant();
+            hash = Convert.ToHexStringLower(await md5.ComputeHashAsync(stream));
         }
-        
+
         var media = MediaEntity.Create(
             fileInfo,
             ffprobe.Value.response,
@@ -110,10 +108,10 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             writers,
             thumbnail: request.Thumbnail);
         await context.Media.AddAsync(media);
-        
+
         await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{hash}.nfo"));
 
-        if (request.Thumbnail != null && ffprobe.Value.mime.StartsWith("video/"))
+        if (request.Thumbnail != null && ffprobe.Value.mime.StartsWith("video/", StringComparison.InvariantCulture))
         {
             var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{hash}.jpg");
             if (!await ffmpeg.TryExtractThumbnail(filePath,
@@ -122,16 +120,16 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             {
                 return StatusCode(StatusCodes.Status406NotAcceptable);
             }
-        
-            System.IO.File.Copy(thumbnailLocation, 
+
+            System.IO.File.Copy(thumbnailLocation,
                 destFileName: Path.Combine(mediaConfig.MediaDirectory, $"{hash}-fanart.jpg"), true);
         }
 
         await context.SaveChangesAsync();
-        
+
         var newFilePath = Path.Combine(mediaConfig.MediaDirectory,
             $"{hash}.{mediaConfig.GetExtensionFromMime(ffprobe.Value.mime)}");
-        
+
         System.IO.File.Move(filePath, newFilePath);
 
         return media.ToReadModel(mediaConfig);

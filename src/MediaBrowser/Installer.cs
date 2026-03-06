@@ -1,9 +1,3 @@
-using MediaBrowser.Media;
-using MediaBrowser.Media.Import;
-using MediaBrowser.Users;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
-
 namespace MediaBrowser;
 
 public static class Installer
@@ -24,7 +18,11 @@ public static class Installer
         // Add Swagger services
         builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc(_version, new OpenApiInfo { Title = "MediaBrowser API", Version = _version });
+            c.SwaggerDoc(_version, new()
+            {
+                Title = "MediaBrowser API",
+                Version = _version
+            });
         });
 
         MediaInstaller.OnBoot(builder);
@@ -32,7 +30,7 @@ public static class Installer
         UserInstaller.OnBoot(builder);
     }
 
-    public static async Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
     {
         // Configure the HTTP request pipeline
         app.UseDefaultFiles()
@@ -46,7 +44,7 @@ public static class Installer
             c.SwaggerEndpoint($"/swagger/{_version}/swagger.json", $"MediaBrowser API {_version}");
             c.RoutePrefix = "swagger";
         });
-        
+
         await MediaInstaller.OnStartup(app, source);
         await ImportInstaller.OnStartup(app, source);
         await UserInstaller.OnStartup(app, source);

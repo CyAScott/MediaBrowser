@@ -1,5 +1,6 @@
 namespace MediaBrowser.Users;
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class ChangePasswordRequest
 {
     [Required, MinLength(6), MaxLength(50)]
@@ -8,6 +9,7 @@ public class ChangePasswordRequest
     public required string NewPassword { get; init; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class UserRegisterRequest
 {
     [Required, RegularExpression(@"^[a-z][\w\-\._]{0,48}[a-z\d]$")]
@@ -17,6 +19,7 @@ public class UserRegisterRequest
     public required string Password { get; init; }
 }
 
+[ExcludeFromCodeCoverage(Justification = "POCO")]
 public class UserLoginRequest
 {
     [Required, RegularExpression(@"^[a-z][\w\-\._]{0,48}[a-z\d]$")]
@@ -34,7 +37,7 @@ public class PasswordAttribute : ValidationAttribute
             !password.Any(char.IsUpper) || !password.Any(char.IsLower) ||
             !password.Any(char.IsDigit) || password.All(char.IsLetterOrDigit))
         {
-            return new ValidationResult("Password must be at least 6 characters long and include uppercase, lowercase, digit, and special character.");
+            return new("Password must be at least 6 characters long and include uppercase, lowercase, digit, and special character.");
         }
 
         return ValidationResult.Success;

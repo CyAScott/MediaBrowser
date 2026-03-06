@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Filters;
-
 namespace MediaBrowser;
 
 public class ValidationStatus417Filter : IActionFilter
