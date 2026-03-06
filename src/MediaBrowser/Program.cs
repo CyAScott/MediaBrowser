@@ -6,12 +6,14 @@ builder.Configuration
     .AddEnvironmentVariables()
     .AddCommandLine(args);
 
-Installer.OnBoot(builder);
+Installer.ConfigureServices(builder.Configuration, builder.Services);
 
 await using var app = builder.Build();
 using var cancelTokenSource = new CancellationTokenSource();
 
-await Installer.OnStartup(app, cancelTokenSource);
+Installer.ConfigureApp(app);
+
+await Installer.OnStartup(app.Services, cancelTokenSource);
 
 if (!cancelTokenSource.IsCancellationRequested)
 {

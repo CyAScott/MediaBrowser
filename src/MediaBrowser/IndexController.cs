@@ -10,18 +10,8 @@ public class IndexController(IWebHostEnvironment env) : Controller
     /// <param name="catchAll">The route path that wasn't matched by other controllers</param>
     /// <returns>The index.html file content</returns>
     [HttpGet("/{**catchAll}", Order = int.MaxValue),
-     AllowAnonymous]
-    public IActionResult Index(string? catchAll = null)
-    {
-        // Don't handle API routes or swagger routes - these should be handled by other controllers
-        if (Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase) ||
-            Request.Path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase))
-        {
-            return NotFound();
-        }
-
-        var indexPath = Path.Combine(env.WebRootPath, "index.html");
-
-        return PhysicalFile(indexPath, "text/html");
-    }
+     AllowAnonymous,
+     ApiExplorerSettings(IgnoreApi = true)]
+    public IActionResult Index(string? catchAll = null) =>
+        PhysicalFile(Path.Combine(env.WebRootPath, "index.html"), "text/html");
 }

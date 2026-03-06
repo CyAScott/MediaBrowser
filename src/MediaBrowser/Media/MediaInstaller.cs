@@ -2,42 +2,42 @@ namespace MediaBrowser.Media;
 
 static class MediaInstaller
 {
-    public static void OnBoot(WebApplicationBuilder builder)
+    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
     {
-        var mediaConfig = new MediaConfig(builder.Configuration);
-        builder.Services.AddSingleton(mediaConfig);
+        var mediaConfig = new MediaConfig(configuration);
+        services.AddSingleton(mediaConfig);
 
-        var dbConfig = new DbConfig(builder.Configuration);
-        builder.Services.AddSingleton(dbConfig);
+        var dbConfig = new DbConfig(configuration);
+        services.AddSingleton(dbConfig);
 
         switch (dbConfig.DbType)
         {
             case DbType.MySql:
-                builder.Services.AddDbContext<MediaDbContext, MediaMySqlDbContext>(options =>
+                services.AddDbContext<MediaDbContext, MediaMySqlDbContext>(options =>
                     options.UseMySql(dbConfig.MySqlConnectionString, ServerVersion.AutoDetect(dbConfig.MySqlConnectionString)));
                 break;
             case DbType.Postgres:
-                builder.Services.AddDbContext<MediaDbContext, MediaPostgresDbContext>(options =>
+                services.AddDbContext<MediaDbContext, MediaPostgresDbContext>(options =>
                     options.UseNpgsql(dbConfig.PostgresConnectionString));
                 break;
             default:
             case DbType.Sqlite:
-                builder.Services.AddDbContext<MediaDbContext, MediaSqliteDbContext>(options =>
+                services.AddDbContext<MediaDbContext, MediaSqliteDbContext>(options =>
                     options.UseSqlite(dbConfig.SqliteConnectionString));
                 break;
             case DbType.SqlServer:
-                builder.Services.AddDbContext<MediaDbContext, MediaSqlServerDbContext>(options =>
+                services.AddDbContext<MediaDbContext, MediaSqlServerDbContext>(options =>
                     options.UseSqlServer(dbConfig.SqlServerConnectionString));
                 break;
         }
     }
 
-    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
     {
-        var dbConfig = app.Services.GetRequiredService<DbConfig>();
+        var dbConfig = services.GetRequiredService<DbConfig>();
         if (dbConfig.MigrateOnBoot)
         {
-            using var scope = app.Services.CreateScope();
+            using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
             await db.Database.MigrateAsync(cancellationToken: source.Token);
             await db.SaveChangesAsync(source.Token);

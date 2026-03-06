@@ -2,35 +2,35 @@ namespace MediaBrowser;
 
 public static class Installer
 {
-    const string _version = "v1";
+    public const string Version = "v1";
 
-    public static void OnBoot(WebApplicationBuilder builder)
+    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
     {
         // Add services to the container
-        builder.Services.AddControllers();
+        services.AddControllers();
 
         // Add global filter for DataAnnotations validation failure
-        builder.Services.Configure<MvcOptions>(options =>
+        services.Configure<MvcOptions>(options =>
         {
             options.Filters.Add(new ValidationStatus417Filter());
         });
 
         // Add Swagger services
-        builder.Services.AddSwaggerGen(c =>
+        services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc(_version, new()
+            c.SwaggerDoc(Version, new()
             {
                 Title = "MediaBrowser API",
-                Version = _version
+                Version = Version
             });
         });
 
-        MediaInstaller.OnBoot(builder);
-        ImportInstaller.OnBoot(builder);
-        UserInstaller.OnBoot(builder);
+        MediaInstaller.ConfigureServices(configuration, services);
+        ImportInstaller.ConfigureServices(services);
+        UserInstaller.ConfigureServices(configuration, services);
     }
 
-    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public static void ConfigureApp(IApplicationBuilder app)
     {
         // Configure the HTTP request pipeline
         app.UseDefaultFiles()
@@ -41,13 +41,11 @@ public static class Installer
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint($"/swagger/{_version}/swagger.json", $"MediaBrowser API {_version}");
+            c.SwaggerEndpoint($"/swagger/{Version}/swagger.json", $"MediaBrowser API {Version}");
             c.RoutePrefix = "swagger";
         });
 
-        await MediaInstaller.OnStartup(app, source);
-        await ImportInstaller.OnStartup(app, source);
-        await UserInstaller.OnStartup(app, source);
+        UserInstaller.ConfigureApp(app);
 
 #pragma warning disable ASP0014
         app.UseEndpoints(endpoints =>
@@ -55,5 +53,12 @@ public static class Installer
             endpoints.MapControllers();
         });
 #pragma warning restore ASP0014
+    }
+
+    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
+    {
+        await MediaInstaller.OnStartup(services, source);
+        await ImportInstaller.OnStartup(services, source);
+        await UserInstaller.OnStartup(services, source);
     }
 }

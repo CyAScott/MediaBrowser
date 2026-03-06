@@ -2,13 +2,13 @@ namespace MediaBrowser.Users;
 
 public static class UserInstaller
 {
-    public static void OnBoot(WebApplicationBuilder builder)
+    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
     {
         // Configure JWT authentication
-        var userConfig = new UserConfig(builder.Configuration);
-        builder.Services.AddSingleton(userConfig);
+        var userConfig = new UserConfig(configuration);
+        services.AddSingleton(userConfig);
 
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new()
@@ -22,24 +22,31 @@ public static class UserInstaller
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userConfig.JwtSecretKey))
                 };
             });
-        builder.Services.AddAuthorizationBuilder()
+        services.AddAuthorizationBuilder()
             .SetFallbackPolicy(new AuthorizationPolicyBuilder()
                 .RequireAuthenticatedUser()
                 .Build());
     }
 
-    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public static void ConfigureApp(IApplicationBuilder app)
+    {
+        app.UseMiddleware<JwtCookieMiddleware>();
+        app.UseAuthentication();
+        app.UseAuthorization();
+    }
+
+    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
     {
         if (source.IsCancellationRequested)
         {
             return;
         }
 
-        var userConfig = app.Services.GetRequiredService<UserConfig>();
+        var userConfig = services.GetRequiredService<UserConfig>();
         if (!string.IsNullOrEmpty(userConfig.InitialUsername)
             && !string.IsNullOrEmpty(userConfig.InitialPassword))
         {
-            using var scope = app.Services.CreateScope();
+            using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
             if (!await db.Users.AnyAsync(u => u.Username == userConfig.InitialUsername, source.Token))
             {
@@ -53,9 +60,5 @@ public static class UserInstaller
                 await db.SaveChangesAsync(source.Token);
             }
         }
-
-        app.UseMiddleware<JwtCookieMiddleware>();
-        app.UseAuthentication();
-        app.UseAuthorization();
     }
 }

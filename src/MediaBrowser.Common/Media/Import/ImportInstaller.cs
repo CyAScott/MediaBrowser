@@ -2,25 +2,25 @@ namespace MediaBrowser.Media.Import;
 
 public static class ImportInstaller
 {
-    public static void OnBoot(WebApplicationBuilder builder)
+    public static void ConfigureServices(IServiceCollection services)
     {
-        builder.Services.AddSingleton<IFfmpeg, Ffmpeg>();
-        builder.Services.AddSingleton<Nfo>();
+        services.AddSingleton<IFfmpeg, Ffmpeg>();
+        services.AddSingleton<Nfo>();
     }
 
-    public async static Task OnStartup(WebApplication app, CancellationTokenSource source)
+    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
     {
-        var mediaConfig = app.Services.GetRequiredService<MediaConfig>();
+        var mediaConfig = services.GetRequiredService<MediaConfig>();
 
         if (!mediaConfig.SyncOnBoot)
         {
             return;
         }
 
-        using var scope = app.Services.CreateScope();
+        using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-        var nfo = app.Services.GetRequiredService<Nfo>();
-        var log = app.Services.GetRequiredService<ILogger<Nfo>>();
+        var nfo = services.GetRequiredService<Nfo>();
+        var log = services.GetRequiredService<ILogger<Nfo>>();
 
         foreach (var nfoLocation in Directory.GetFiles(mediaConfig.MediaDirectory, "*.nfo")
             .Where(f => !Path.GetFileName(f).StartsWith('.')))
