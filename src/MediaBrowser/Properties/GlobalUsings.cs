@@ -1,4 +1,6 @@
-global using MediaBrowser;
+global using System.Diagnostics.CodeAnalysis;
+global using System.Text;
+global using System.Text.Json.Nodes;
 global using MediaBrowser.Media;
 global using MediaBrowser.Media.Import;
 global using MediaBrowser.Users;

@@ -1,9 +1,3 @@
-using System.Diagnostics;
-using System.Text.Json.Nodes;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-
 namespace MediaBrowser;
 
 public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer>

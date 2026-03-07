@@ -1,6 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using Shouldly;
-
 namespace MediaBrowser.Media.Import;
 
 public class NfoTests

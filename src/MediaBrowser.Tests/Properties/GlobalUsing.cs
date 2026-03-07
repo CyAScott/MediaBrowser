@@ -1,0 +1,16 @@
+global using System.Diagnostics;
+global using System.Diagnostics.CodeAnalysis;
+global using System.Globalization;
+global using System.Text;
+global using System.Text.Json.Nodes;
+global using System.Text.RegularExpressions;
+global using Microsoft.AspNetCore.Mvc.Testing;
+global using Microsoft.Data.SqlClient;
+global using Microsoft.Data.Sqlite;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Hosting;
+global using MySqlConnector;
+global using Npgsql;
+global using Shouldly;
