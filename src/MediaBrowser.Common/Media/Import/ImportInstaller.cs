@@ -2,9 +2,16 @@ namespace MediaBrowser.Media.Import;
 
 public static class ImportInstaller
 {
-    public static void ConfigureServices(IServiceCollection services)
+    public static void ConfigureServices(IServiceCollection services, IFfmpeg? mockFfmpeg = null)
     {
-        services.AddSingleton<IFfmpeg, Ffmpeg>();
+        if (mockFfmpeg != null)
+        {
+            services.AddSingleton(mockFfmpeg);
+        }
+        else
+        {
+            services.AddSingleton<IFfmpeg, Ffmpeg>();
+        }
         services.AddSingleton<Nfo>();
     }
 

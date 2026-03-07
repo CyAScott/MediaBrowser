@@ -1,8 +1,8 @@
 namespace MediaBrowser.Media.Import;
 
-[ExcludeFromCodeCoverage(Justification = "POCO")]
-public class ImportMediaRequest : UpdateMediaRequest
+[Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class ImportMediaRequest : UpdateMediaRequest
 {
-    [Range(0, double.MaxValue)]
+    [JsonPropertyName("thumbnail"), Range(0, double.MaxValue)]
     public double? Thumbnail { get; init; }
 }

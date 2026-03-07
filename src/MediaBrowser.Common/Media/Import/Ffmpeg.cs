@@ -79,11 +79,7 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
                 args.AddRange(["-ss", timeAt]);
             }
 
-            args.AddRange([
-                "-i", inputPath,
-                "-vframes", "1",
-                outputPath
-            ]);
+            args.AddRange(["-i", inputPath, "-vframes", "1", outputPath]);
 
             using var ffprobe = Process.Start("ffmpeg", args);
 
@@ -95,7 +91,7 @@ public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
         }
         catch (Exception error)
         {
-            log.LogError("Failed to extract thumbnail for {Path} at {timeAt}: {error}", inputPath, timeAt, error);
+            log.LogError("Failed to extract thumbnail for {Path} at {TimeAt}: {Error}", inputPath, timeAt, error);
             return false;
         }
     }

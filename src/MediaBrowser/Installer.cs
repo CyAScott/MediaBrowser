@@ -5,9 +5,8 @@ public class Installer
     public const string Version = "v1";
 
     public const string CliArgsKey = "CliArgs", TestConfigsKey = "TestConfigs";
-    public static IHostBuilder CreateHostBuilder(string[] args, JsonObject[] configs)
+    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs, IFfmpeg? mockFfmpeg = null)
     {
-
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration(configurationBuilder =>
             {
@@ -17,7 +16,7 @@ public class Installer
             .ConfigureAppConfiguration(ConfigureSettings)
             .ConfigureServices(ConfigureServices)
             .ConfigureServices(MediaInstaller.ConfigureServices)
-            .ConfigureServices(ImportInstaller.ConfigureServices)
+            .ConfigureServices(services => ImportInstaller.ConfigureServices(services, mockFfmpeg))
             .ConfigureServices(UserInstaller.ConfigureServices)
             .ConfigureWebHostDefaults(webBuilder => webBuilder.Configure(ConfigureApp));
 
@@ -33,7 +32,7 @@ public class Installer
             .AddCommandLine((string[])configurationBuilder.Properties[CliArgsKey]);
 
         // load optional test configurations
-        foreach (var bytes in ((JsonObject[])configurationBuilder.Properties[TestConfigsKey])
+        foreach (var bytes in ((IEnumerable<JsonObject>)configurationBuilder.Properties[TestConfigsKey])
                      .Select(jsonConfiguration => jsonConfiguration.ToJsonString())
                      .Select(json => Encoding.UTF8.GetBytes(json)))
         {

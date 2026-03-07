@@ -13,58 +13,35 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
                 .OrderBy(it => it.Name)
                 .ToList();
 
-    bool FileExists(string name, out string filePath, out FileExtensionInfo fileExtension)
-    {
-        if (name.StartsWith('.')
-            || !name.Contains('.')
-            || name.Contains(Path.DirectorySeparatorChar)
-            || name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-        {
-            filePath = null!;
-            fileExtension = null!;
-            return false;
-        }
-        filePath = Path.Combine(mediaConfig.ImportDirectory!, name);
-        return mediaConfig.ImportExtensions.TryGetValue(Path.GetExtension(name)[1..].ToLowerInvariant(), out fileExtension!)
-               && System.IO.File.Exists(filePath);
-    }
-
     [HttpGet("file/{name}")]
     public IActionResult ReadFile(string name)
     {
-        if (!FileExists(name, out var filePath, out var fileExtension))
+        if (!mediaConfig.TryToGetFile(name, out var file))
         {
             return NotFound();
         }
 
-        var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
-        if (Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValue) &&
-            DateTime.TryParse(ifModifiedSinceValue, out var ifModifiedSince) &&
-            Math.Abs((lastModified - ifModifiedSince.ToUniversalTime()).TotalSeconds) < 2)
+        var lastModified = System.IO.File.GetLastWriteTimeUtc(file.Path);
+        if (!Request.WasModifiedSince(lastModified))
         {
             return StatusCode(StatusCodes.Status304NotModified);
         }
         Response.Headers.LastModified = lastModified.ToString("R");
 
-        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), fileExtension.Mime,
+        return File(new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read), file.Extension.Mime,
             enableRangeProcessing: true);
     }
 
     [HttpGet("file/{name}/info")]
-    public ActionResult<ImportFileInfo> ReadFileInfo(string name)
-    {
-        if (!FileExists(name, out var filePath, out _))
-        {
-            return NotFound();
-        }
-
-        return ImportFileInfo.Create(mediaConfig, filePath)!;
-    }
+    public ActionResult<ImportFileInfo> ReadFileInfo(string name) =>
+        !mediaConfig.TryToGetFile(name, out var file)
+            ? NotFound()
+            : ImportFileInfo.Create(mediaConfig, file.Path)!;
 
     [HttpPost("file/{name}")]
     public async Task<ActionResult<MediaReadModel>> Import(string name, [FromBody] ImportMediaRequest request)
     {
-        if (!FileExists(name, out var filePath, out _))
+        if (!mediaConfig.TryToGetFile(name, out var file))
         {
             return NotFound();
         }
@@ -81,13 +58,13 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             return StatusCode(StatusCodes.Status417ExpectationFailed);
         }
 
-        var ffprobe = await ffmpeg.GetMediaInfo(filePath);
+        var ffprobe = await ffmpeg.GetMediaInfo(file.Path);
         if (ffprobe == null)
         {
             return StatusCode(StatusCodes.Status406NotAcceptable);
         }
 
-        var fileInfo = new FileInfo(filePath);
+        var fileInfo = new FileInfo(file.Path);
 
         string hash;
         using (var md5 = MD5.Create())
@@ -114,9 +91,9 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         if (request.Thumbnail != null && ffprobe.Value.mime.StartsWith("video/", StringComparison.InvariantCulture))
         {
             var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{hash}.jpg");
-            if (!await ffmpeg.TryExtractThumbnail(filePath,
-                    outputPath: thumbnailLocation,
-                    at: TimeSpan.FromSeconds(request.Thumbnail.Value)))
+            if (!await ffmpeg.TryExtractThumbnail(file.Path,
+                outputPath: thumbnailLocation,
+                at: TimeSpan.FromSeconds(request.Thumbnail.Value)))
             {
                 return StatusCode(StatusCodes.Status406NotAcceptable);
             }
@@ -130,7 +107,7 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
         var newFilePath = Path.Combine(mediaConfig.MediaDirectory,
             $"{hash}.{mediaConfig.GetExtensionFromMime(ffprobe.Value.mime)}");
 
-        System.IO.File.Move(filePath, newFilePath);
+        System.IO.File.Move(file.Path, newFilePath);
 
         return media.ToReadModel(mediaConfig);
     }

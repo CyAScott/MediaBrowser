@@ -20,28 +20,12 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
 
     void Login(UserEntity user)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.UTF8.GetBytes(userConfig.JwtSecretKey);
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new(
-            [
-                new(ClaimTypes.Name, user.Username),
-                new(ClaimTypes.NameIdentifier, user.Id.ToString())
-            ]),
-            Expires = DateTime.UtcNow.AddMinutes(userConfig.JwtExpiryMinutes),
-            SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-            Issuer = userConfig.JwtIssuer,
-            Audience = userConfig.JwtAudience
-        };
-
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
+        var (tokenString, expires) = userConfig.GetJwt(user.Id, user.Username);
 
         Response.Cookies.Append(JwtCookieMiddleware.CookieName, tokenString, new()
         {
             HttpOnly = false,
-            Expires = tokenDescriptor.Expires,
+            Expires = expires,
             Secure = userConfig.UseSecureCookies,
             SameSite = SameSiteMode.Strict
         });

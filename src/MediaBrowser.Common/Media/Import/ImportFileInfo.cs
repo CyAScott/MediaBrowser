@@ -1,6 +1,7 @@
 namespace MediaBrowser.Media.Import;
 
-public class ImportFileInfo
+[ExcludeFromCodeCoverage(Justification = "POCO")]
+public record ImportFileInfo
 {
     public static ImportFileInfo? Create(MediaConfig mediaConfig, string path)
     {
@@ -28,19 +29,27 @@ public class ImportFileInfo
         };
     }
 
+    [JsonPropertyName("name")]
     public required string Name { get; init; }
 
+    [JsonPropertyName("mime")]
     public required string Mime { get; init; }
 
+    [JsonPropertyName("size")]
     public required long? Size { get; init; }
 
+    [JsonPropertyName("ctimeMs")]
     public required long CtimeMs { get; init; }
 
+    [JsonPropertyName("mtimeMs")]
     public required long MtimeMs { get; init; }
 
+    [JsonPropertyName("createdOn")]
     public required DateTime? CreatedOn { get; init; }
 
+    [JsonPropertyName("updatedOn")]
     public required DateTime? UpdatedOn { get; init; }
 
+    [JsonPropertyName("url")]
     public required string Url { get; init; }
 }

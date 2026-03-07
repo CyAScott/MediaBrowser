@@ -214,9 +214,7 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         }
 
         var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
-        if (Request.Headers.TryGetValue("If-Modified-Since", out var value) &&
-            DateTime.TryParse(value, out var ifModifiedSince) &&
-            Math.Abs((lastModified - ifModifiedSince.ToUniversalTime()).TotalSeconds) < 2)
+        if (!Request.WasModifiedSince(lastModified))
         {
             return StatusCode(StatusCodes.Status304NotModified);
         }
@@ -235,9 +233,7 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         }
 
         var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
-        if (Request.Headers.TryGetValue("If-Modified-Since", out var ifModifiedSinceValues) &&
-            DateTime.TryParse(ifModifiedSinceValues, out var ifModifiedSince) &&
-            Math.Abs((lastModified - ifModifiedSince.ToUniversalTime()).TotalSeconds) < 2)
+        if (!Request.WasModifiedSince(lastModified))
         {
             return StatusCode(StatusCodes.Status304NotModified);
         }

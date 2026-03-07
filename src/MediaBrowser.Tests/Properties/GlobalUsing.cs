@@ -13,4 +13,5 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using MySqlConnector;
 global using Npgsql;
+global using NUnit.Framework;
 global using Shouldly;

@@ -20,11 +20,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="NUnit.Framework"/>
+        <None Remove="TestFiles\test.mp4" />
+        <EmbeddedResource Include="TestFiles\test.mp4" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MediaBrowser\MediaBrowser.csproj" />
+        <ProjectReference Include="..\MediaBrowser\MediaBrowser.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,3 +1,6 @@
+using MediaBrowser.Media.Import;
+using MediaBrowser.Users;
+
 namespace MediaBrowser;
 
 public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer>
@@ -63,6 +66,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     }
     public CancellationTokenSource CancellationTokenSource { get; }
     public DbType DbType { get; }
+    public IFfmpeg? MockFfmpeg { get; set; }
     public List<JsonObject> ConfigurationFiles { get; }
     public string CastDirectory { get; }
     public string DirectorsDirectory { get; }
@@ -80,7 +84,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     {
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.Properties.Add(Installer.CliArgsKey, Array.Empty<string>());
-        configurationBuilder.Properties.Add(Installer.TestConfigsKey, ConfigurationFiles.ToArray());
+        configurationBuilder.Properties.Add(Installer.TestConfigsKey, ConfigurationFiles);
         Installer.ConfigureSettings(configurationBuilder);
         return configurationBuilder.Build();
     }
@@ -91,5 +95,11 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
         StartServer();
         await Installer.OnStartup(Services, CancellationTokenSource.Token);
     }
-    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles.ToArray());
+    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles, MockFfmpeg);
+
+    public string GetJwtTokenForTestUser()
+    {
+        var userConfig = Services.GetRequiredService<UserConfig>();
+        return userConfig.GetJwt(Guid.NewGuid(), "testUser").Jwt;
+    }
 }
