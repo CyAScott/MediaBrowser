@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Hosting;
+
 namespace MediaBrowser.Media.Import;
 
 public static class ImportInstaller
@@ -19,8 +21,9 @@ public static class ImportInstaller
 
         using var scope = services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-        var nfo = services.GetRequiredService<Nfo>();
+        var hostApplicationLifetime = scope.ServiceProvider.GetRequiredService<IHostApplicationLifetime>();
         var log = services.GetRequiredService<ILogger<Nfo>>();
+        var nfo = services.GetRequiredService<Nfo>();
 
         foreach (var nfoLocation in Directory.GetFiles(mediaConfig.MediaDirectory, "*.nfo")
             // Ignore hidden files, which may be temp files created by media management software
@@ -43,7 +46,7 @@ public static class ImportInstaller
 
         if (mediaConfig.StopAfterSync)
         {
-            Environment.Exit(0);
+            hostApplicationLifetime.StopApplication();
         }
     }
 }

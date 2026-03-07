@@ -3,11 +3,11 @@ using static MediaBrowser.Installer;
 var builder = CreateHostBuilder(args, []);
 
 using var app = builder.Build();
-using var cancelTokenSource = new CancellationTokenSource();
+var cancellationToken = app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopped;
 
-await OnStartup(app.Services, cancelTokenSource.Token);
+await OnStartup(app.Services, cancellationToken);
 
-if (!cancelTokenSource.IsCancellationRequested)
+if (!cancellationToken.IsCancellationRequested)
 {
-    await app.RunAsync(cancelTokenSource.Token);
+    await app.RunAsync(cancellationToken);
 }
