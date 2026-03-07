@@ -1,16 +1,16 @@
 namespace MediaBrowser.Media.Producers;
 
-[Table("media_producers"), ExcludeFromCodeCoverage(Justification = "POCO")]
-public class ProducerEntity
+[Table("media_producers"), Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class ProducerEntity
 {
-    [Column("id"), JsonPropertyName("id"), Key, Required,
+    [Column("id"), IgnoreEquality, JsonPropertyName("id"), Key, Required,
      DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public required int Id { get; set; }
     [Column("media_id"), JsonPropertyName("mediaId"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
     [Column("producer"), JsonPropertyName("name"), Required, MaxLength(50)]
     public required string Name { get; init; }
-    [JsonIgnore]
+    [JsonIgnore, IgnoreEquality]
     public MediaEntity Media { get; init; } = null!;
 }
 

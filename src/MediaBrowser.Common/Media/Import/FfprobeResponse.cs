@@ -1,9 +1,9 @@
 namespace MediaBrowser.Media.Import;
 
-[ExcludeFromCodeCoverage(Justification = "POCO")]
-public class FfprobeResponse
+[Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class FfprobeResponse
 {
-    [JsonPropertyName("streams")]
+    [JsonPropertyName("streams"), OrderedEquality]
     public required IReadOnlyList<Stream>? Streams { get; init; }
     [JsonPropertyName("format")]
     public required Format? Format { get; init; }

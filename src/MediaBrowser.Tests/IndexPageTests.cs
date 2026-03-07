@@ -1,6 +1,6 @@
 using Shouldly;
 
-namespace MediaBrowser.Tests;
+namespace MediaBrowser;
 
 /// <summary>
 /// Integration tests for <see cref="IndexController"/>.

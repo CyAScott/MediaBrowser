@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Hosting;
-
 namespace MediaBrowser.Users;
 
 public static class UserInstaller

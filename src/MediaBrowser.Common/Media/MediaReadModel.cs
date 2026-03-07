@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
-[ExcludeFromCodeCoverage(Justification = "POCO")]
-public class MediaReadModel
+[Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class MediaReadModel
 {
     public required Guid Id { get; init; }
 
@@ -41,14 +41,19 @@ public class MediaReadModel
 
     public required FfprobeResponse Ffprobe { get; init; }
 
+    [UnorderedEquality]
     public required IReadOnlyList<string> Cast { get; init; }
 
+    [UnorderedEquality]
     public required IReadOnlyList<string> Directors { get; init; }
 
+    [UnorderedEquality]
     public required IReadOnlyList<string> Genres { get; init; }
 
+    [UnorderedEquality]
     public required IReadOnlyList<string> Producers { get; init; }
 
+    [UnorderedEquality]
     public required IReadOnlyList<string> Writers { get; init; }
 
     public required string Url { get; init; }

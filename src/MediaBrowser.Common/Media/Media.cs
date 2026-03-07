@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
-[Table("media"), ExcludeFromCodeCoverage(Justification = "POCO")]
-public class MediaEntity
+[Table("media"), Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class MediaEntity
 {
     [Column("id"), JsonPropertyName("id"), Key]
     public required Guid Id { get; init; }
@@ -63,19 +63,19 @@ public class MediaEntity
     [Column("thumbnail"), JsonPropertyName("thumbnail")]
     public double? Thumbnail { get; set; }
 
-    [JsonPropertyName("cast")]
+    [JsonPropertyName("cast"), UnorderedEquality]
     public ICollection<CastEntity> Cast { get; set; } = [];
 
-    [JsonPropertyName("directors")]
+    [JsonPropertyName("directors"), UnorderedEquality]
     public ICollection<DirectorEntity> Directors { get; set; } = [];
 
-    [JsonPropertyName("genres")]
+    [JsonPropertyName("genres"), UnorderedEquality]
     public ICollection<GenreEntity> Genres { get; set; } = [];
 
-    [JsonPropertyName("producers")]
+    [JsonPropertyName("producers"), UnorderedEquality]
     public ICollection<ProducerEntity> Producers { get; set; } = [];
 
-    [JsonPropertyName("writers")]
+    [JsonPropertyName("writers"), UnorderedEquality]
     public ICollection<WriterEntity> Writers { get; set; } = [];
 
     public MediaReadModel ToReadModel(MediaConfig config) => new()

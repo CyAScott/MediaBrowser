@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Hosting;
-
 namespace MediaBrowser.Media.Import;
 
 public static class ImportInstaller
@@ -20,8 +18,7 @@ public static class ImportInstaller
         }
 
         using var scope = services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-        var hostApplicationLifetime = scope.ServiceProvider.GetRequiredService<IHostApplicationLifetime>();
+        await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
         var log = services.GetRequiredService<ILogger<Nfo>>();
         var nfo = services.GetRequiredService<Nfo>();
 
@@ -46,7 +43,7 @@ public static class ImportInstaller
 
         if (mediaConfig.StopAfterSync)
         {
-            hostApplicationLifetime.StopApplication();
+            scope.ServiceProvider.GetRequiredService<IHostApplicationLifetime>().StopApplication();
         }
     }
 }

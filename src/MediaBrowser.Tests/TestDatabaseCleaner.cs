@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using Npgsql;
 using Shouldly;
@@ -12,13 +11,9 @@ public static partial class TestDatabaseCleaner
 {
     public async static Task CleanDatabase(this MediaBrowserWebApplicationFactory factory, CancellationToken cancellationToken = default)
     {
-        // We need to read the configuration settings for the connection strings
-        var configurationBuilder = new ConfigurationBuilder();
-        configurationBuilder.Properties.Add(Installer.CliArgsKey, Array.Empty<string>());
-        configurationBuilder.Properties.Add(Installer.TestConfigsKey, factory.ConfigurationFiles.ToArray());
-        Installer.ConfigureSettings(configurationBuilder);
+        var config = factory.GetConfiguration();
 
-        var dbConfig = new DbConfig(configurationBuilder.Build());
+        var dbConfig = new DbConfig(config);
         var connectionString = factory.DbType switch
         {
             DbType.MySql => dbConfig.MySqlConnectionString,

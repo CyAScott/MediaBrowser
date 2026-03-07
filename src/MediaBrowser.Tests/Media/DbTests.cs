@@ -1,8 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 
-namespace MediaBrowser.Tests.Media;
+namespace MediaBrowser.Media;
 
 /// <summary>
 /// Integration tests to test using different SQL DBs.
@@ -21,7 +21,7 @@ public class DbTests
         await factory.StartServerAsync();
 
         using var scope = factory.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+        await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
 
         var appliedContext = await db.Database.GetAppliedMigrationsAsync();
         appliedContext.ShouldNotBeEmpty("The migrations should be applied successfully on boot, indicating that the backend can connect to the database and update the schema as needed.");

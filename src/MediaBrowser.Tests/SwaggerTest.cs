@@ -1,4 +1,4 @@
-namespace MediaBrowser.Tests;
+namespace MediaBrowser;
 
 public class SwaggerTest
 {

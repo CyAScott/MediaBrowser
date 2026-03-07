@@ -1,16 +1,16 @@
 namespace MediaBrowser.Media.Writers;
 
-[Table("media_writers"), ExcludeFromCodeCoverage(Justification = "POCO")]
-public class WriterEntity
+[Table("media_writers"), Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class WriterEntity
 {
-    [Column("id"), JsonPropertyName("id"), Key, Required,
+    [Column("id"), IgnoreEquality, JsonPropertyName("id"), Key, Required,
      DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public required int Id { get; set; }
     [Column("media_id"), JsonPropertyName("mediaId"), MaxLength(36), Required]
     public required Guid MediaId { get; init; }
     [Column("writer"), JsonPropertyName("name"), Required, MaxLength(50)]
     public required string Name { get; init; }
-    [JsonIgnore]
+    [JsonIgnore, IgnoreEquality]
     public MediaEntity Media { get; init; } = null!;
 }
 
