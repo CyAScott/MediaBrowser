@@ -1,36 +1,68 @@
+using System.Text;
+using System.Text.Json.Nodes;
+
 namespace MediaBrowser;
 
-public static class Installer
+public class Installer
 {
     public const string Version = "v1";
 
-    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+    public const string CliArgsKey = "CliArgs", TestConfigsKey = "TestConfigs";
+    public static IHostBuilder CreateHostBuilder(string[] args, JsonObject[] configs)
     {
-        // Add services to the container
-        services.AddControllers();
 
-        // Add global filter for DataAnnotations validation failure
-        services.Configure<MvcOptions>(options =>
-        {
-            options.Filters.Add(new ValidationStatus417Filter());
-        });
-
-        // Add Swagger services
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc(Version, new()
+        var builder = Host.CreateDefaultBuilder(args)
+            .ConfigureAppConfiguration(configurationBuilder =>
             {
-                Title = "MediaBrowser API",
-                Version = Version
-            });
-        });
+                configurationBuilder.Properties.Add(CliArgsKey, args);
+                configurationBuilder.Properties.Add(TestConfigsKey, configs);
+            })
+            .ConfigureAppConfiguration(ConfigureSettings)
+            .ConfigureServices(ConfigureServices)
+            .ConfigureServices(MediaInstaller.ConfigureServices)
+            .ConfigureServices(ImportInstaller.ConfigureServices)
+            .ConfigureServices(UserInstaller.ConfigureServices)
+            .ConfigureWebHostDefaults(webBuilder => webBuilder.Configure(ConfigureApp));
 
-        MediaInstaller.ConfigureServices(configuration, services);
-        ImportInstaller.ConfigureServices(services);
-        UserInstaller.ConfigureServices(configuration, services);
+        return builder;
     }
 
-    public static void ConfigureApp(IApplicationBuilder app)
+    public static void ConfigureSettings(IConfigurationBuilder configurationBuilder)
+    {
+        // Add configuration sources to the host builder
+        configurationBuilder.AddJsonFile("appsettings.json")
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+            .AddEnvironmentVariables()
+            .AddCommandLine((string[])configurationBuilder.Properties[CliArgsKey]);
+
+        // load optional test configurations
+        foreach (var bytes in ((JsonObject[])configurationBuilder.Properties[TestConfigsKey])
+                     .Select(jsonConfiguration => jsonConfiguration.ToJsonString())
+                     .Select(json => Encoding.UTF8.GetBytes(json)))
+        {
+            configurationBuilder.AddJsonStream(new MemoryStream(bytes, false));
+        }
+    }
+
+    static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+    {
+        // Add services to the container
+        services.AddControllers()
+            .AddApplicationPart(typeof(DbConfig).Assembly)
+            .AddApplicationPart(typeof(Installer).Assembly);
+
+        // Add global filter for DataAnnotations validation failure
+        services.Configure<MvcOptions>(options => options.Filters.Add(new ValidationStatus417Filter()));
+
+        // Add Swagger services
+        services.AddSwaggerGen(options => options.SwaggerDoc(Version, new()
+        {
+            Title = "MediaBrowser API",
+            Version = Version
+        }));
+    }
+
+    static void ConfigureApp(IApplicationBuilder app)
     {
         // Configure the HTTP request pipeline
         app.UseDefaultFiles()
@@ -47,18 +79,16 @@ public static class Installer
 
         UserInstaller.ConfigureApp(app);
 
-#pragma warning disable ASP0014
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
         });
-#pragma warning restore ASP0014
     }
 
-    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
+    public async static Task OnStartup(IServiceProvider services, CancellationToken cancellationToken)
     {
-        await MediaInstaller.OnStartup(services, source);
-        await ImportInstaller.OnStartup(services, source);
-        await UserInstaller.OnStartup(services, source);
+        await MediaInstaller.OnStartup(services, cancellationToken);
+        await ImportInstaller.OnStartup(services, cancellationToken);
+        await UserInstaller.OnStartup(services, cancellationToken);
     }
 }

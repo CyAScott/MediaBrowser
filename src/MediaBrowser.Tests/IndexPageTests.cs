@@ -12,7 +12,7 @@ public class IndexPageTests
     {
         await using var factory = new MediaBrowserWebApplicationFactory();
 
-        factory.StartServer();
+        await factory.StartServerAsync();
 
         using var client = factory.CreateClient();
 

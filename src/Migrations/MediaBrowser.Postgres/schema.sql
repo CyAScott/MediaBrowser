@@ -175,5 +175,20 @@ BEGIN
     VALUES ('20251017193532_Thumbnail', '9.0.9');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20260306204654_ExpandPasswordLength') THEN
+    ALTER TABLE users ALTER COLUMN password_hash TYPE character varying(125);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20260306204654_ExpandPasswordLength') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20260306204654_ExpandPasswordLength', '9.0.9');
+    END IF;
+END $EF$;
 COMMIT;
 

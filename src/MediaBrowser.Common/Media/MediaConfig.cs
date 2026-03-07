@@ -31,6 +31,7 @@ public class MediaConfig(IConfiguration configuration)
     public string ProducersDirectory { get; } = configuration["media:producersDirectory"]!;
     public string WritersDirectory { get; } = configuration["media:writersDirectory"]!;
     public bool SyncOnBoot { get; } = bool.Parse(configuration["media:syncOnBoot"] ?? "false");
+    public bool StopAfterSync { get; } = bool.Parse(configuration["media:stopAfterSync"] ?? "true");
 }
 
 [ExcludeFromCodeCoverage(Justification = "POCO")]

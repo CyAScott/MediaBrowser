@@ -87,5 +87,8 @@ ALTER TABLE "media" ADD "thumbnail" REAL NULL;
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20251017193532_Thumbnail', '9.0.9');
 
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260306204644_ExpandPasswordLength', '9.0.9');
+
 COMMIT;
 

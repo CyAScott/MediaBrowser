@@ -153,7 +153,7 @@ namespace MediaBrowser.Migrations
 
                     b.Property<string>("Ffprobe")
                         .IsRequired()
-                        .HasColumnType("JSON")
+                        .HasColumnType("NVARCHAR(MAX)")
                         .HasColumnName("ffprobe")
                         .HasAnnotation("Relational:JsonPropertyName", "ffprobe");
 
@@ -319,8 +319,8 @@ namespace MediaBrowser.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(125)
+                        .HasColumnType("nvarchar(125)")
                         .HasColumnName("password_hash");
 
                     b.Property<string>("Username")

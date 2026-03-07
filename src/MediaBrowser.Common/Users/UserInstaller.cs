@@ -1,11 +1,13 @@
+using Microsoft.Extensions.Hosting;
+
 namespace MediaBrowser.Users;
 
 public static class UserInstaller
 {
-    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+    public static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
     {
         // Configure JWT authentication
-        var userConfig = new UserConfig(configuration);
+        var userConfig = new UserConfig(context.Configuration);
         services.AddSingleton(userConfig);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -35,9 +37,9 @@ public static class UserInstaller
         app.UseAuthorization();
     }
 
-    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
+    public async static Task OnStartup(IServiceProvider services, CancellationToken cancellationToken)
     {
-        if (source.IsCancellationRequested)
+        if (cancellationToken.IsCancellationRequested)
         {
             return;
         }
@@ -47,8 +49,8 @@ public static class UserInstaller
             && !string.IsNullOrEmpty(userConfig.InitialPassword))
         {
             using var scope = services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-            if (!await db.Users.AnyAsync(u => u.Username == userConfig.InitialUsername, source.Token))
+            await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+            if (!await db.Users.AnyAsync(u => u.Username == userConfig.InitialUsername, cancellationToken))
             {
                 var user = new UserEntity
                 {
@@ -57,7 +59,7 @@ public static class UserInstaller
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(userConfig.InitialPassword)
                 };
                 db.Users.Add(user);
-                await db.SaveChangesAsync(source.Token);
+                await db.SaveChangesAsync(cancellationToken);
             }
         }
     }

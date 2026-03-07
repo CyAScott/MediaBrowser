@@ -1,24 +1,40 @@
-using System.Text;
 using System.Text.Json.Nodes;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
-namespace MediaBrowser.Tests;
+namespace MediaBrowser;
 
-public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Program>
+public class MediaBrowserWebApplicationFactory(DbType dbType = DbType.Sqlite, TimeSpan? timeout = null) : WebApplicationFactory<Installer>
 {
-    readonly List<JsonObject> _configurationFiles = [];
+    public CancellationTokenSource CancellationTokenSource { get; } = new(timeout ?? TimeSpan.FromSeconds(30));
+    public DbType DbType => dbType;
+
+    readonly List<JsonObject> _configurationFiles =
+    [
+        new()
+        {
+            {
+                "db", new JsonObject
+                {
+                    {"type", dbType.ToString()}
+                }
+            },
+            {
+                "media", new JsonObject
+                {
+                    {"stopAfterSync", false}
+                }
+            }
+        }
+    ];
+    public IReadOnlyList<JsonObject> ConfigurationFiles => _configurationFiles;
     public void AddJsonConfigFile(JsonObject jsonConfiguration) => _configurationFiles.Add(jsonConfiguration);
 
-    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    public async Task StartServerAsync()
     {
-        var configurationBuilder = new ConfigurationBuilder();
-        foreach (var bytes in _configurationFiles
-            .Select(jsonConfiguration => jsonConfiguration.ToJsonString())
-            .Select(json => Encoding.UTF8.GetBytes(json)))
-        {
-            configurationBuilder.AddJsonStream(new MemoryStream(bytes, false));
-        }
+        await this.CleanDatabase(cancellationToken: CancellationTokenSource.Token);
+        StartServer();
+        await Installer.OnStartup(Services, CancellationTokenSource.Token);
     }
+    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], _configurationFiles.ToArray());
 }

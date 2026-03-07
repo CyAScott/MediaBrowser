@@ -9,7 +9,7 @@ public class UserEntity
     [Column("user_name"), MaxLength(50)]
     public required string Username { get; set; }
 
-    [Column("password_hash"), MaxLength(50)]
+    [Column("password_hash"), MaxLength(125)]
     public required string PasswordHash { get; set; }
 
     public UserReadModel ToReadModel() => new()

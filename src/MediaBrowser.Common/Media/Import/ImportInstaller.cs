@@ -8,7 +8,7 @@ public static class ImportInstaller
         services.AddSingleton<Nfo>();
     }
 
-    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
+    public async static Task OnStartup(IServiceProvider services, CancellationToken cancellationToken)
     {
         var mediaConfig = services.GetRequiredService<MediaConfig>();
 
@@ -23,25 +23,27 @@ public static class ImportInstaller
         var log = services.GetRequiredService<ILogger<Nfo>>();
 
         foreach (var nfoLocation in Directory.GetFiles(mediaConfig.MediaDirectory, "*.nfo")
+            // Ignore hidden files, which may be temp files created by media management software
             .Where(f => !Path.GetFileName(f).StartsWith('.')))
         {
             try
             {
-                var rawXml = await File.ReadAllTextAsync(nfoLocation, Encoding.UTF8, source.Token);
+                var rawXml = await File.ReadAllTextAsync(nfoLocation, Encoding.UTF8, cancellationToken);
                 var mediaEntity = nfo.Read(rawXml);
 
-                await db.Media.Where(m => m.Id == mediaEntity.Id).ExecuteDeleteAsync();
+                await db.Media.Where(m => m.Id == mediaEntity.Id).ExecuteDeleteAsync(cancellationToken: cancellationToken);
                 db.Media.Add(mediaEntity);
-                await db.SaveChangesAsync();
+                await db.SaveChangesAsync(cancellationToken);
             }
             catch (Exception error)
             {
-#pragma warning disable CA2254
-                log.LogError(error, error.Message);
-#pragma warning restore CA2254
+                log.LogError(error, "{Message}", error.Message);
             }
         }
 
-        await source.CancelAsync();
+        if (mediaConfig.StopAfterSync)
+        {
+            Environment.Exit(0);
+        }
     }
 }

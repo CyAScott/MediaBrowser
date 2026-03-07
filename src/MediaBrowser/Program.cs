@@ -1,21 +1,13 @@
-var builder = WebApplication.CreateBuilder(args);
+using static MediaBrowser.Installer;
 
-builder.Configuration
-    .AddJsonFile("appsettings.json")
-    .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
-    .AddEnvironmentVariables()
-    .AddCommandLine(args);
+var builder = CreateHostBuilder(args, []);
 
-Installer.ConfigureServices(builder.Configuration, builder.Services);
-
-await using var app = builder.Build();
+using var app = builder.Build();
 using var cancelTokenSource = new CancellationTokenSource();
 
-Installer.ConfigureApp(app);
-
-await Installer.OnStartup(app.Services, cancelTokenSource);
+await OnStartup(app.Services, cancelTokenSource.Token);
 
 if (!cancelTokenSource.IsCancellationRequested)
 {
-    await app.RunAsync();
+    await app.RunAsync(cancelTokenSource.Token);
 }

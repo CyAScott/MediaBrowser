@@ -156,7 +156,7 @@ namespace MediaBrowser.Migrations
 
                     b.Property<string>("Ffprobe")
                         .IsRequired()
-                        .HasColumnType("JSON")
+                        .HasColumnType("NVARCHAR(MAX)")
                         .HasColumnName("ffprobe")
                         .HasAnnotation("Relational:JsonPropertyName", "ffprobe");
 

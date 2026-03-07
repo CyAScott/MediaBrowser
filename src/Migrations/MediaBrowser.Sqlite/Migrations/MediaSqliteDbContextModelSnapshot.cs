@@ -304,7 +304,7 @@ namespace MediaBrowser.Migrations
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(125)
                         .HasColumnType("TEXT")
                         .HasColumnName("password_hash");
 

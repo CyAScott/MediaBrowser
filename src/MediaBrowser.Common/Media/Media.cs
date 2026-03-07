@@ -255,7 +255,7 @@ public class MediaEntityConfiguration(DbType type) : IEntityTypeConfiguration<Me
                 ffprobe.HasColumnType("TEXT");
                 break;
             case DbType.SqlServer:
-                ffprobe.HasColumnType("JSON");
+                ffprobe.HasColumnType("NVARCHAR(MAX)");
                 break;
         }
 

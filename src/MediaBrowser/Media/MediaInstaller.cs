@@ -2,12 +2,12 @@ namespace MediaBrowser.Media;
 
 static class MediaInstaller
 {
-    public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+    public static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
     {
-        var mediaConfig = new MediaConfig(configuration);
+        var mediaConfig = new MediaConfig(context.Configuration);
         services.AddSingleton(mediaConfig);
 
-        var dbConfig = new DbConfig(configuration);
+        var dbConfig = new DbConfig(context.Configuration);
         services.AddSingleton(dbConfig);
 
         switch (dbConfig.DbType)
@@ -32,15 +32,15 @@ static class MediaInstaller
         }
     }
 
-    public async static Task OnStartup(IServiceProvider services, CancellationTokenSource source)
+    public async static Task OnStartup(IServiceProvider services, CancellationToken cancellationToken)
     {
         var dbConfig = services.GetRequiredService<DbConfig>();
         if (dbConfig.MigrateOnBoot)
         {
             using var scope = services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-            await db.Database.MigrateAsync(cancellationToken: source.Token);
-            await db.SaveChangesAsync(source.Token);
+            await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+            await db.Database.MigrateAsync(cancellationToken: cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
 }

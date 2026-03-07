@@ -33,7 +33,7 @@ BEGIN
         [mtime_ms] bigint NOT NULL,
         [created_on] datetime2 NULL,
         [updated_on] datetime2 NULL,
-        [ffprobe] JSON NOT NULL,
+        [ffprobe] NVARCHAR(MAX) NOT NULL,
         CONSTRAINT [PK_media] PRIMARY KEY ([id])
     );
 END;
@@ -193,6 +193,29 @@ IF NOT EXISTS (
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
     VALUES (N'20251017193532_Thumbnail', N'9.0.9');
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306204659_ExpandPasswordLength'
+)
+BEGIN
+    DECLARE @var sysname;
+    SELECT @var = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[users]') AND [c].[name] = N'password_hash');
+    IF @var IS NOT NULL EXEC(N'ALTER TABLE [users] DROP CONSTRAINT [' + @var + '];');
+    ALTER TABLE [users] ALTER COLUMN [password_hash] nvarchar(125) NOT NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260306204659_ExpandPasswordLength'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260306204659_ExpandPasswordLength', N'9.0.9');
 END;
 
 COMMIT;

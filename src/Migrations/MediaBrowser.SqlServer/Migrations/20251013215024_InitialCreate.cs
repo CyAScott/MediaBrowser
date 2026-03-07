@@ -33,7 +33,7 @@ namespace MediaBrowser.Migrations
                     mtime_ms = table.Column<long>(type: "bigint", nullable: false),
                     created_on = table.Column<DateTime>(type: "datetime2", nullable: true),
                     updated_on = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ffprobe = table.Column<string>(type: "JSON", nullable: false)
+                    ffprobe = table.Column<string>(type: "NVARCHAR(MAX)", nullable: false)
                 },
                 constraints: table =>
                 {
