@@ -97,7 +97,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     }
     protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles, MockFfmpeg);
 
-    public string GetJwtTokenForTestUser()
+    public string GetJwtForTestUser()
     {
         var userConfig = Services.GetRequiredService<UserConfig>();
         return userConfig.GetJwt(Guid.NewGuid(), "testUser").Jwt;

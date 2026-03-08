@@ -1,6 +1,4 @@
 using System.Net;
-using System.Text.Json;
-using System.Web;
 using MediaBrowser.TestFiles;
 
 // ReSharper disable AccessToDisposedClosure
@@ -9,47 +7,59 @@ namespace MediaBrowser.Media.Import;
 
 public class ImportControllerTests
 {
-    [Test(Description = "Test CRUD Import APIs.")]
+    [Test(Description = "Test CRUD import APIs.")]
     public async Task Test()
     {
         await using var factory = new MediaBrowserWebApplicationFactory();
 
         await factory.StartServerAsync();
 
-        var expectedFiles = await AddImportFiles(factory).ToDictionaryAsync(i => i.Name);
+        var (validFile, invalidFile) = await AddImportFiles(factory);
 
         using var client = factory.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new("Bearer", factory.GetJwtTokenForTestUser());
+        client.DefaultRequestHeaders.Authorization = new("Bearer", factory.GetJwtForTestUser());
+        var importClient = new ImportClient(client);
 
         await GetFilesTest();
         async Task GetFilesTest()
         {
-            var actualFiles = await GetFiles(client);
-            actualFiles.Count.ShouldBe(expectedFiles.Count);
-            foreach (var actualFile in actualFiles)
+            var testFiles = new[]
+                {
+                    invalidFile,
+                    validFile
+                }
+                .OrderBy(it => it.Name)
+                .ToList();
+            using var response = await importClient.GetFiles();
+            response.EnsureSuccessStatusCode();
+            response.Content.ShouldNotBeNull()
+                .Count.ShouldBe(testFiles.Count, "The number of files returned should match the number of files added for this test.");
+            foreach (var (actualFile, expectedFile) in response.Content
+                .OrderBy(it => it.Name)
+                .Zip(testFiles))
             {
-                actualFile.ShouldBe(expectedFiles[actualFile.Name]);
+                actualFile.ShouldBe(expectedFile);
             }
         }
 
         await ReadFileNotFoundTest();
         async Task ReadFileNotFoundTest()
         {
-            using var response = await ReadFile(client, "random-file-name");
-            response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            using var response = await importClient.ReadFile("random-file-name");
+            response.StatusCode.ShouldBe(HttpStatusCode.NotFound, "The file does not exist, so it should return 404 Not Found.");
         }
 
         await ReadFileInfoNotFoundTest();
         async Task ReadFileInfoNotFoundTest()
         {
-            using var response = await ReadFileInfo(client, "random-file-name");
-            response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            using var response = await importClient.ReadFileInfo("random-file-name");
+            response.StatusCode.ShouldBe(HttpStatusCode.NotFound, "The file does not exist, so it should return 404 Not Found.");
         }
 
         await ImportNotFoundTest();
         async Task ImportNotFoundTest()
         {
-            using var response = await Import(client, "random-file-name", new()
+            using var response = await importClient.Import("random-file-name", new()
             {
                 Title = "title",
                 OriginalTitle = "original title",
@@ -60,49 +70,37 @@ public class ImportControllerTests
                 Producers = [],
                 Writers = []
             });
-            response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
+            response.StatusCode.ShouldBe(HttpStatusCode.NotFound, "The file does not exist, so it should return 404 Not Found.");
         }
 
         await ReadFileValidTest();
         async Task ReadFileValidTest()
         {
-            var validFile = expectedFiles[_validFileName];
-            using var response = await ReadFile(client, validFile.Name);
+            // Read the file test file and ensure the content and headers are correct.
+            // This also serves as a baseline for the subsequent test to ensure that the file is cached after the first read.
+            using var response = await importClient.ReadFile(validFile.Name);
             response.EnsureSuccessStatusCode();
             response.Content.Headers.ContentLength.ShouldBe(validFile.Size);
-            response.Content.Headers.ContentType.ShouldNotBeNull().MediaType.ShouldBe("video/mp4");
+            response.Content.Headers.ContentType.ShouldNotBeNull().MediaType.ShouldBe(validFile.Mime);
+
+            // Read the file again with the Last-Modified header to ensure it returns 304 Not Modified since the file has not changed.
             var lastModifiedOn = response.Content.Headers.LastModified.ShouldNotBeNull().UtcDateTime;
-            using var achedResponse = await ReadFile(client, validFile.Name, lastModifiedOn);
-            achedResponse.StatusCode.ShouldBe(HttpStatusCode.NotModified);
+            using var cachedResponse = await importClient.ReadFile(validFile.Name, lastModifiedOn);
+            cachedResponse.StatusCode.ShouldBe(HttpStatusCode.NotModified);
         }
 
         await ReadFileInfoValidTest();
         async Task ReadFileInfoValidTest()
         {
-            var validFile = expectedFiles[_validFileName];
-            using var response = await ReadFileInfo(client, validFile.Name);
+            using var response = await importClient.ReadFileInfo(validFile.Name);
             response.EnsureSuccessStatusCode();
-            var actualFile = await response.Read<ImportFileInfo>();
-            actualFile.ShouldBe(validFile);
+            response.Content.ShouldBe(validFile);
         }
 
         await ImportInvalidTest();
         async Task ImportInvalidTest()
         {
-            var invalidFile = expectedFiles[_invalidFileName];
-            using var invalidCastResponse = await Import(client, invalidFile.Name, new()
-            {
-                Title = "title",
-                OriginalTitle = "original title",
-                Description = "description",
-                Cast = ["_actor1_", "_actor2_"],
-                Directors = [],
-                Genres = [],
-                Producers = [],
-                Writers = []
-            });
-            invalidCastResponse.StatusCode.ShouldBe(HttpStatusCode.ExpectationFailed);
-            using var invalidFileResponse = await Import(client, invalidFile.Name, new()
+            using var response = await importClient.Import(invalidFile.Name, new()
             {
                 Title = "title",
                 OriginalTitle = "original title",
@@ -113,15 +111,38 @@ public class ImportControllerTests
                 Producers = [],
                 Writers = []
             });
-            invalidFileResponse.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable);
+            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable,
+                "The file is not a valid media file, so it should return 406 Not Acceptable.");
         }
 
-        await ImportValidTest();
-        async Task ImportValidTest()
+        await InvalidTagTest(TagType.Cast);
+        await InvalidTagTest(TagType.Director);
+        await InvalidTagTest(TagType.Genre);
+        await InvalidTagTest(TagType.Producer);
+        await InvalidTagTest(TagType.Writer);
+        async Task InvalidTagTest(TagType tagType)
         {
-            var validFile = expectedFiles[_validFileName];
+            const string invalidTag = "_actor1_";
 
-            using var invalidThumbnailResponse = await Import(client, validFile.Name, new()
+            using var response = await importClient.Import(validFile.Name, new()
+            {
+                Title = "title",
+                OriginalTitle = "original title",
+                Description = "description",
+                Cast = tagType == TagType.Cast ? [invalidTag] : [],
+                Directors = tagType == TagType.Director ? [invalidTag] : [],
+                Genres = tagType == TagType.Genre ? [invalidTag] : [],
+                Producers = tagType == TagType.Producer ? [invalidTag] : [],
+                Writers = tagType == TagType.Writer ? [invalidTag] : []
+            });
+            response.StatusCode.ShouldBe(HttpStatusCode.ExpectationFailed,
+                "Only alphanumeric characters are allowed for cast, directors, genres, producers, and writers, so it should return 417 Expectation Failed.");
+        }
+
+        await ImportValidFileWithInvalidThumbnailTest();
+        async Task ImportValidFileWithInvalidThumbnailTest()
+        {
+            using var response = await importClient.Import(validFile.Name, new()
             {
                 Title = "title",
                 OriginalTitle = "original title",
@@ -133,9 +154,13 @@ public class ImportControllerTests
                 Writers = ["writer"],
                 Thumbnail = 60 // 1 minute into the video which is valid for our 1-second test video
             });
-            invalidThumbnailResponse.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable);
+            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable, "The thumbnail timestamp is beyond the duration of the video, so it should return 406 Not Acceptable.");
+        }
 
-            using var validFileResponse = await Import(client, validFile.Name, new()
+        await ImportValidTest();
+        async Task ImportValidTest()
+        {
+            using var response = await importClient.Import(validFile.Name, new()
             {
                 Title = "title",
                 OriginalTitle = "original title",
@@ -147,52 +172,31 @@ public class ImportControllerTests
                 Writers = ["writer"],
                 Thumbnail = 0.5
             });
-            validFileResponse.EnsureSuccessStatusCode();
-
-            var actual = await validFileResponse.Read<MediaReadModel>();
-            actual.ShouldNotBeNull();
+            response.EnsureSuccessStatusCode();
+            response.Content.ShouldNotBeNull();
 
             using var scope = factory.Services.CreateScope();
             await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
-            var media = await db.MediaJoined.FirstOrDefaultAsync(m => m.Id == actual.Id);
+            var media = await db.MediaJoined.FirstOrDefaultAsync(m => m.Id == response.Content.Id);
             media.ShouldNotBeNull();
 
             var expected = media.ToReadModel(scope.ServiceProvider.GetRequiredService<MediaConfig>());
-            actual.ShouldBe(expected);
+            response.Content.ShouldBe(expected);
         }
     }
 
-    const string _invalidFileName = "invalid.mp4", _validFileName = "valid.mp4";
-    async IAsyncEnumerable<ImportFileInfo> AddImportFiles(MediaBrowserWebApplicationFactory factory)
+    async Task<(ImportFileInfo ValidFile, ImportFileInfo InvalidFile)> AddImportFiles(MediaBrowserWebApplicationFactory factory)
     {
         var mediaConfig = factory.Services.GetRequiredService<MediaConfig>();
 
-        var invalidFilePath = Path.Combine(factory.ImportDirectory, _invalidFileName);
+        var invalidFilePath = Path.Combine(factory.ImportDirectory, "invalid.mp4");
         await File.AppendAllTextAsync(invalidFilePath, "invalid content");
-        yield return ImportFileInfo.Create(mediaConfig, invalidFilePath).ShouldNotBeNull();
+        var invalidFile = ImportFileInfo.Create(mediaConfig, invalidFilePath).ShouldNotBeNull();
 
-        var validFilePath = Path.Combine(factory.ImportDirectory, _validFileName);
+        var validFilePath = Path.Combine(factory.ImportDirectory, "valid.mp4");
         await Files.Mp4(validFilePath);
-        yield return ImportFileInfo.Create(mediaConfig, validFilePath).ShouldNotBeNull();
-    }
+        var validFile = ImportFileInfo.Create(mediaConfig, validFilePath).ShouldNotBeNull();
 
-    async Task<IReadOnlyList<ImportFileInfo>> GetFiles(HttpClient client)
-    {
-        using var response = await client.GetAsync("/api/import/files");
-        response.EnsureSuccessStatusCode();
-        return await response.Read<IReadOnlyList<ImportFileInfo>>();
+        return (validFile, invalidFile);
     }
-    async Task<HttpResponseMessage> ReadFile(HttpClient client, string name, DateTime? lastModified = null) =>
-        await client.SendAsync(new(HttpMethod.Get, $"/api/import/file/{HttpUtility.UrlPathEncode(name)}")
-        {
-            Headers =
-            {
-                IfModifiedSince = lastModified
-            }
-        });
-    Task<HttpResponseMessage> ReadFileInfo(HttpClient client, string name) =>
-        client.GetAsync($"/api/import/file/{HttpUtility.UrlPathEncode(name)}/info");
-    Task<HttpResponseMessage> Import(HttpClient client, string name, ImportMediaRequest request) =>
-        client.PostAsync($"/api/import/file/{HttpUtility.UrlPathEncode(name)}",
-            new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json"));
 }
