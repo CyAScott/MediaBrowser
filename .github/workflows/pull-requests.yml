@@ -13,7 +13,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: MediaBrowser
+          MYSQL_DATABASE: mediabrowser
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -23,7 +23,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: MediaBrowser
+          POSTGRES_DB: mediabrowser
         ports:
           - 5432:5432
         options: >-
@@ -63,13 +63,7 @@ jobs:
     - name: Test
       run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
       env:
-        DB_MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=MediaBrowser;User=root;Password=password;"
-        DB_POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=MediaBrowser;Username=postgres;Password=password;"
-        DB_SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=MediaBrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
-
-        # Mapping to standard .NET configuration keys to ensure correct behavior
-        db__mySqlConnectionString: "Server=127.0.0.1;Port=3306;Database=MediaBrowser;User=root;Password=password;"
-        db__postgresConnectionString: "Host=127.0.0.1;Port=5432;Database=MediaBrowser;Username=postgres;Password=password;"
-        db__sqlServerConnectionString: "Server=127.0.0.1,1433;Database=MediaBrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
-        db__migrateOnBoot: "true"
-        ASPNETCORE_ENVIRONMENT: "Test"
+        LOGGING__LOGLEVEL__DEFAULT: "Error"
+        DB_MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=mediabrowser;User=root;Password=password;"
+        DB_POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=mediabrowser;Username=postgres;Password=password;"
+        DB_SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=mediabrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
