@@ -1,0 +1,91 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: MediaBrowser
+          MYSQL_USER: root
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: MediaBrowser
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: "Password123!"
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore src/MediaBrowser.Tests/MediaBrowser.Tests.csproj
+
+    - name: Build
+      run: dotnet build src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-restore
+
+    - name: Wait for SQL Server
+      run: |
+        echo "Waiting for SQL Server..."
+        # Loop until SQL Server is ready (max 60 seconds)
+        for i in {1..12}; do
+          if docker run --network host --rm mcr.microsoft.com/mssql/server:2022-latest /opt/mssql-tools/bin/sqlcmd -S localhost,1433 -U sa -P 'Password123!' -Q "SELECT 1" > /dev/null 2>&1; then
+            echo "SQL Server is ready."
+            exit 0
+          fi
+          echo "SQL Server not ready yet... ($i/12)"
+          sleep 5
+        done
+        echo "SQL Server failed to start."
+        exit 1
+
+    - name: Create SQL Server Database
+      run: |
+        docker run --network host --rm mcr.microsoft.com/mssql/server:2022-latest /opt/mssql-tools/bin/sqlcmd \
+        -S localhost,1433 -U sa -P 'Password123!' -Q "CREATE DATABASE MediaBrowser"
+
+    - name: Test
+      run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
+      env:
+        DB_MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=MediaBrowser;User=root;Password=password;"
+        DB_POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=MediaBrowser;Username=postgres;Password=password;"
+        DB_SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=MediaBrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
+        
+        # Mapping to standard .NET configuration keys to ensure correct behavior
+        db__mySqlConnectionString: "Server=127.0.0.1;Port=3306;Database=MediaBrowser;User=root;Password=password;"
+        db__postgresConnectionString: "Host=127.0.0.1;Port=5432;Database=MediaBrowser;Username=postgres;Password=password;"
+        db__sqlServerConnectionString: "Server=127.0.0.1,1433;Database=MediaBrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
+        db__migrateOnBoot: "true"
+        ASPNETCORE_ENVIRONMENT: "Test"
