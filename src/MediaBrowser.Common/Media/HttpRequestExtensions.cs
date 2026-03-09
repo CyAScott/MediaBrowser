@@ -14,7 +14,7 @@ public static class HttpRequestExtensions
             }
 
             var range = rangeHeader[0];
-            if (string.IsNullOrEmpty(range) || !range.StartsWith("bytes="))
+            if (string.IsNullOrEmpty(range) || !range.StartsWith("bytes=", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
@@ -23,12 +23,12 @@ public static class HttpRequestExtensions
             {
                 return false;
             }
-            if (!long.TryParse(parts[0], out var start))
+            if (!long.TryParse(parts[0], CultureInfo.InvariantCulture, out var start))
             {
                 start = 0;
             }
 
-            if (!long.TryParse(parts[1], out var end))
+            if (!long.TryParse(parts[1], CultureInfo.InvariantCulture, out var end))
             {
                 end = fileLength - 1;
             }

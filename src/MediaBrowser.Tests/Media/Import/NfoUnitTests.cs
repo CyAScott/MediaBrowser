@@ -1,8 +1,8 @@
 namespace MediaBrowser.Media.Import;
 
-public class NfoTests
+public class NfoUnitTests
 {
-    public NfoTests()
+    public NfoUnitTests()
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), "MediaBrowserTests");
         if (Directory.Exists(tempDirectory))
