@@ -51,6 +51,21 @@ public class MediaControllerTests
             response.Content.Results.ShouldContain(testVideoFile, message);
         }
 
+        await SearchKeywordTests();
+        async Task SearchKeywordTests()
+        {
+            using var response = await mediaClient.Search(new()
+            {
+                Keywords = testImageFile.Title,
+                Take = 100
+            });
+            const string message = "This should return search results successfully since we have added media files, and we are not applying any filters.";
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, message);
+            response.Content.ShouldNotBeNull(message);
+            response.Content.Count.ShouldBe(1, message);
+            response.Content.Results.ShouldContain(testImageFile, message);
+        }
+
         await StreamThumbnailTest(testImageFile);
         await StreamThumbnailTest(testVideoFile);
         async Task StreamThumbnailTest(MediaReadModel testFile)
@@ -443,7 +458,7 @@ public class MediaControllerTests
 
         using var response = await importClient.Import(fileName, new()
         {
-            Title = "title",
+            Title = "image title",
             OriginalTitle = "original title",
             Description = "description",
             Cast = [],
@@ -470,7 +485,7 @@ public class MediaControllerTests
 
         using var response = await importClient.Import(fileName, new()
         {
-            Title = "title",
+            Title = "video title",
             OriginalTitle = "original title",
             Description = "description",
             Cast = ["cast", $"cast {_noThumbnailTag}"],
