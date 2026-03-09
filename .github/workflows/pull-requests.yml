@@ -39,6 +39,11 @@ jobs:
           ACCEPT_EULA: "Y"
         ports:
           - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Password123!' -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
     - uses: actions/checkout@v4
@@ -53,21 +58,6 @@ jobs:
 
     - name: Build
       run: dotnet build src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-restore
-
-    - name: Wait for SQL Server
-      run: |
-        echo "Waiting for SQL Server..."
-        # Loop until SQL Server is ready (max 60 seconds)
-        for i in {1..12}; do
-          if docker run --network host --rm mcr.microsoft.com/mssql/server:2022-latest /opt/mssql-tools/bin/sqlcmd -S localhost,1433 -U sa -P 'Password123!' -Q "SELECT 1" > /dev/null 2>&1; then
-            echo "SQL Server is ready."
-            exit 0
-          fi
-          echo "SQL Server not ready yet... ($i/12)"
-          sleep 5
-        done
-        echo "SQL Server failed to start."
-        exit 1
 
     - name: Create SQL Server Database
       run: |
