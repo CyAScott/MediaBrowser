@@ -64,6 +64,6 @@ jobs:
       run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
       env:
         LOGGING__LOGLEVEL__DEFAULT: "Error"
-        DB_MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=mediabrowser;User=root;Password=password;"
-        DB_POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=mediabrowser;Username=postgres;Password=password;"
-        DB_SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=mediabrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
+        DB__MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=mediabrowser;User=root;Password=password;"
+        DB__POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=mediabrowser;Username=postgres;Password=password;"
+        DB__SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=mediabrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
