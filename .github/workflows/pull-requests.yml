@@ -60,11 +60,6 @@ jobs:
     - name: Build
       run: dotnet build src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-restore
 
-    - name: Create SQL Server Database
-      run: |
-        docker exec sqlserver /opt/mssql-tools/bin/sqlcmd \
-        -S localhost -U sa -P 'Password123!' -Q "CREATE DATABASE MediaBrowser"
-
     - name: Test
       run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
       env:
