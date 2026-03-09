@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
 [ApiController, Route("api/[controller]")]
-public partial class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
+public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
 {
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MediaReadModel>> Get(Guid id)

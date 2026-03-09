@@ -1,12 +1,6 @@
 namespace MediaBrowser.Media.Import;
 
-public interface IFfmpeg
-{
-    Task<(FfprobeResponse response, string mime)?> GetMediaInfo(string path, CancellationToken cancellationToken = default);
-    Task<bool> TryExtractThumbnail(string inputPath, string outputPath, TimeSpan? at = null, CancellationToken cancellationToken = default);
-}
-
-public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig) : IFfmpeg
+public class Ffmpeg(ILogger<Ffmpeg> log, MediaConfig mediaConfig)
 {
     public async Task<(FfprobeResponse response, string mime)?> GetMediaInfo(string path, CancellationToken cancellationToken = default)
     {

@@ -89,7 +89,6 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     }
     public CancellationTokenSource CancellationTokenSource { get; }
     public DbType DbType { get; }
-    public IFfmpeg? MockFfmpeg { get; set; }
     public List<JsonObject> ConfigurationFiles { get; }
     public string CastDirectory { get; }
     public string DirectorsDirectory { get; }
@@ -118,7 +117,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
         StartServer();
         await Installer.OnStartup(Services, CancellationTokenSource.Token);
     }
-    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles, MockFfmpeg);
+    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles);
 
     public string GetJwtForTestUser(UserReadModel? user = null)
     {

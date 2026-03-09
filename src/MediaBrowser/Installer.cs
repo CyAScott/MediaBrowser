@@ -5,7 +5,7 @@ public class Installer
     public const string Version = "v1";
 
     public const string CliArgsKey = "CliArgs", TestConfigsKey = "TestConfigs";
-    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs, IFfmpeg? mockFfmpeg = null)
+    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs)
     {
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration(configurationBuilder =>
@@ -16,7 +16,7 @@ public class Installer
             .ConfigureAppConfiguration(ConfigureSettings)
             .ConfigureServices(ConfigureServices)
             .ConfigureServices(MediaInstaller.ConfigureServices)
-            .ConfigureServices(services => ImportInstaller.ConfigureServices(services, mockFfmpeg))
+            .ConfigureServices(ImportInstaller.ConfigureServices)
             .ConfigureServices(UserInstaller.ConfigureServices)
             .ConfigureWebHostDefaults(webBuilder => webBuilder.Configure(ConfigureApp));
 

@@ -12,6 +12,6 @@ public class IndexController(IWebHostEnvironment env) : Controller
     [HttpGet("/{**catchAll}", Order = int.MaxValue),
      AllowAnonymous,
      ApiExplorerSettings(IgnoreApi = true)]
-    public IActionResult Index() =>
+    public IActionResult Index(string? catchAll = null) =>
         PhysicalFile(Path.Combine(env.WebRootPath, "index.html"), "text/html");
 }

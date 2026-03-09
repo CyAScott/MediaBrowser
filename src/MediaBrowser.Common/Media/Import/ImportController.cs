@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media.Import;
 
 [ApiController, Route("api/[controller]")]
-public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
+public class ImportController(Ffmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
 {
     [HttpGet("files")]
     public ActionResult<IReadOnlyList<ImportFileInfo>> GetFiles() =>
