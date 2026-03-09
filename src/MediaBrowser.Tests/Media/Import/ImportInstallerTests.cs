@@ -119,12 +119,12 @@ public class ImportInstallerTests
                     Width = random.Next(640, 1920),
                     Height = random.Next(360, 1080),
                     Duration = (random.NextDouble() * 3600).ToString("F2", CultureInfo.InvariantCulture),
-                    BitRate = random.Next(1_000_000, 10_000_000).ToString(),
-                    SampleRate = random.Next(22050, 48000).ToString(),
+                    BitRate = random.Next(1_000_000, 10_000_000).ToString(CultureInfo.InvariantCulture),
+                    SampleRate = random.Next(22050, 48000).ToString(CultureInfo.InvariantCulture),
                     Channels = random.Next(1, 8),
                     Tags = new()
                     {
-                        CreationTime = DateTime.UtcNow.AddDays(-random.Next(0, 365)).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        CreationTime = DateTime.UtcNow.AddDays(-random.Next(0, 365)).ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
                         Language = "eng",
                         HandlerName = "VideoHandler",
                         VendorId = Guid.NewGuid().ToString()
@@ -139,15 +139,15 @@ public class ImportInstallerTests
                 FormatLongName = "QuickTime / MOV",
                 StartTime = "0.000000",
                 Duration = (random.NextDouble() * 3600).ToString("F2", CultureInfo.InvariantCulture),
-                Size = random.NextInt64(1_000_000, 10_000_000).ToString(),
-                BitRate = random.Next(1_000_000, 10_000_000).ToString(),
+                Size = random.NextInt64(1_000_000, 10_000_000).ToString(CultureInfo.InvariantCulture),
+                BitRate = random.Next(1_000_000, 10_000_000).ToString(CultureInfo.InvariantCulture),
                 ProbeScore = random.Next(50, 100),
                 Tags = new()
                 {
                     MajorBrand = "mp42",
                     MinorVersion = "0",
                     CompatibleBrands = "isom,mp42",
-                    CreationTime = DateTime.UtcNow.AddDays(-random.Next(0, 365)).ToString("yyyy-MM-ddTHH:mm:ssZ")
+                    CreationTime = DateTime.UtcNow.AddDays(-random.Next(0, 365)).ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)
                 }
             }
         };

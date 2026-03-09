@@ -1,7 +1,4 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Headers;
-using Microsoft.Net.Http.Headers;
+
 
 // ReSharper disable AccessToDisposedClosure
 
@@ -159,7 +156,7 @@ public class UsersControllerTests
     (string Jwt, DateTimeOffset ExpiresOn) GetCookie(HttpResponseHeaders header)
     {
         header.TryGetValues(HeaderNames.SetCookie, out var cookies).ShouldBeTrue();
-        var cookie = cookies.ShouldNotBeNull().SingleOrDefault(c => c.StartsWith(JwtCookieMiddleware.CookieName)).ShouldNotBeNull();
+        var cookie = cookies.ShouldNotBeNull().SingleOrDefault(c => c.StartsWith(JwtCookieMiddleware.CookieName, StringComparison.Ordinal)).ShouldNotBeNull();
         var parts = cookie.Split('=', 2).Skip(1).SingleOrDefault().ShouldNotBeNull().Split(';', StringSplitOptions.TrimEntries);
         parts.ShouldNotBeEmpty();
 

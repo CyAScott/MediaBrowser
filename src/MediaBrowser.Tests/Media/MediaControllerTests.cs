@@ -1,6 +1,3 @@
-using System.Net;
-using MediaBrowser.Media.Import;
-
 namespace MediaBrowser.Media;
 
 public class MediaControllerTests
@@ -76,7 +73,7 @@ public class MediaControllerTests
              response.Content.ShouldNotBeNull(message);
              response.Content.Headers.ContentLength.ShouldNotBeNull(message).ShouldNotBe(0, message);
              response.Content.Headers.ContentType.ShouldNotBeNull(message).MediaType
-                 .ShouldBe(testFile.Mime.StartsWith("video/") ? "image/jpeg" : testFile.Mime, message);
+                 .ShouldBe(testFile.Mime.StartsWith("video/", StringComparison.Ordinal) ? "image/jpeg" : testFile.Mime, message);
 
              // Read the file again with the Last-Modified header to ensure it returns 304 Not Modified since the file has not changed.
              const string cachedMessage = "This should return 304 Not Modified since the file has not changed.";
@@ -95,7 +92,7 @@ public class MediaControllerTests
              response.Content.ShouldNotBeNull(message);
              response.Content.Headers.ContentLength.ShouldNotBeNull(message).ShouldNotBe(0, message);
              response.Content.Headers.ContentType.ShouldNotBeNull(message).MediaType
-                 .ShouldBe(testFile.Mime.StartsWith("video/") ? "image/jpeg" : testFile.Mime, message);
+                 .ShouldBe(testFile.Mime.StartsWith("video/", StringComparison.Ordinal) ? "image/jpeg" : testFile.Mime, message);
 
              // Read the file again with the Last-Modified header to ensure it returns 304 Not Modified since the file has not changed.
              const string cachedMessage = "This should return 304 Not Modified since the file has not changed.";
@@ -327,12 +324,12 @@ public class MediaControllerTests
     async Task UpdateThumbnailWithFileTests(MediaConfig mediaConfig, MediaClient mediaClient, MediaReadModel testVideoFile, MediaReadModel testImageFile)
     {
         var thumbnail = new FileInfo(Path.Combine(mediaConfig.ImportDirectory!, "valid-thumbnail.webp"));
-        await TestFiles.Files.Image(thumbnail.FullName);
+        await Files.Image(thumbnail.FullName);
 
         await NotFoundTest();
         async Task NotFoundTest()
         {
-            using var stream = thumbnail.OpenRead();
+            await using var stream = thumbnail.OpenRead();
             using var response = await mediaClient.UpdateThumbnailWithFile(Guid.NewGuid(), stream, thumbnail.Name, isPrimary: true);
             response.StatusCode.ShouldBe(HttpStatusCode.NotFound, "The media does not exist because this is a random media ID, so it should return 404 Not Found.");
         }
@@ -340,7 +337,7 @@ public class MediaControllerTests
         await ThumbnailForImageTest();
         async Task ThumbnailForImageTest()
         {
-            using var stream = thumbnail.OpenRead();
+            await using var stream = thumbnail.OpenRead();
             using var response = await mediaClient.UpdateThumbnailWithFile(testImageFile.Id, stream, thumbnail.Name, isPrimary: true);
             response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable,
                 "The media is an image file which does not support thumbnail update with an image file, so it should return 406 Not Acceptable.");
@@ -351,7 +348,7 @@ public class MediaControllerTests
         {
             var invalidThumbnail = new FileInfo(Path.Combine(mediaConfig.ImportDirectory!, "invalid-thumbnail.webp"));
             await File.WriteAllTextAsync(invalidThumbnail.FullName, "this is not a valid image file");
-            using var stream = invalidThumbnail.OpenRead();
+            await using var stream = invalidThumbnail.OpenRead();
             using var response = await mediaClient.UpdateThumbnailWithFile(testVideoFile.Id, stream, invalidThumbnail.Name, isPrimary: true);
             response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable, "This should return 406 Not Acceptable since the file is not a valid image file.");
         }
@@ -359,14 +356,14 @@ public class MediaControllerTests
         await ValidPrimaryThumbnailTest();
         async Task ValidPrimaryThumbnailTest()
         {
-            using var stream = thumbnail.OpenRead();
+            await using var stream = thumbnail.OpenRead();
             using var response = await mediaClient.UpdateThumbnailWithFile(testVideoFile.Id, stream, thumbnail.Name, isPrimary: true);
             response.StatusCode.ShouldBe(HttpStatusCode.OK, "This should update the primary thumbnail successfully since we are using a valid media ID and a valid image file, so it should return 200 Ok.");
         }
         await ValidFanartThumbnailTest();
         async Task ValidFanartThumbnailTest()
         {
-            using var stream = thumbnail.OpenRead();
+            await using var stream = thumbnail.OpenRead();
             using var response = await mediaClient.UpdateThumbnailWithFile(testVideoFile.Id, stream, thumbnail.Name, isPrimary: false);
             response.StatusCode.ShouldBe(HttpStatusCode.OK, "This should update the fanart thumbnail successfully since we are using a valid media ID and a valid image file, so it should return 200 Ok.");
         }
@@ -454,7 +451,7 @@ public class MediaControllerTests
 
         const string fileName = "import.webp";
         var filePath = Path.Combine(mediaConfig.ImportDirectory!, fileName);
-        await TestFiles.Files.Image(filePath);
+        await Files.Image(filePath);
 
         using var response = await importClient.Import(fileName, new()
         {
@@ -481,7 +478,7 @@ public class MediaControllerTests
 
         const string fileName = "import.mp4";
         var filePath = Path.Combine(mediaConfig.ImportDirectory!, fileName);
-        await TestFiles.Files.Mp4(filePath);
+        await Files.Mp4(filePath);
 
         using var response = await importClient.Import(fileName, new()
         {
@@ -500,11 +497,11 @@ public class MediaControllerTests
 
         // The first item in each list should have a thumbnail, and the second item should not.
         // So we check that the first item has a thumbnail file, and we don't check for the second item.
-        await TestFiles.Files.Cast(Path.Combine(mediaConfig.CastDirectory, $"{response.Content.Cast[0]}.jpg"));
-        await TestFiles.Files.Cast(Path.Combine(mediaConfig.DirectorsDirectory, $"{response.Content.Directors[0]}.jpg"));
-        await TestFiles.Files.Cast(Path.Combine(mediaConfig.GenresDirectory, $"{response.Content.Genres[0]}.jpg"));
-        await TestFiles.Files.Cast(Path.Combine(mediaConfig.ProducersDirectory, $"{response.Content.Producers[0]}.jpg"));
-        await TestFiles.Files.Cast(Path.Combine(mediaConfig.WritersDirectory, $"{response.Content.Writers[0]}.jpg"));
+        await Files.Cast(Path.Combine(mediaConfig.CastDirectory, $"{response.Content.Cast[0]}.jpg"));
+        await Files.Cast(Path.Combine(mediaConfig.DirectorsDirectory, $"{response.Content.Directors[0]}.jpg"));
+        await Files.Cast(Path.Combine(mediaConfig.GenresDirectory, $"{response.Content.Genres[0]}.jpg"));
+        await Files.Cast(Path.Combine(mediaConfig.ProducersDirectory, $"{response.Content.Producers[0]}.jpg"));
+        await Files.Cast(Path.Combine(mediaConfig.WritersDirectory, $"{response.Content.Writers[0]}.jpg"));
 
         return response.Content;
     }

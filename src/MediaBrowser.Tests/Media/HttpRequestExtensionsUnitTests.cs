@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Net.Http.Headers;
-
 namespace MediaBrowser.Media;
 
 public class HttpRequestExtensionsUnitTests
@@ -48,7 +45,7 @@ public class HttpRequestExtensionsUnitTests
     {
         var context = new DefaultHttpContext();
         var request = context.Request;
-        var etag = "\"abc123\"";
+        const string etag = "\"abc123\"";
         request.Headers[HeaderNames.IfNoneMatch] = etag;
         request.Headers[HeaderNames.Range] = "bytes=10-49";
         var result = request.DoEtagsMatch(etag, 50);
@@ -73,7 +70,7 @@ public class HttpRequestExtensionsUnitTests
             request.Headers[HeaderNames.IfModifiedSince] = requestLastModified;
         }
         var result = request.WasModifiedSince(DateTimeOffset.Parse(actualLastModified, CultureInfo.InvariantCulture), 100);
-        result.ShouldBe(!string.Equals(requestLastModified, actualLastModified));
+        result.ShouldBe(!string.Equals(requestLastModified, actualLastModified, StringComparison.Ordinal));
     }
 
     [Test]

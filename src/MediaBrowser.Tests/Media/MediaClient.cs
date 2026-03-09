@@ -1,7 +1,3 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using HeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
-
 namespace MediaBrowser.Media;
 
 public class MediaClient(HttpClient client)

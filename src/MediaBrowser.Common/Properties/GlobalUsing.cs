@@ -40,4 +40,6 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.Net.Http.Headers;
 global using static MediaBrowser.Media.ValidationTools;
+global using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;

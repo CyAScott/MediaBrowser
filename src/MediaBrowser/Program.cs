@@ -1,5 +1,7 @@
 using static MediaBrowser.Installer;
 
+namespace MediaBrowser;
+
 [ExcludeFromCodeCoverage(Justification = "This is the entry point of the application and is not easily testable.")]
 public static class Program
 {

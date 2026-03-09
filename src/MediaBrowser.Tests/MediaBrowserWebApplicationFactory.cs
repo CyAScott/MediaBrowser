@@ -1,6 +1,3 @@
-using MediaBrowser.Media.Import;
-using MediaBrowser.Users;
-
 namespace MediaBrowser;
 
 public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer>

@@ -1,9 +1,3 @@
-using MediaBrowser.Media.Cast;
-using MediaBrowser.Media.Directors;
-using MediaBrowser.Media.Genres;
-using MediaBrowser.Media.Producers;
-using MediaBrowser.Media.Writers;
-
 namespace MediaBrowser.Media;
 
 public class SearchRequestExtensionsUnitTests
@@ -77,7 +71,7 @@ public class SearchRequestExtensionsUnitTests
     }.AsQueryable();
 
     [Test]
-    public void ApplySortAndPagination_SortsByTitleAscending()
+    public void ApplySortAndPaginationSortsByTitleAscending()
     {
         var request = new SearchRequest { Sort = Sort.Title, Descending = false, Skip = 0, Take = 2 };
         var query = GetSampleMediaEntities();
@@ -87,7 +81,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void ApplySortAndPagination_SortsByTitleDescending()
+    public void ApplySortAndPaginationSortsByTitleDescending()
     {
         var request = new SearchRequest { Sort = Sort.Title, Descending = true, Skip = 0, Take = 2 };
         var query = GetSampleMediaEntities();
@@ -97,7 +91,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void ApplySortAndPagination_SkipAndTake()
+    public void ApplySortAndPaginationSkipAndTake()
     {
         var request = new SearchRequest { Sort = Sort.Title, Descending = false, Skip = 1, Take = 1 };
         var query = GetSampleMediaEntities();
@@ -107,7 +101,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void CreateQuery_FiltersByCast()
+    public void CreateQueryFiltersByCast()
     {
         var request = new SearchRequest { Cast = "John", Take = 2 };
         var query = GetSampleMediaEntities();
@@ -117,7 +111,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void CreateQuery_FiltersByDirectors()
+    public void CreateQueryFiltersByDirectors()
     {
         var request = new SearchRequest { Directors = "Bob", Take = 2 };
         var query = GetSampleMediaEntities();
@@ -127,7 +121,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void CreateQuery_FiltersByGenres()
+    public void CreateQueryFiltersByGenres()
     {
         var request = new SearchRequest { Genres = "Drama", Take = 2 };
         var query = GetSampleMediaEntities();
@@ -137,7 +131,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void CreateQuery_FiltersByProducers()
+    public void CreateQueryFiltersByProducers()
     {
         var request = new SearchRequest { Producers = "Producer2", Take = 2 };
         var query = GetSampleMediaEntities();
@@ -147,7 +141,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void CreateQuery_FiltersByWriters()
+    public void CreateQueryFiltersByWriters()
     {
         var request = new SearchRequest { Writers = "Writer1", Take = 2 };
         var query = GetSampleMediaEntities();
@@ -157,7 +151,7 @@ public class SearchRequestExtensionsUnitTests
     }
 
     [Test]
-    public void CreateQuery_NoFilters_ReturnsAll()
+    public void CreateQueryNoFiltersReturnsAll()
     {
         var request = new SearchRequest { Take = 2 };
         var query = GetSampleMediaEntities();

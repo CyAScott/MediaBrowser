@@ -1,6 +1,3 @@
-using System.Net.Http.Json;
-using Microsoft.Net.Http.Headers;
-
 namespace MediaBrowser.Users;
 
 public class UsersClient(HttpClient client)

@@ -1,5 +1,3 @@
-using Microsoft.Net.Http.Headers;
-
 namespace MediaBrowser.Media;
 
 public static class HttpRequestExtensions

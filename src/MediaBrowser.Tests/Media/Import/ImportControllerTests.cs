@@ -1,5 +1,4 @@
-using System.Net;
-using MediaBrowser.TestFiles;
+
 
 // ReSharper disable AccessToDisposedClosure
 
