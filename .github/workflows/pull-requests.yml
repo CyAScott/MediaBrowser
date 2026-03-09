@@ -60,6 +60,11 @@ jobs:
     - name: Build
       run: dotnet build src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-restore
 
+    - name: Create index.html for tests
+      run: |
+        mkdir -p src/MediaBrowser/wwwroot
+        echo '<!DOCTYPE html><html lang="en"><body></body></html>' > src/MediaBrowser/wwwroot/index.html
+
     - name: Test
       run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
       env:
