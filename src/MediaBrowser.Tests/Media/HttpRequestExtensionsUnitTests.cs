@@ -5,64 +5,42 @@ namespace MediaBrowser.Media;
 
 public class HttpRequestExtensionsUnitTests
 {
-    [Test]
-    public void IsPartialRangeRequestNoRangeHeaderReturnsFalse()
+    [Test,
+     TestCase(100, null, false),
+     TestCase(100, "bytes=", false),
+     TestCase(100, "bytes=0-", false),
+     TestCase(100, "bytes=0-99", false),
+     TestCase(100, "bytes=0-49", true),
+     TestCase(100, "bytes=49-99", true),
+     TestCase(100, "invalid", false),
+     TestCase(100, "bytes=invalid-", false),
+     TestCase(100, "bytes=invalid-invalid", false)]
+    public void IsPartialRangeRequestTest(long length, string? rangeHeader, bool expected)
     {
         var context = new DefaultHttpContext();
         var request = context.Request;
-        var result = request.IsPartialRangeRequest(100);
-        result.ShouldBeFalse();
+        if (rangeHeader != null)
+        {
+            request.Headers[HeaderNames.Range] = rangeHeader;
+        }
+        var result = request.IsPartialRangeRequest(length);
+        result.ShouldBe(expected);
     }
 
-    [Test]
-    public void IsPartialRangeRequestValidPartialRangeReturnsTrue()
+    [Test,
+     TestCase(null, "\"abc123\"", false),
+     TestCase("\"other\"", "\"abc123\"", false),
+     TestCase("\"abc123\"", "\"abc123\"", true)]
+    public void DoEtagsMatchTests(string? requestEtag, string actualEtag, bool expected)
     {
         var context = new DefaultHttpContext();
         var request = context.Request;
-        request.Headers[HeaderNames.Range] = "bytes=10-49";
-        var result = request.IsPartialRangeRequest(50);
-        result.ShouldBeTrue();
-    }
-
-    [Test]
-    public void IsPartialRangeRequestWholeFileRangeReturnsFalse()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        request.Headers[HeaderNames.Range] = "bytes=0-99";
-        var result = request.IsPartialRangeRequest(100);
-        result.ShouldBeFalse();
-    }
-
-    [Test]
-    public void IsPartialRangeRequestInvalidRangeHeaderReturnsFalse()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        request.Headers[HeaderNames.Range] = "invalid";
-        var result = request.IsPartialRangeRequest(100);
-        result.ShouldBeFalse();
-    }
-
-    [Test]
-    public void IsPartialRangeRequestInvalidRangeValuesHeaderReturnsFalse()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        request.Headers[HeaderNames.Range] = "bytes=invalid-invalid";
-        var result = request.IsPartialRangeRequest(100);
-        result.ShouldBeFalse();
-    }
-
-    [Test]
-    public void DoEtagsMatchValidEtagAndNotPartialRangeReturnsTrue()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        var etag = "\"abc123\"";
-        request.Headers[HeaderNames.IfNoneMatch] = etag;
-        var result = request.DoEtagsMatch(etag, 100);
-        result.ShouldBeTrue();
+        if (requestEtag != null)
+        {
+            request.Headers[HeaderNames.IfNoneMatch] = requestEtag;
+        }
+        var result = request.DoEtagsMatch(actualEtag, 100);
+        result.ShouldBe(expected);
     }
 
     [Test]
@@ -77,24 +55,25 @@ public class HttpRequestExtensionsUnitTests
         result.ShouldBeFalse();
     }
 
-    [Test]
-    public void DoEtagsMatchMismatchedEtagReturnsFalse()
+    [Test,
+     TestCase(null, "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("invalid-date", "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("Wed, 21 Oct 2015 07:28:00 GMT", "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("Wed, 21 Oct 2015 07:27:57 GMT", "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("Wed, 21 Oct 2015 07:27:58 GMT", "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("Wed, 21 Oct 2015 07:27:59 GMT", "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("Wed, 21 Oct 2015 07:27:56 GMT", "Wed, 21 Oct 2015 07:28:00 GMT"),
+     TestCase("Wed, 21 Oct 2015 07:28:01 GMT", "Wed, 21 Oct 2015 07:28:00 GMT")]
+    public void WasModifiedSinceTests(string? requestLastModified, string actualLastModified)
     {
         var context = new DefaultHttpContext();
         var request = context.Request;
-        request.Headers[HeaderNames.IfNoneMatch] = "\"other\"";
-        var result = request.DoEtagsMatch("\"abc123\"", 100);
-        result.ShouldBeFalse();
-    }
-
-    [Test]
-    public void WasModifiedSinceNoIfModifiedSinceHeaderReturnsTrue()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        var lastModified = DateTimeOffset.UtcNow;
-        var result = request.WasModifiedSince(lastModified, 100);
-        result.ShouldBeTrue();
+        if (requestLastModified != null)
+        {
+            request.Headers[HeaderNames.IfModifiedSince] = requestLastModified;
+        }
+        var result = request.WasModifiedSince(DateTimeOffset.Parse(actualLastModified, CultureInfo.InvariantCulture), 100);
+        result.ShouldBe(!string.Equals(requestLastModified, actualLastModified));
     }
 
     [Test]
@@ -105,40 +84,6 @@ public class HttpRequestExtensionsUnitTests
         request.Headers[HeaderNames.Range] = "bytes=10-49";
         var lastModified = DateTimeOffset.UtcNow;
         var result = request.WasModifiedSince(lastModified, 50);
-        result.ShouldBeTrue();
-    }
-
-    [Test]
-    public void WasModifiedSinceIfModifiedSinceMatchesReturnsFalse()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        var lastModified = DateTimeOffset.UtcNow;
-        request.Headers[HeaderNames.IfModifiedSince] = lastModified.ToString("R", CultureInfo.InvariantCulture);
-        var result = request.WasModifiedSince(lastModified, 100);
-        result.ShouldBeFalse();
-    }
-
-    [Test]
-    public void WasModifiedSinceIfModifiedSinceDiffersByMoreThan2SecondsReturnsTrue()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        var lastModified = DateTimeOffset.UtcNow;
-        var oldDate = lastModified.AddSeconds(-10);
-        request.Headers[HeaderNames.IfModifiedSince] = oldDate.ToString("R", CultureInfo.InvariantCulture);
-        var result = request.WasModifiedSince(lastModified, 100);
-        result.ShouldBeTrue();
-    }
-
-    [Test]
-    public void WasModifiedSinceInvalidIfModifiedSinceHeaderReturnsTrue()
-    {
-        var context = new DefaultHttpContext();
-        var request = context.Request;
-        request.Headers[HeaderNames.IfModifiedSince] = "not-a-date";
-        var lastModified = DateTimeOffset.UtcNow;
-        var result = request.WasModifiedSince(lastModified, 100);
         result.ShouldBeTrue();
     }
 }

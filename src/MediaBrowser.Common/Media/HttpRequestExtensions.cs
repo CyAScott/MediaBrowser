@@ -49,7 +49,7 @@ public static class HttpRequestExtensions
             || !request.Headers.TryGetValue(HeaderNames.IfModifiedSince, out var ifModifiedSinceValue)
             || ifModifiedSinceValue.Count != 1
             || !DateTimeOffset.TryParse(ifModifiedSinceValue[0], CultureInfo.InvariantCulture, out var ifModifiedSince)
-            || Math.Abs((lastModified - ifModifiedSince.ToUniversalTime()).TotalSeconds) > 2;
+            || Math.Abs((lastModified - ifModifiedSince).TotalSeconds) >= 1;
     }
 
 }
