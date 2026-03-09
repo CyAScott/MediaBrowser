@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       mysql:
         image: mysql:8.0
@@ -48,12 +48,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 10.0.x
-        
+
     - name: Restore dependencies
       run: dotnet restore src/MediaBrowser.Tests/MediaBrowser.Tests.csproj
 
@@ -62,8 +62,8 @@ jobs:
 
     - name: Create SQL Server Database
       run: |
-        docker run --network host --rm mcr.microsoft.com/mssql/server:2022-latest /opt/mssql-tools/bin/sqlcmd \
-        -S localhost,1433 -U sa -P 'Password123!' -Q "CREATE DATABASE MediaBrowser"
+        docker exec sqlserver /opt/mssql-tools/bin/sqlcmd \
+        -S localhost -U sa -P 'Password123!' -Q "CREATE DATABASE MediaBrowser"
 
     - name: Test
       run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
@@ -71,7 +71,7 @@ jobs:
         DB_MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=MediaBrowser;User=root;Password=password;"
         DB_POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=MediaBrowser;Username=postgres;Password=password;"
         DB_SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=MediaBrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"
-        
+
         # Mapping to standard .NET configuration keys to ensure correct behavior
         db__mySqlConnectionString: "Server=127.0.0.1;Port=3306;Database=MediaBrowser;User=root;Password=password;"
         db__postgresConnectionString: "Host=127.0.0.1;Port=5432;Database=MediaBrowser;Username=postgres;Password=password;"
