@@ -3,7 +3,7 @@ namespace MediaBrowser.Media;
 [ExcludeFromCodeCoverage(Justification = "POCO")]
 public class UpdateThumbnailRequest
 {
-    [Range(0, double.MaxValue)]
+    [JsonPropertyName("at"), Range(0, double.MaxValue)]
     public required double At { get; init; }
 }
 

@@ -84,7 +84,7 @@ public class ImportControllerTests
             response.Content.Headers.ContentType.ShouldNotBeNull().MediaType.ShouldBe(validFile.Mime);
 
             // Read the file again with the Last-Modified header to ensure it returns 304 Not Modified since the file has not changed.
-            var lastModifiedOn = response.Content.Headers.LastModified.ShouldNotBeNull().UtcDateTime;
+            var lastModifiedOn = response.Content.Headers.LastModified.ShouldNotBeNull();
             using var cachedResponse = await importClient.ReadFile(validFile.Name, lastModifiedOn);
             cachedResponse.StatusCode.ShouldBe(HttpStatusCode.NotModified);
         }
@@ -122,7 +122,9 @@ public class ImportControllerTests
         await InvalidTagTest(TagType.Writer);
         async Task InvalidTagTest(TagType tagType)
         {
-            const string invalidTag = "_actor1_";
+            // The tag must be alphanumeric characters only,
+            // so using an invalid tag with underscores should cause the import to fail with 417 Expectation Failed.
+            const string invalidTag = "_tag_";
 
             using var response = await importClient.Import(validFile.Name, new()
             {
@@ -154,7 +156,8 @@ public class ImportControllerTests
                 Writers = ["writer"],
                 Thumbnail = 60 // 1 minute into the video which is valid for our 1-second test video
             });
-            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable, "The thumbnail timestamp is beyond the duration of the video, so it should return 406 Not Acceptable.");
+            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable,
+                "The thumbnail timestamp is beyond the duration of the video, so it should return 406 Not Acceptable.");
         }
 
         await ImportValidTest();

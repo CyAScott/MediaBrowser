@@ -388,6 +388,7 @@ testem.log
 /typings
 
 # System Files
+temp/*
 .DS_Store
 Thumbs.db
 src/.idea/**

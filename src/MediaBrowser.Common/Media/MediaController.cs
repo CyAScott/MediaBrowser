@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
 [ApiController, Route("api/[controller]")]
-public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
+public partial class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
 {
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<MediaReadModel>> Get(Guid id)
@@ -45,25 +45,11 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
     [HttpGet("search")]
     public async Task<SearchResponse> Search([FromQuery] SearchRequest request)
     {
-        var query = request.Apply(context.MediaJoined);
+        var query = request.CreateQuery(context.MediaJoined);
 
         var count = await query.CountAsync();
 
-        query = request.Sort switch
-        {
-            Sort.Title => request.Descending ? query.OrderByDescending(m => m.Title) : query.OrderBy(m => m.Title),
-            Sort.CreatedOn => request.Descending ? query.OrderByDescending(m => m.CreatedOn) : query.OrderBy(m => m.CreatedOn),
-            Sort.Duration => request.Descending ? query.OrderByDescending(m => m.Duration) : query.OrderBy(m => m.Duration),
-            Sort.UserStarRating => request.Descending ? query.OrderByDescending(m => m.UserStarRating) : query.OrderBy(m => m.UserStarRating),
-            _ => query
-        };
-
-        query = query.Skip(request.Skip);
-
-        if (request.Take != null)
-        {
-            query = query.Take(request.Take.Value);
-        }
+        query = request.ApplySortAndPagination(query);
 
         var results = await query.ToListAsync();
 
@@ -73,41 +59,6 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             Results = results.Select(it => it.ToReadModel(mediaConfig)).ToArray()
         };
     }
-
-    [HttpGet("cast")]
-    public async Task<IReadOnlyList<string>> GetAllCast() =>
-        await context.Casts.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
-
-    [HttpGet("cast/{name}/thumbnail")]
-    public ActionResult GetCastThumbnail(string name) => ReadFile(mediaConfig.CastDirectory, $"{name}.jpg");
-
-    [HttpGet("directors")]
-    public async Task<IReadOnlyList<string>> GetAllDirectors() =>
-        await context.Directors.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
-
-    [HttpGet("director/{name}/thumbnail")]
-    public ActionResult GetDirectorThumbnail(string name) => ReadFile(mediaConfig.DirectorsDirectory, $"{name}.jpg");
-
-    [HttpGet("genres")]
-    public async Task<IReadOnlyList<string>> GetAllGenres() =>
-        await context.Genres.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
-
-    [HttpGet("genre/{name}/thumbnail")]
-    public ActionResult GetGenreThumbnail(string name) => ReadFile(mediaConfig.GenresDirectory, $"{name}.jpg");
-
-    [HttpGet("producers")]
-    public async Task<IReadOnlyList<string>> GetAllProducers() =>
-        await context.Producers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
-
-    [HttpGet("producer/{name}/thumbnail")]
-    public ActionResult GetProducerThumbnail(string name) => ReadFile(mediaConfig.ProducersDirectory, $"{name}.jpg");
-
-    [HttpGet("writers")]
-    public async Task<IReadOnlyList<string>> GetAllWriters() =>
-        await context.Writers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync();
-
-    [HttpGet("writer/{name}/thumbnail")]
-    public ActionResult GetWriterThumbnail(string name) => ReadFile(mediaConfig.WritersDirectory, $"{name}.jpg");
 
     [HttpGet("{id:guid}/file")]
     public Task<ActionResult> Stream(Guid id) =>
@@ -120,8 +71,8 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             media => media.Mime.StartsWith("image/", StringComparison.InvariantCulture) ? media.Mime : "image/jpeg");
 
     [HttpPost("{id:guid}/file/thumbnail-fanart")]
-    public Task<ActionResult> UpdateFanartThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
-        WriteFile(id, "-fanart.jpg", request.At);
+    public Task<ActionResult> UpdateFanartThumbnailWithTimestamp(Guid id, [FromBody] UpdateThumbnailRequest request) =>
+        UpdateThumbnailWithTimestamp(id, "-fanart.jpg", request.At);
 
     [HttpGet("{id:guid}/file/thumbnail")]
     public Task<ActionResult> StreamThumbnail(Guid id) =>
@@ -130,11 +81,11 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             media => media.Mime.StartsWith("image/", StringComparison.InvariantCulture) ? media.Mime : "image/jpeg");
 
     [HttpPost("{id:guid}/file/thumbnail")]
-    public Task<ActionResult> UpdateThumbnail(Guid id, [FromBody] UpdateThumbnailRequest request) =>
-        WriteFile(id, ".jpg", request.At, true);
+    public Task<ActionResult> UpdateThumbnailWithTimestamp(Guid id, [FromBody] UpdateThumbnailRequest request) =>
+        UpdateThumbnailWithTimestamp(id, ".jpg", request.At, true);
 
     [HttpPost("{id:guid}/file/thumbnail/file")]
-    public async Task<ActionResult> UpdateThumbnail(Guid id, [FromForm] UploadThumbnailRequest request)
+    public async Task<ActionResult> UpdateThumbnailWithFile(Guid id, [FromForm] UploadThumbnailRequest request)
     {
         var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
         if (media == null)
@@ -164,17 +115,12 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
 
             var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
 
-            if (!await ffmpeg.TryExtractThumbnail(tempFile,
-                    outputPath: thumbnailLocation))
+            if (!await ffmpeg.TryExtractThumbnail(tempFile, outputPath: thumbnailLocation))
             {
                 return StatusCode(StatusCodes.Status406NotAcceptable);
             }
 
             return Ok();
-        }
-        catch (Exception error)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, error.Message);
         }
         finally
         {
@@ -197,52 +143,33 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         }
 
         var filePath = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension(media)}");
-
         if (!System.IO.File.Exists(filePath))
         {
             return NotFound();
         }
 
+        var fileInfo = new FileInfo(filePath);
         if (etag)
         {
             var etagValue = $"\"{media.Md5}\"";
-            if (Request.Headers.TryGetValue("If-None-Match", out var ifNoneMatch) && ifNoneMatch == etagValue)
+            if (Request.DoEtagsMatch(etagValue, fileInfo.Length))
             {
                 return StatusCode(StatusCodes.Status304NotModified);
             }
             Response.Headers.ETag = etagValue;
         }
 
-        var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
-        if (!Request.WasModifiedSince(lastModified))
+        if (!Request.WasModifiedSince(fileInfo.LastWriteTimeUtc, fileInfo.Length))
         {
             return StatusCode(StatusCodes.Status304NotModified);
         }
-        Response.Headers.LastModified = lastModified.ToString("R");
+        Response.Headers.LastModified = fileInfo.LastWriteTimeUtc.ToString("R");
 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media),
             enableRangeProcessing: true);
     }
 
-    ActionResult ReadFile(string directory, string name)
-    {
-        var filePath = Path.Combine(directory, name);
-        if (!System.IO.File.Exists(filePath))
-        {
-            return NotFound();
-        }
-
-        var lastModified = System.IO.File.GetLastWriteTimeUtc(filePath);
-        if (!Request.WasModifiedSince(lastModified))
-        {
-            return StatusCode(StatusCodes.Status304NotModified);
-        }
-        Response.Headers.LastModified = lastModified.ToString("R");
-
-        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), "image/jpeg");
-    }
-
-    async Task<ActionResult> WriteFile(Guid id, string extension, double at, bool isPrimary = false)
+    async Task<ActionResult> UpdateThumbnailWithTimestamp(Guid id, string extension, double at, bool isPrimary = false)
     {
         var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
         if (media == null)
@@ -250,23 +177,21 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             return NotFound();
         }
 
-        if (isPrimary)
+        if (!media.Mime.StartsWith("video/", StringComparison.InvariantCulture))
         {
-            media.Thumbnail = at;
+            return StatusCode(StatusCodes.Status406NotAcceptable);
         }
 
         var filePath = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.{mediaConfig.GetExtensionFromMime(media.Mime)}");
-
         if (!System.IO.File.Exists(filePath))
         {
             return NotFound();
         }
 
         var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
-
         if (!await ffmpeg.TryExtractThumbnail(filePath,
-                outputPath: thumbnailLocation,
-                at: TimeSpan.FromSeconds(at)))
+            outputPath: thumbnailLocation,
+            at: TimeSpan.FromSeconds(at)))
         {
             return StatusCode(StatusCodes.Status406NotAcceptable);
         }
@@ -274,6 +199,7 @@ public class MediaController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         // ReSharper disable once InvertIf
         if (isPrimary)
         {
+            media.Thumbnail = at;
             await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
             await context.SaveChangesAsync();
         }

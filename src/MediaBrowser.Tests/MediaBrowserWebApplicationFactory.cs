@@ -9,29 +9,6 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     {
         DbType = dbType;
         CancellationTokenSource = new(timeout ?? TimeSpan.FromSeconds(Debugger.IsAttached ? 60 * 60 : 30));
-
-        var tempDirectory = Path.Combine(Path.GetTempPath(), "MediaBrowserTests");
-        if (Directory.Exists(tempDirectory))
-        {
-            Directory.Delete(tempDirectory, true);
-        }
-        Directory.CreateDirectory(tempDirectory);
-
-        CastDirectory = Path.Combine(tempDirectory, "cast");
-        Directory.CreateDirectory(CastDirectory);
-        DirectorsDirectory = Path.Combine(tempDirectory, "directors");
-        Directory.CreateDirectory(DirectorsDirectory);
-        GenresDirectory = Path.Combine(tempDirectory, "genres");
-        Directory.CreateDirectory(GenresDirectory);
-        ImportDirectory = Path.Combine(tempDirectory, "import");
-        Directory.CreateDirectory(ImportDirectory);
-        MediaDirectory = Path.Combine(tempDirectory, "media");
-        Directory.CreateDirectory(MediaDirectory);
-        ProducersDirectory = Path.Combine(tempDirectory, "producers");
-        Directory.CreateDirectory(ProducersDirectory);
-        WritersDirectory = Path.Combine(tempDirectory, "writers");
-        Directory.CreateDirectory(WritersDirectory);
-
         ConfigurationFiles =
         [
             new()
@@ -63,6 +40,55 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
                 }
             }
         ];
+
+        var configuration = GetConfiguration();
+        var tempDirectory = configuration.GetValue<string>("test:tempDirectory") ?? Path.Combine(Path.GetTempPath(), "MediaBrowserTests");
+        if (Directory.Exists(tempDirectory))
+        {
+            Directory.Delete(tempDirectory, true);
+        }
+        Directory.CreateDirectory(tempDirectory);
+
+        var sqlLiteFile = Path.Combine(tempDirectory, $"media-browser-{TestContext.CurrentContext.Test.ID}.db");
+        var sqlLiteConnectionString = $"Data Source={sqlLiteFile}";
+
+        CastDirectory = Path.Combine(tempDirectory, "cast");
+        Directory.CreateDirectory(CastDirectory);
+        DirectorsDirectory = Path.Combine(tempDirectory, "directors");
+        Directory.CreateDirectory(DirectorsDirectory);
+        GenresDirectory = Path.Combine(tempDirectory, "genres");
+        Directory.CreateDirectory(GenresDirectory);
+        ImportDirectory = Path.Combine(tempDirectory, "import");
+        Directory.CreateDirectory(ImportDirectory);
+        MediaDirectory = Path.Combine(tempDirectory, "media");
+        Directory.CreateDirectory(MediaDirectory);
+        ProducersDirectory = Path.Combine(tempDirectory, "producers");
+        Directory.CreateDirectory(ProducersDirectory);
+        WritersDirectory = Path.Combine(tempDirectory, "writers");
+        Directory.CreateDirectory(WritersDirectory);
+
+        ConfigurationFiles.Add(new()
+        {
+            {
+                "db", new JsonObject
+                {
+                    {"sqliteConnectionString", sqlLiteConnectionString}
+                }
+            },
+            {
+                "media", new JsonObject
+                {
+                    {"castDirectory", CastDirectory},
+                    {"directorsDirectory", DirectorsDirectory},
+                    {"genresDirectory", GenresDirectory},
+                    {"importDirectory", ImportDirectory},
+                    {"mediaDirectory", MediaDirectory},
+                    {"producersDirectory", ProducersDirectory},
+                    {"writersDirectory", WritersDirectory},
+                    {"stopAfterSync", false}
+                }
+            }
+        });
     }
     public CancellationTokenSource CancellationTokenSource { get; }
     public DbType DbType { get; }

@@ -20,8 +20,20 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="TestFiles\test.mp4" />
-        <EmbeddedResource Include="TestFiles\test.mp4" />
+        <None Remove="TestFiles\cast.jpg" />
+        <EmbeddedResource Include="TestFiles\cast.jpg" />
+        <None Remove="TestFiles\director.jpg" />
+        <EmbeddedResource Include="TestFiles\director.jpg" />
+        <None Remove="TestFiles\genre.jpg" />
+        <EmbeddedResource Include="TestFiles\genre.jpg" />
+        <None Remove="TestFiles\image.webp" />
+        <EmbeddedResource Include="TestFiles\image.webp" />
+        <None Remove="TestFiles\producer.jpg" />
+        <EmbeddedResource Include="TestFiles\producer.jpg" />
+        <None Remove="TestFiles\video.mp4" />
+        <EmbeddedResource Include="TestFiles\video.mp4" />
+        <None Remove="TestFiles\writer.jpg" />
+        <EmbeddedResource Include="TestFiles\writer.jpg" />
     </ItemGroup>
 
     <ItemGroup>

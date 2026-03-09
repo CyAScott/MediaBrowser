@@ -21,12 +21,12 @@ public class ImportController(IFfmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCo
             return NotFound();
         }
 
-        var lastModified = System.IO.File.GetLastWriteTimeUtc(file.Path);
-        if (!Request.WasModifiedSince(lastModified))
+        var fileInfo = new FileInfo(file.Path);
+        if (!Request.WasModifiedSince(fileInfo.LastWriteTimeUtc, fileInfo.Length))
         {
             return StatusCode(StatusCodes.Status304NotModified);
         }
-        Response.Headers.LastModified = lastModified.ToString("R");
+        Response.Headers.LastModified = fileInfo.LastWriteTimeUtc.ToString("R");
 
         return File(new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read), file.Extension.Mime,
             enableRangeProcessing: true);

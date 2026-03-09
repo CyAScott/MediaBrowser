@@ -1,7 +1,7 @@
 namespace MediaBrowser.Media;
 
 [ExcludeFromCodeCoverage(Justification = "POCO")]
-public class SearchRequest
+public record SearchRequest
 {
     public bool Descending { get; init; }
     public string? Cast { get; init; }
@@ -21,7 +21,28 @@ public static class SearchRequestExtensions
 {
     extension(SearchRequest request)
     {
-        public IQueryable<MediaEntity> Apply(IQueryable<MediaEntity> query)
+        public IQueryable<MediaEntity> ApplySortAndPagination(IQueryable<MediaEntity> query)
+        {
+            query = request.Sort switch
+            {
+                Sort.Title => request.Descending ? query.OrderByDescending(m => m.Title) : query.OrderBy(m => m.Title),
+                Sort.CreatedOn => request.Descending ? query.OrderByDescending(m => m.CreatedOn) : query.OrderBy(m => m.CreatedOn),
+                Sort.Duration => request.Descending ? query.OrderByDescending(m => m.Duration) : query.OrderBy(m => m.Duration),
+                Sort.UserStarRating => request.Descending ? query.OrderByDescending(m => m.UserStarRating) : query.OrderBy(m => m.UserStarRating),
+                _ => query
+            };
+
+            query = query.Skip(request.Skip);
+
+            if (request.Take != null)
+            {
+                query = query.Take(request.Take.Value);
+            }
+
+            return query;
+        }
+
+        public IQueryable<MediaEntity> CreateQuery(IQueryable<MediaEntity> query)
         {
             var castQuery = request.Cast?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .Distinct()
@@ -97,9 +118,10 @@ public enum Sort
     UserStarRating
 }
 
-[ExcludeFromCodeCoverage(Justification = "POCO")]
-public class SearchResponse
+[Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]
+public partial class SearchResponse
 {
+    [OrderedEquality]
     public required IReadOnlyList<MediaReadModel> Results { get; init; }
 
     public required int Count { get; init; }

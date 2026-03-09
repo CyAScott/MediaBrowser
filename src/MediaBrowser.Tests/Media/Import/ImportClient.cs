@@ -7,7 +7,7 @@ public class ImportClient(HttpClient client)
     public Task<HttpResponseMessage<IReadOnlyList<ImportFileInfo>>> GetFiles() =>
         client.GetAsync<IReadOnlyList<ImportFileInfo>>("/api/import/files");
 
-    public async Task<HttpResponseMessage> ReadFile(string name, DateTime? lastModified = null) =>
+    public async Task<HttpResponseMessage> ReadFile(string name, DateTimeOffset? lastModified = null) =>
         await client.SendAsync(new(HttpMethod.Get, $"/api/import/file/{HttpUtility.UrlPathEncode(name)}")
         {
             Headers =
