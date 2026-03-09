@@ -260,7 +260,7 @@ public class MediaControllerTests
             {
                 Take = 100
             });
-            searchResponse.EnsureSuccessStatusCode();
+            await searchResponse.EnsureSuccessStatusCode();
             searchResponse.Content.ShouldNotBeNull();
 
             var tags = tagType switch
@@ -290,7 +290,7 @@ public class MediaControllerTests
             {
                 Take = 100
             });
-            searchResponse.EnsureSuccessStatusCode();
+            await searchResponse.EnsureSuccessStatusCode();
             searchResponse.Content.ShouldNotBeNull();
             var tags = tagType switch
             {
@@ -467,7 +467,7 @@ public class MediaControllerTests
             Producers = [],
             Writers = []
         });
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCode();
         response.Content.ShouldNotBeNull();
 
         return response.Content;
@@ -495,7 +495,7 @@ public class MediaControllerTests
             Writers = ["writer", $"writer {_noThumbnailTag}"],
             Thumbnail = 0.5
         });
-        response.EnsureSuccessStatusCode();
+        await response.EnsureSuccessStatusCode();
         response.Content.ShouldNotBeNull();
 
         // The first item in each list should have a thumbnail, and the second item should not.

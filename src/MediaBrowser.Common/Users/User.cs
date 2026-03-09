@@ -30,7 +30,7 @@ public class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 }
 
 [ExcludeFromCodeCoverage(Justification = "POCO")]
-public class UserReadModel
+public record UserReadModel
 {
     public Guid Id { get; init; }
     public required string Username { get; init; }

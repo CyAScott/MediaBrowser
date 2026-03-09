@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
 namespace MediaBrowser;
@@ -34,8 +35,9 @@ public static class HttpClientExtensions
 [DebuggerStepThrough]
 public class HttpResponseMessage<TResponse>(HttpResponseMessage response, TResponse? content = default) : IDisposable
 {
+    public HttpResponseHeaders Headers => response.Headers;
     public HttpStatusCode StatusCode => response.StatusCode;
     public TResponse? Content => content;
-    public void EnsureSuccessStatusCode() => response.EnsureSuccessStatusCode();
+    public async Task EnsureSuccessStatusCode() => response.StatusCode.ShouldBeOneOf([HttpStatusCode.OK, HttpStatusCode.NoContent], await response.Content.ReadAsStringAsync());
     public void Dispose() => response.Dispose();
 }

@@ -31,7 +31,7 @@ public class ImportControllerTests
                 .OrderBy(it => it.Name)
                 .ToList();
             using var response = await importClient.GetFiles();
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCode();
             response.Content.ShouldNotBeNull()
                 .Count.ShouldBe(testFiles.Count, "The number of files returned should match the number of files added for this test.");
             foreach (var (actualFile, expectedFile) in response.Content
@@ -93,7 +93,7 @@ public class ImportControllerTests
         async Task ReadFileInfoValidTest()
         {
             using var response = await importClient.ReadFileInfo(validFile.Name);
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCode();
             response.Content.ShouldBe(validFile);
         }
 
@@ -175,7 +175,7 @@ public class ImportControllerTests
                 Writers = ["writer"],
                 Thumbnail = 0.5
             });
-            response.EnsureSuccessStatusCode();
+            await response.EnsureSuccessStatusCode();
             response.Content.ShouldNotBeNull();
 
             using var scope = factory.Services.CreateScope();

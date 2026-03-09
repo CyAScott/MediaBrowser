@@ -7,7 +7,7 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     public async Task<ActionResult<UserReadModel>> Login([FromBody] UserLoginRequest request)
     {
         var username = request.Username.ToLowerInvariant();
-        var user = await context.Users.SingleOrDefaultAsync(u => u.Username == username);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Username == username);
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return Unauthorized();
@@ -34,14 +34,14 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
     [HttpPost("logout")]
     public ActionResult Logout()
     {
-        Response.Cookies.Append(JwtCookieMiddleware.CookieName, "", new()
+        Response.Cookies.Append(JwtCookieMiddleware.CookieName, "logout", new()
         {
             HttpOnly = false,
             Expires = DateTime.UtcNow.AddDays(-1),
             Secure = userConfig.UseSecureCookies,
             SameSite = SameSiteMode.Strict
         });
-        return NoContent();
+        return Ok();
     }
 
     [HttpGet("me")]
@@ -111,6 +111,6 @@ public class UsersController(UserConfig userConfig, MediaDbContext context) : Co
         context.Users.Remove(user);
         await context.SaveChangesAsync();
 
-        return NoContent();
+        return Ok();
     }
 }
