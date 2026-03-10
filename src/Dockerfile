@@ -60,8 +60,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Install ffmpeg and ffprobe
-RUN apt-get update && \
-    apt-get install -y ffmpeg && \
+RUN apt-get update -qq && \
+    apt-get install -y -qq ffmpeg && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
