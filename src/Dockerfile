@@ -8,7 +8,7 @@ WORKDIR /app/frontend
 COPY MediaBrowser.Frontend/package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --quiet
 
 # Copy the frontend source code
 COPY MediaBrowser.Frontend/ ./
@@ -34,7 +34,7 @@ COPY Migrations/MediaBrowser.Sqlite/MediaBrowser.Sqlite.csproj ./Migrations/Medi
 COPY Migrations/MediaBrowser.SqlServer/MediaBrowser.SqlServer.csproj ./Migrations/MediaBrowser.SqlServer/
 
 # Restore dependencies
-RUN dotnet restore MediaBrowser/MediaBrowser.csproj
+RUN dotnet restore MediaBrowser/MediaBrowser.csproj --verbosity minimal
 
 # Copy the rest of the source code
 COPY . ./
@@ -48,7 +48,7 @@ ARG ASSEMBLY_SEM_FILE_VER_ARG
 ARG INFORMATIONAL_VERSION_ARG
 
 # Build the application
-RUN dotnet publish MediaBrowser/MediaBrowser.csproj -c Release -o /app/publish \
+RUN dotnet publish MediaBrowser/MediaBrowser.csproj -c Release -o /app/publish --verbosity minimal \
   /p:Version=$FULL_SEM_VER_ARG \
   /p:AssemblyVersion=$ASSEMBLY_SEM_VER_ARG \
   /p:FileVersion=$ASSEMBLY_SEM_FILE_VER_ARG \
