@@ -20,7 +20,7 @@ RUN mkdir -p ../MediaBrowser/wwwroot
 RUN npm run build
 
 # Stage 2: Build the .NET application
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS dotnet-build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dotnet-build
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ COPY Migrations/MediaBrowser.Sqlite/MediaBrowser.Sqlite.csproj ./Migrations/Medi
 COPY Migrations/MediaBrowser.SqlServer/MediaBrowser.SqlServer.csproj ./Migrations/MediaBrowser.SqlServer/
 
 # Restore dependencies
-RUN dotnet restore
+RUN dotnet restore MediaBrowser/MediaBrowser.csproj
 
 # Copy the rest of the source code
 COPY . ./
@@ -42,11 +42,20 @@ COPY . ./
 # Copy the built frontend from the previous stage
 COPY --from=frontend-build /app/MediaBrowser/wwwroot ./MediaBrowser/wwwroot/
 
+ARG FULL_SEM_VER_ARG
+ARG ASSEMBLY_SEM_VER_ARG
+ARG ASSEMBLY_SEM_FILE_VER_ARG
+ARG INFORMATIONAL_VERSION_ARG
+
 # Build the application
-RUN dotnet publish MediaBrowser/MediaBrowser.csproj -c Release -o /app/publish
+RUN dotnet publish MediaBrowser/MediaBrowser.csproj -c Release -o /app/publish \
+  /p:Version=$FULL_SEM_VER_ARG \
+  /p:AssemblyVersion=$ASSEMBLY_SEM_VER_ARG \
+  /p:FileVersion=$ASSEMBLY_SEM_FILE_VER_ARG \
+  /p:InformationalVersion=$INFORMATIONAL_VERSION_ARG
 
 # Stage 3: Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 WORKDIR /app
 

@@ -28,8 +28,14 @@ dotnet ef migrations script --output ../Migrations/MediaBrowser.SqlServer/schema
 
 To build the docker image run the following from the root of the repository:
 ```sh
+export FULL_SEM_VER=1.0.0
 cd src
-docker build -t mediabrowser .
+docker build -t mediabrowser:$FULL_SEM_VER \
+  --build-arg FULL_SEM_VER_ARG=$FULL_SEM_VER \
+  --build-arg ASSEMBLY_SEM_VER_ARG=$FULL_SEM_VER.0 \
+  --build-arg ASSEMBLY_SEM_FILE_VER_ARG=$FULL_SEM_VER.0 \
+  --build-arg INFORMATIONAL_VERSION_ARG=$FULL_SEM_VER.0 \
+  .
 ```
 
 To run the docker image run the following command:

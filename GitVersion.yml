@@ -1,0 +1,8 @@
+mode: ContinuousDeployment
+increment: Patch
+next-version: 0.1.0
+commit-message-incrementing: Enabled
+branches: {}
+ignore: 
+   sha: []
+minor-version-bump-message: '(^feat|\+semver:\s?(feature|minor))'
