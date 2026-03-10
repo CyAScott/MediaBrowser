@@ -1,0 +1,83 @@
+
+.import-container {
+  padding: 0.25em 1em 0.5em 0.5em;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - (var(--sidebar-width) / 2));
+}
+
+/* Files section styles */
+.files-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.files-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: var(--radius1);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.files-table th {
+  background-color: var(--surface2-bg);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--fg2);
+}
+
+.files-table td {
+  padding: 0.75rem 1rem;
+  color: var(--fg2);
+}
+
+.files-table tr:nth-child(even) td {
+  background-color: var(--surface2-bg);
+}
+
+.filename {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.action {
+  text-align: center;
+  width: 80px;
+}
+
+.import-btn {
+  background: var(--primary3-bg);
+  border: none;
+  font-size: 1.2rem;
+  color: var(--fg4);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius1);
+  transition: background-color 0.2s;
+}
+
+.import-btn:hover {
+  opacity: 0.8;
+}
+
+/* Empty state styles */
+.empty-state {
+  text-align: center;
+  font-style: italic;
+  margin-top: 2rem;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .import-container {
+    height: 100%;
+    width: calc(100% - 2rem);
+  }
+}

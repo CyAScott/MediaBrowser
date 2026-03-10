@@ -1,0 +1,181 @@
+.user-management-container {
+  padding: 0.25em 1em 0.5em 0.5em;
+  display: flex;
+  flex-direction: column;
+  width: calc(100% - (var(--sidebar-width) / 2));
+}
+
+/* Header section styles */
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 0 0.5rem;
+}
+
+.header-section h2 {
+  margin: 0;
+  color: var(--fg1);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.action-btn {
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: var(--radius1);
+  background-color: var(--accent-bg);
+  color: var(--accent-fg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: var(--accent-hover-bg);
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}
+
+.change-password-btn {
+  background-color: var(--surface2-bg);
+  color: var(--fg2);
+}
+
+.change-password-btn:hover {
+  background-color: var(--surface3-bg);
+}
+
+/* Users section styles */
+.users-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: var(--radius1);
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.users-table th {
+  background-color: var(--surface2-bg);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--fg2);
+}
+
+.users-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--surface1-bg);
+  background-color: var(--surface-bg);
+}
+
+.users-table tr:hover td {
+  background-color: var(--surface1-bg);
+}
+
+.users-table tr:last-child td {
+  border-bottom: none;
+}
+
+.username {
+  color: var(--fg1);
+  font-weight: 500;
+}
+
+.action {
+  text-align: right;
+  width: 100px;
+}
+
+.delete-btn {
+  padding: 0.5rem;
+  border: none;
+  border-radius: var(--radius1);
+  background-color: var(--error-bg);
+  color: var(--error-fg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background-color: var(--error-hover-bg);
+  transform: scale(1.05);
+}
+
+.delete-btn:active {
+  transform: scale(0.98);
+}
+
+/* Loading and empty states */
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--fg2);
+  font-size: 1rem;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.empty-state {
+  background-color: var(--surface1-bg);
+  border-radius: var(--radius1);
+  border: 2px dashed var(--surface2-bg);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .action-buttons {
+    justify-content: space-between;
+  }
+
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .username {
+    font-size: 0.875rem;
+  }
+}

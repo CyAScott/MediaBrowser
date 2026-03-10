@@ -1,0 +1,143 @@
+<div class="form-section">
+  <h3>People</h3>
+
+  <!-- Cast -->
+  <div class="form-group">
+    <label>Cast</label>
+    <div class="array-input">
+      <div *ngFor="let member of peopleData.cast; let i = index; trackBy: trackByIndex" class="array-item">
+        <app-typeahead-input
+          [(ngModel)]="peopleData.cast[i]"
+          [suggestions]="getCastSuggestions()"
+          placeholder="Cast member name"
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('cast', i, $event)"
+        ></app-typeahead-input>
+        <button
+          (click)="removeArrayItem('cast', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('cast')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Cast Member
+      </button>
+    </div>
+  </div>
+
+  <!-- Directors -->
+  <div class="form-group">
+    <label>Directors</label>
+    <div class="array-input">
+      <div *ngFor="let director of peopleData.directors; let i = index; trackBy: trackByIndex" class="array-item">
+        <app-typeahead-input
+          [(ngModel)]="peopleData.directors[i]"
+          [suggestions]="getDirectorsSuggestions()"
+          placeholder="Director name"
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('directors', i, $event)"
+        ></app-typeahead-input>
+        <button
+          (click)="removeArrayItem('directors', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('directors')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Director
+      </button>
+    </div>
+  </div>
+
+  <!-- Genres -->
+  <div class="form-group">
+    <label>Genres</label>
+    <div class="array-input">
+      <div *ngFor="let genre of peopleData.genres; let i = index; trackBy: trackByIndex" class="array-item">
+        <app-typeahead-input
+          [(ngModel)]="peopleData.genres[i]"
+          [suggestions]="getGenresSuggestions()"
+          placeholder="Genre name"
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('genres', i, $event)"
+        ></app-typeahead-input>
+        <button
+          (click)="removeArrayItem('genres', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('genres')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Genres
+      </button>
+    </div>
+  </div>
+
+  <!-- Producers -->
+  <div class="form-group">
+    <label>Producers</label>
+    <div class="array-input">
+      <div *ngFor="let producer of peopleData.producers; let i = index; trackBy: trackByIndex" class="array-item">
+        <app-typeahead-input
+          [(ngModel)]="peopleData.producers[i]"
+          [suggestions]="getProducersSuggestions()"
+          placeholder="Producer name"
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('producers', i, $event)"
+        ></app-typeahead-input>
+        <button
+          (click)="removeArrayItem('producers', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('producers')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Producer
+      </button>
+    </div>
+  </div>
+
+  <!-- Writers -->
+  <div class="form-group">
+    <label>Writers</label>
+    <div class="array-input">
+      <div *ngFor="let writer of peopleData.writers; let i = index; trackBy: trackByIndex" class="array-item">
+        <app-typeahead-input
+          [(ngModel)]="peopleData.writers[i]"
+          [suggestions]="getWritersSuggestions()"
+          placeholder="Writer name"
+          (ngModelChange)="onPeopleChange()"
+          (suggestionSelected)="onSuggestionSelected('writers', i, $event)"
+        ></app-typeahead-input>
+        <button
+          (click)="removeArrayItem('writers', i)"
+          class="remove-button"
+          type="button">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <button
+        (click)="addArrayItem('writers')"
+        class="add-button"
+        type="button">
+        <i class="fa-solid fa-plus"></i> Add Writer
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,88 @@
+<div *ngIf="mediaData && !mediaData.mime.startsWith('image/')"
+  class="form-section thumbnail-section">
+  <h3>Thumbnail Creation</h3>
+  <p>Select one or more thumbnails and navigate through the thumbnails to select the final thumbnail:</p>
+  <br/>
+  <div class="thumbnail-container">
+
+    <div class="thumbnail-selection-container">
+      <div class="video-container" *ngIf="mediaData.mime.startsWith('video/')">
+        <video
+          (loadedmetadata)="onVideoMetadataLoaded()"
+          (keydown.enter)="setThumbnailPreview()"
+          [src]="getVideoUrl()"
+          #videoPlayer
+          class="video-player"
+          controls
+          muted
+          preload="metadata">
+          Your browser does not support the video tag.
+        </video>
+        <div class="video-overlay"></div>
+      </div>
+
+      <div
+        (click)="openFileBrowser()"
+        (dragleave)="onDragLeave($event)"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event)"
+        [class.drag-over]="isDragOver"
+        *ngIf="mediaData.mime.startsWith('audio/')" 
+        class="thumbnail-drop">
+        <div class="drop-content">
+          <i class="fa-solid fa-cloud-upload-alt drop-icon"></i>
+          <p class="drop-text">Drop image here or click to browse</p>
+          <p class="drop-hint">Supports: JPG, PNG, GIF, WebP</p>
+        </div>
+        <input 
+          (change)="onFileSelected($event)"
+          #fileInput
+          accept="image/*"
+          style="display: none"
+          type="file" />
+      </div>
+    </div>
+
+    <div class="thumbnail-preview-container">
+      <div 
+        [style.background-image]="selectedThumbnail?.thumbnailPreviewUrl ? 'url(' + selectedThumbnail!.thumbnailPreviewUrl + ')' : 'none'"
+        class="result-card thumbnail-preview">
+      </div>
+      <div class="thumbnail-navigation">
+        <button 
+          (click)="previousThumbnail()"
+          [disabled]="thumbnails.length == 0 || selectedThumbnailIndex == 0"
+          class="nav-button nav-button-left">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button 
+          (click)="nextThumbnail()"
+          [disabled]="thumbnails.length == 0 || selectedThumbnailIndex >= thumbnails.length - 1"
+          class="nav-button nav-button-right">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="thumbnail-controls">
+    <button
+      (click)="setThumbnailPreview()"
+      [disabled]="isCreatingThumbnail || !mediaData"
+      *ngIf="showSetThumbnail"
+      class="thumbnail-button">
+      <i class="fa-solid fa-eye" *ngIf="!isCreatingThumbnail"></i>
+      <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
+      {{ isCreatingThumbnail ? 'Updating Preview...' : 'Set Preview Image' }}
+    </button>
+    <button
+      (click)="saveThumbnail()"
+      [disabled]="isCreatingThumbnail || !selectedThumbnail"
+      *ngIf="showSaveThumbnail"
+      class="thumbnail-button save-thumbnail-button">
+      <i class="fa-solid fa-camera" *ngIf="!isCreatingThumbnail"></i>
+      <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
+      {{ isCreatingThumbnail ? 'Saving Thumbnail...' : 'Save Thumbnail' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,6 @@
+<div class="app-container">
+  <app-navigation-tabs></app-navigation-tabs>
+  <main class="main-content" [class.no-sidebar]="!usersService.isAuthenticated()">
+    <router-outlet></router-outlet>
+  </main>
+</div>

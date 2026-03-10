@@ -1,0 +1,80 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: mediabrowser
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mediabrowser
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: "Password123!"
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: "Express"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd="exit 0"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@2016bd2012dba4e32de620c46fe006a3ac9f0602
+      with:
+        dotnet-version: 10.x
+
+    - name: Restore dependencies
+      run: dotnet restore src/MediaBrowser.Tests/MediaBrowser.Tests.csproj
+
+    - name: Build
+      run: dotnet build src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-restore
+
+    - name: Install FFmpeg
+      run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+    - name: Create index.html for tests
+      run: |
+        mkdir -p src/MediaBrowser/wwwroot
+        echo '<!DOCTYPE html><html lang="en"><body></body></html>' > src/MediaBrowser/wwwroot/index.html
+
+    - name: Test
+      run: dotnet test src/MediaBrowser.Tests/MediaBrowser.Tests.csproj --no-build --verbosity normal
+      env:
+        LOGGING__LOGLEVEL__DEFAULT: "Error"
+        DB__MYSQLCONNECTIONSTRING: "Server=127.0.0.1;Port=3306;Database=mediabrowser;User=root;Password=password;"
+        DB__POSTGRESCONNECTIONSTRING: "Host=127.0.0.1;Port=5432;Database=mediabrowser;Username=postgres;Password=password;"
+        DB__SQLSERVERCONNECTIONSTRING: "Server=127.0.0.1,1433;Database=mediabrowser;User Id=sa;Password=Password123!;TrustServerCertificate=True;"

@@ -1,0 +1,71 @@
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  color: var(--fg2);
+  font-size: 1rem;
+  font-style: italic;
+  flex: 1;
+}
+
+.no-more-results {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--fg2);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.card-overlay {
+  color: var(--fg1);
+  font-size: 2rem;
+}
+
+.card-overlay i {
+  text-shadow: 0.25rem 0.25rem 1rem black;
+  opacity: 0.7;
+}
+
+.search-content {
+  height: 100vh;
+  overflow-y: auto;
+  min-height: 0;
+  padding-top: 1rem;
+}
+
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  align-content: start;
+  padding-bottom: 1rem;
+}
+
+.search-grid .result-card {
+  width: 100%;
+  height: auto;
+}
+
+.settings-icon {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  color: var(--fg1);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 1.25rem;
+  z-index: 10;
+  opacity: 0.7;
+  text-shadow: 0.25rem 0.25rem 1rem black;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.75rem;
+  }
+}

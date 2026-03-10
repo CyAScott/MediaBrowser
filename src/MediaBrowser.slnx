@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Migrations/">
+    <Project Path="Migrations\MediaBrowser.MySql\MediaBrowser.MySql.csproj" Type="C#" />
+    <Project Path="Migrations\MediaBrowser.Postgres\MediaBrowser.Postgres.csproj" Type="C#" />
+    <Project Path="Migrations\MediaBrowser.Sqlite\MediaBrowser.Sqlite.csproj" Type="C#" />
+    <Project Path="Migrations\MediaBrowser.SqlServer\MediaBrowser.SqlServer.csproj" Type="C#" />
+  </Folder>
+  <Project Path="MediaBrowser.Common\MediaBrowser.Common.csproj" Type="C#" />
+  <Project Path="MediaBrowser.Tests/MediaBrowser.Tests.csproj" />
+  <Project Path="MediaBrowser\MediaBrowser.csproj" Type="C#" />
+</Solution>

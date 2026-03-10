@@ -1,0 +1,55 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Media Browser</h1>
+      <p>Sign in to your account</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          required
+          placeholder="Enter your username"
+          class="form-input"
+          [disabled]="isLoading"
+          (keypress)="onUsernameKeyPress($event)"
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+          placeholder="Enter your password"
+          class="form-input"
+          [disabled]="isLoading"
+          (keypress)="onPasswordKeyPress($event)"
+          autocomplete="current-password"
+        />
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button
+        type="submit"
+        class="login-button"
+        [disabled]="isLoading || !username.trim() || !password.trim()"
+      >
+        <span *ngIf="isLoading" class="loading-spinner"></span>
+        {{ isLoading ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+  </div>
+</div>

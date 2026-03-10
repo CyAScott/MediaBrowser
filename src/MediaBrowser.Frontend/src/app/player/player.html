@@ -1,0 +1,55 @@
+<div class="player-container">
+  <div 
+    (mouseleave)="onMouseLeave()"
+    (mousemove)="onMouseMove()"
+    [class.fade-out]="!headerVisible"
+    *ngIf="mediaData"
+    class="player-header">
+    <button (click)="goBack()" *ngIf="hasHistory" class="back-button">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <h2>{{ mediaData.title }}</h2>
+    <button (click)="editMedia()" class="edit-button">
+      <i class="fa-solid fa-file-pen"></i>
+    </button>
+  </div>
+  
+  <div class="player">
+    <video 
+      (loadedmetadata)="applySavedVolume()"
+      (volumechange)="onVolumeChange($event)"
+      [poster]="mediaData.thumbnailUrl"
+      *ngIf="mediaData && mediaData.mime.startsWith('video/')"
+      #videoElement
+      autoplay
+      class="video-element"
+      controls>
+      <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+      Your browser does not support the video tag.
+    </video>
+
+    <audio 
+      (loadedmetadata)="applySavedVolume()"
+      (volumechange)="onVolumeChange($event)"
+      [ngStyle]="{'backgroundImage':'url(' + mediaData.thumbnailUrl + ')'}"
+      *ngIf="mediaData && mediaData.mime.startsWith('audio/')"
+      #audioElement
+      autoplay
+      class="audio-element"
+      controls>
+      <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+      Your browser does not support the audio element.
+    </audio>
+
+    <img 
+      [src]="mediaData.url"
+      *ngIf="mediaData && mediaData.mime.startsWith('image/')"
+      alt="{{ mediaData.title }}"
+      class="image-element"/>
+  </div>
+  
+  <div *ngIf="!mediaData" class="no-media">
+    <p>No media data available</p>
+    <button (click)="goBack()">Return to Search</button>
+  </div>
+</div>
