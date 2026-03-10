@@ -25,6 +25,7 @@
     "isolatedModules": true,
 
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "importHelpers": true,
     "composite": true,
   },
