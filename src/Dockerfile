@@ -61,7 +61,7 @@ WORKDIR /app
 
 # Install ffmpeg and ffprobe
 RUN apt-get update -qq && \
-    apt-get install -y -qq ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg > /dev/null && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
