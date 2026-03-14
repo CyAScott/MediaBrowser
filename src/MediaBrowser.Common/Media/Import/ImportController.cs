@@ -3,6 +3,38 @@ namespace MediaBrowser.Media.Import;
 [ApiController, Route("api/[controller]")]
 public class ImportController(Ffmpeg ffmpeg, MediaConfig mediaConfig, MediaDbContext context, Nfo nfo) : ControllerBase
 {
+    static readonly char[] _invalidFileNameChars = Path
+        .GetInvalidFileNameChars()
+        .Concat(Path.GetInvalidPathChars())
+        .Concat(['/', '\\', ':', '*', '?', '"', '<', '>', '|'])
+        .Distinct()
+        .ToArray();
+    [HttpPost("files")]
+    public async Task<ActionResult> Add([FromForm] AddFileRequest request)
+    {
+        if (!Directory.Exists(mediaConfig.ImportDirectory)
+            || request.File.FileName.StartsWith('.')
+            || !request.File.FileName.Contains('.')
+            || request.File.FileName.IndexOfAny(_invalidFileNameChars) >= 0
+            || !mediaConfig.ImportExtensions.ContainsKey(Path.GetExtension(request.File.FileName)[1..].ToLowerInvariant()))
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable);
+        }
+
+        var path = Path.Combine(mediaConfig.ImportDirectory, request.File.FileName);
+        if (System.IO.File.Exists(path))
+        {
+            return StatusCode(StatusCodes.Status409Conflict);
+        }
+
+        await using (var stream = System.IO.File.Create(path))
+        {
+            await request.File.CopyToAsync(stream);
+        }
+
+        return Ok();
+    }
+
     [HttpGet("files")]
     public ActionResult<IReadOnlyList<ImportFileInfo>> GetFiles() =>
         !Directory.Exists(mediaConfig.ImportDirectory)

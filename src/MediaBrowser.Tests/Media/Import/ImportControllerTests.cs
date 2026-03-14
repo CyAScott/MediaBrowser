@@ -185,6 +185,72 @@ public class ImportControllerTests
             var expected = media.ToReadModel(scope.ServiceProvider.GetRequiredService<MediaConfig>());
             response.Content.ShouldBe(expected);
         }
+
+        var mediaConfig = factory.Services.GetRequiredService<MediaConfig>();
+        await AddFileTests(mediaConfig, importClient);
+    }
+
+    async Task AddFileTests(MediaConfig mediaConfig, ImportClient importClient)
+    {
+        const string validFileName = "valid.mp4";
+
+        await ImportDirectoryMissingTest();
+        async Task ImportDirectoryMissingTest()
+        {
+            Directory.Delete(mediaConfig.ImportDirectory!, true);
+            using var response = await importClient.Add(new MemoryStream(Guid.NewGuid().ToByteArray()), validFileName);
+            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable,
+                "The import directory is missing, so it should return 406 Not Acceptable Error.");
+            Directory.CreateDirectory(mediaConfig.ImportDirectory!);
+        }
+
+        var invalidFileNames = new[]
+        {
+            "invalid",
+            ".invalid.mp4",
+            "invalid.txt",
+            "invalid/../file.mp4",
+            @"invalid\..\file.mp4",
+            "invalid:file.mp4",
+            "invalid*file.mp4",
+            "invalid?file.mp4",
+            "invalid<file.mp4",
+            "invalid>file.mp4",
+            "invalid|file.mp4"
+        };
+        foreach (var invalidFileName in invalidFileNames)
+        {
+            await InvalidFilesNamesTest(invalidFileName);
+        }
+        async Task InvalidFilesNamesTest(string fileName)
+        {
+            using var response = await importClient.Add(new MemoryStream(Guid.NewGuid().ToByteArray()), fileName);
+            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable,
+                "The file name is invalid, so it should return 406 Not Acceptable Error.");
+        }
+
+        await DuplicateFileTest();
+        async Task DuplicateFileTest()
+        {
+            const string existingFileName = "existing.mp4";
+            var validFilePath = Path.Combine(mediaConfig.ImportDirectory!, existingFileName);
+            await File.WriteAllTextAsync(validFilePath, Guid.NewGuid().ToString());
+
+            using var response = await importClient.Add(new MemoryStream(Guid.NewGuid().ToByteArray()), existingFileName);
+            response.StatusCode.ShouldBe(HttpStatusCode.Conflict,
+                "The file already exists, so it should return 409 Conflict.");
+        }
+
+        await ValidFileTest();
+        async Task ValidFileTest()
+        {
+            var contents = Guid.NewGuid().ToByteArray();
+            using var response = await importClient.Add(new MemoryStream(contents), validFileName);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, "The file should have been added successfully, so it should return 200 OK.");
+            var expectedPath = Path.Combine(mediaConfig.ImportDirectory!, validFileName);
+            File.Exists(expectedPath).ShouldBeTrue("The file should have been added successfully, so it should return 200 OK.");
+            (await File.ReadAllBytesAsync(expectedPath)).ShouldBe(contents, "The contents of the file should match the contents that were uploaded.");
+        }
     }
 
     async Task<(ImportFileInfo ValidFile, ImportFileInfo InvalidFile)> AddImportFiles(MediaBrowserWebApplicationFactory factory)

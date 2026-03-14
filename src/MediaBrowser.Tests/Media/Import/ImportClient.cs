@@ -2,6 +2,12 @@ namespace MediaBrowser.Media.Import;
 
 public class ImportClient(HttpClient client)
 {
+    public Task<HttpResponseMessage> Add(System.IO.Stream file, string fileName) =>
+        client.PostAsync("/api/import/files", new MultipartFormDataContent
+        {
+            {new StreamContent(file), "file", fileName}
+        });
+
     public Task<HttpResponseMessage<IReadOnlyList<ImportFileInfo>>> GetFiles() =>
         client.GetAsync<IReadOnlyList<ImportFileInfo>>("/api/import/files");
 
