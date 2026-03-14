@@ -105,7 +105,7 @@ public class MediaControllerTests
         await StreamTests(mediaConfig, mediaClient, testImageFile);
         await StreamTests(mediaConfig, mediaClient, testVideoFile);
 
-        await TagTests(mediaClient);
+        await TagTests(mediaConfig, mediaClient);
 
         await UpdateNotFoundTest();
         async Task UpdateNotFoundTest()
@@ -244,7 +244,7 @@ public class MediaControllerTests
         }
     }
 
-    async Task TagTests(MediaClient mediaClient)
+    async Task TagTests(MediaConfig mediaConfig, MediaClient mediaClient)
     {
         await GetAllTest(TagType.Cast);
         await GetAllTest(TagType.Director);
@@ -319,6 +319,56 @@ public class MediaControllerTests
                 }
             }
         }
+
+        await SetThumbnailTest(TagType.Cast);
+        await SetThumbnailTest(TagType.Director);
+        await SetThumbnailTest(TagType.Genre);
+        await SetThumbnailTest(TagType.Producer);
+        await SetThumbnailTest(TagType.Writer);
+
+        async Task SetThumbnailTest(TagType tagType)
+        {
+            const string validTag = "new tag";
+            var thumbnail = new FileInfo(Path.Combine(mediaConfig.ImportDirectory!, "valid-thumbnail.webp"));
+            await Files.Image(thumbnail.FullName);
+
+            await InvalidTagTest();
+            async Task InvalidTagTest()
+            {
+                await using var stream = thumbnail.OpenRead();
+                using var response = await mediaClient.SetThumbnail(tagType, "_invalid_tag_", stream, thumbnail.Name);
+                response.StatusCode.ShouldBe(HttpStatusCode.ExpectationFailed,
+                    "Only alphanumeric characters are allowed for cast, directors, genres, producers, and writers, so it should return 417 Expectation Failed.");
+            }
+
+            await InvalidThumbnailTest();
+            async Task InvalidThumbnailTest()
+            {
+                var invalidThumbnail = new FileInfo(Path.Combine(mediaConfig.ImportDirectory!, "invalid-thumbnail.webp"));
+                await File.WriteAllTextAsync(invalidThumbnail.FullName, "this is not a valid image file");
+                await using (var stream = invalidThumbnail.OpenRead())
+                {
+                    using var response = await mediaClient.SetThumbnail(tagType, validTag, stream, invalidThumbnail.Name);
+                    response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable, "This should return 406 Not Acceptable since the file is not a valid image file.");
+                }
+                invalidThumbnail.Delete();
+            }
+
+            await ValidThumbnailTest();
+            async Task ValidThumbnailTest()
+            {
+                await using var stream = thumbnail.OpenRead();
+                using var response = await mediaClient.SetThumbnail(tagType, validTag, stream, thumbnail.Name);
+                const string message = "This should set the thumbnail successfully since we are using a valid tag and a valid image file.";
+                response.StatusCode.ShouldBe(HttpStatusCode.OK, message);
+
+                using var thumbnailResponse = await mediaClient.GetThumbnail(tagType, validTag);
+                thumbnailResponse.StatusCode.ShouldBe(HttpStatusCode.OK, message);
+                thumbnailResponse.Content.ShouldNotBeNull(message);
+                thumbnailResponse.Content.Headers.ContentLength.ShouldNotBeNull(message);
+                thumbnailResponse.Content.Headers.ContentType.ShouldNotBeNull(message).MediaType.ShouldBe("image/jpeg", message);
+            }
+        }
     }
 
     async Task UpdateThumbnailWithFileTests(MediaConfig mediaConfig, MediaClient mediaClient, MediaReadModel testVideoFile, MediaReadModel testImageFile)
@@ -348,9 +398,12 @@ public class MediaControllerTests
         {
             var invalidThumbnail = new FileInfo(Path.Combine(mediaConfig.ImportDirectory!, "invalid-thumbnail.webp"));
             await File.WriteAllTextAsync(invalidThumbnail.FullName, "this is not a valid image file");
-            await using var stream = invalidThumbnail.OpenRead();
-            using var response = await mediaClient.UpdateThumbnailWithFile(testVideoFile.Id, stream, invalidThumbnail.Name, isPrimary: true);
-            response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable, "This should return 406 Not Acceptable since the file is not a valid image file.");
+            await using (var stream = invalidThumbnail.OpenRead())
+            {
+                using var response = await mediaClient.UpdateThumbnailWithFile(testVideoFile.Id, stream, invalidThumbnail.Name, isPrimary: true);
+                response.StatusCode.ShouldBe(HttpStatusCode.NotAcceptable, "This should return 406 Not Acceptable since the file is not a valid image file.");
+            }
+            invalidThumbnail.Delete();
         }
 
         await ValidPrimaryThumbnailTest();
@@ -367,6 +420,8 @@ public class MediaControllerTests
             using var response = await mediaClient.UpdateThumbnailWithFile(testVideoFile.Id, stream, thumbnail.Name, isPrimary: false);
             response.StatusCode.ShouldBe(HttpStatusCode.OK, "This should update the fanart thumbnail successfully since we are using a valid media ID and a valid image file, so it should return 200 Ok.");
         }
+
+        thumbnail.Delete();
     }
 
     async Task UpdateThumbnailWithTimestampTests(MediaConfig mediaConfig, MediaClient mediaClient, MediaReadModel testVideoFile, MediaReadModel testImageFile)

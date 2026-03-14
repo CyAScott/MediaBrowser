@@ -98,37 +98,21 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
             return StatusCode(StatusCodes.Status406NotAcceptable);
         }
 
-        var tempFile = Path.GetTempFileName();
-        try
+        var extension = request.IsPrimary ? ".jpg" : "-fanart.jpg";
+        var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
+
+        var (result, success) = await UpdateThumbnail(request.Thumbnail, thumbnailLocation);
+
+        if (!success || !request.IsPrimary)
         {
-            await using (var stream = System.IO.File.Create(tempFile))
-            {
-                await request.Thumbnail.CopyToAsync(stream);
-            }
-
-            if (request.IsPrimary)
-            {
-                media.Thumbnail = null;
-            }
-
-            var extension = request.IsPrimary ? ".jpg" : "-fanart.jpg";
-
-            var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
-
-            if (!await ffmpeg.TryExtractThumbnail(tempFile, outputPath: thumbnailLocation))
-            {
-                return StatusCode(StatusCodes.Status406NotAcceptable);
-            }
-
-            return Ok();
+            return result;
         }
-        finally
-        {
-            if (System.IO.File.Exists(tempFile))
-            {
-                System.IO.File.Delete(tempFile);
-            }
-        }
+
+        media.Thumbnail = null;
+        await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
+        await context.SaveChangesAsync();
+
+        return result;
     }
 
     async Task<ActionResult> ReadFile(Guid id,
@@ -167,6 +151,32 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media),
             enableRangeProcessing: true);
+    }
+
+    async Task<(ActionResult Result, bool Success)> UpdateThumbnail(IFormFile thumbnail, string thumbnailLocation)
+    {
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            await using (var stream = System.IO.File.Create(tempFile))
+            {
+                await thumbnail.CopyToAsync(stream);
+            }
+
+            if (!await ffmpeg.TryExtractThumbnail(tempFile, outputPath: thumbnailLocation))
+            {
+                return (StatusCode(StatusCodes.Status406NotAcceptable), false);
+            }
+
+            return (Ok(), true);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(tempFile))
+            {
+                System.IO.File.Delete(tempFile);
+            }
+        }
     }
 
     async Task<ActionResult> UpdateThumbnailWithTimestamp(Guid id, string extension, double at, bool isPrimary = false)

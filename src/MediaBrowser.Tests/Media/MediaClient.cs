@@ -41,6 +41,12 @@ public class MediaClient(HttpClient client)
             }
         });
 
+    public Task<HttpResponseMessage> SetThumbnail(TagType tagType, string name, Stream thumbnail, string thumbnailFileName) =>
+        client.PostAsync($"/api/media/{tagType}/{name}/thumbnail", new MultipartFormDataContent
+        {
+            {new StreamContent(thumbnail), "thumbnail", thumbnailFileName}
+        });
+
     public async Task<HttpResponseMessage> Stream(Guid id,
         DateTimeOffset? lastModified = null,
         RangeHeaderValue? rangeHeaderValue = null,

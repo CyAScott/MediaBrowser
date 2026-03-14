@@ -12,17 +12,19 @@ partial class MediaController
         _ => await context.Writers.Select(c => c.Name).Distinct().OrderBy(n => n).ToListAsync()
     };
 
+    string GetTagDirectory(TagType tagType) => tagType switch
+    {
+        TagType.Cast => mediaConfig.CastDirectory,
+        TagType.Director => mediaConfig.DirectorsDirectory,
+        TagType.Genre => mediaConfig.GenresDirectory,
+        TagType.Producer => mediaConfig.ProducersDirectory,
+        _ => mediaConfig.WritersDirectory
+    };
+
     [HttpGet("{tagType}/{name}/thumbnail")]
     public ActionResult GetThumbnail(TagType tagType, string name)
     {
-        var filePath = Path.Combine(tagType switch
-            {
-                TagType.Cast => mediaConfig.CastDirectory,
-                TagType.Director => mediaConfig.DirectorsDirectory,
-                TagType.Genre => mediaConfig.GenresDirectory,
-                TagType.Producer => mediaConfig.ProducersDirectory,
-                _ => mediaConfig.WritersDirectory
-            }, $"{name}.jpg");
+        var filePath = Path.Combine(GetTagDirectory(tagType), $"{name}.jpg");
         if (!System.IO.File.Exists(filePath))
         {
             return NotFound();
@@ -36,5 +38,20 @@ partial class MediaController
         Response.Headers.LastModified = fileInfo.LastWriteTimeUtc.ToString("R");
 
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), "image/jpeg");
+    }
+
+    [HttpPost("{tagType}/{name}/thumbnail")]
+    public async Task<ActionResult> SetThumbnail(TagType tagType, string name, [FromForm] SetTagThumbnailRequest request)
+    {
+        if (!IsNameValid(name))
+        {
+            return StatusCode(StatusCodes.Status417ExpectationFailed);
+        }
+
+        var thumbnailLocation = Path.Combine(GetTagDirectory(tagType), $"{name}.jpg");
+
+        var (result, _) = await UpdateThumbnail(request.Thumbnail, thumbnailLocation);
+
+        return result;
     }
 }
