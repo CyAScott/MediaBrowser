@@ -5,19 +5,20 @@
   
   <div class="meta-content" #metaGrid>
     <div class="meta-grid" *ngIf="!isLoading && metaMembers.length > 0">
-      <a class="result-card" 
-           *ngFor="let metaMember of metaMembers;" 
-           [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}"
-           [title]="metaMember.name"
-           [routerLink]="'/search'"
-           [queryParams]="metaMember.queryParams"
-           (click)="clearPagePositionState()">
-        <div class="card-overlay">
-          <div class="meta-info">
-            <div class="meta-name">{{ metaMember.name }}</div>
+      @for (metaMember of metaMembers; track $index) {
+        <a class="result-card" 
+             [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}"
+             [title]="metaMember.name"
+             [routerLink]="'/search'"
+             [queryParams]="metaMember.queryParams"
+             (click)="clearPagePositionState()">
+          <div class="card-overlay">
+            <div class="meta-info">
+              <div class="meta-name">{{ metaMember.name }}</div>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
+      }
     </div>
     
     <!-- Empty state -->

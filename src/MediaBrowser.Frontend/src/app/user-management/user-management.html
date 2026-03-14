@@ -30,17 +30,19 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of users">
-          <td class="username">{{user.username}}</td>
-          <td class="action">
-            <button 
-              class="delete-btn"
-              (click)="deleteUser(user.id)"
-              title="Delete this user">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-        </tr>
+        @for (user of users; track user.id) {
+          <tr>
+            <td class="username">{{user.username}}</td>
+            <td class="action">
+              <button 
+                class="delete-btn"
+                (click)="deleteUser(user.id)"
+                title="Delete this user">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
   </div>
