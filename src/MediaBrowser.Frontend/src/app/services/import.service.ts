@@ -25,6 +25,12 @@ export class ImportService {
 
   constructor(private apiService: ApiService) {}
 
+  uploadFile(file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.apiService.post<void>('/import/files', formData);
+  }
+
   files(): Observable<ImportFileInfo[]> {
     return this.apiService.get<ImportFileInfo[]>('/import/files');
   }

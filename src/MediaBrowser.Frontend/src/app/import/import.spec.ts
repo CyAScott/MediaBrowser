@@ -6,6 +6,15 @@ import { of, throwError } from 'rxjs';
 import { ImportComponent } from './import';
 import { ImportFileInfo, ImportService } from '../services/import.service';
 
+type ImportServiceMock = {
+  files: ReturnType<typeof vi.fn>;
+  uploadFile: ReturnType<typeof vi.fn>;
+};
+
+function getImportServiceMock(): ImportServiceMock {
+  return TestBed.inject(ImportService) as unknown as ImportServiceMock;
+}
+
 function createImportFileInfo(overrides?: Partial<ImportFileInfo>): ImportFileInfo {
   return {
     createdOn: new Date('2025-01-01T00:00:00.000Z'),
@@ -30,7 +39,8 @@ describe('ImportComponent', () => {
         {
           provide: ImportService,
           useValue: {
-            files: vi.fn()
+            files: vi.fn(),
+            uploadFile: vi.fn()
           }
         }
       ]
@@ -67,7 +77,7 @@ describe('ImportComponent', () => {
   });
 
   it('loads files on init and maps them to MediaReadModel', async () => {
-    const importService = TestBed.inject(ImportService) as { files: ReturnType<typeof vi.fn> };
+    const importService = getImportServiceMock();
     const file = createImportFileInfo({ name: 'loaded.mp4' });
     importService.files.mockReturnValue(of([file]));
 
@@ -90,7 +100,7 @@ describe('ImportComponent', () => {
   });
 
   it('handles scan errors by clearing files and logging the error', async () => {
-    const importService = TestBed.inject(ImportService) as { files: ReturnType<typeof vi.fn> };
+    const importService = getImportServiceMock();
     const error = new Error('scan failed');
     importService.files.mockReturnValue(throwError(() => error));
 
@@ -115,5 +125,103 @@ describe('ImportComponent', () => {
     );
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it('uploads a dropped file and refreshes the files list', async () => {
+    const importService = getImportServiceMock();
+    const initialFiles = [createImportFileInfo({ name: 'initial.mp4' })];
+    const uploadedFiles = [createImportFileInfo({ name: 'uploaded.mp4' })];
+    importService.files
+      .mockReturnValueOnce(of(initialFiles))
+      .mockReturnValueOnce(of(uploadedFiles));
+    importService.uploadFile.mockReturnValue(of(void 0));
+
+    const fixture = TestBed.createComponent(ImportComponent);
+    const component = fixture.componentInstance;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const droppedFile = new File(['video content'], 'uploaded.mp4', { type: 'video/mp4' });
+    const preventDefault = vi.fn();
+    await component.onDrop({
+      preventDefault,
+      dataTransfer: {
+        files: {
+          item: vi.fn().mockReturnValue(droppedFile)
+        }
+      }
+    } as unknown as DragEvent);
+    await fixture.whenStable();
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(importService.uploadFile).toHaveBeenCalledWith(droppedFile);
+    expect(importService.files).toHaveBeenCalledTimes(2);
+    expect(component.files).toHaveLength(1);
+    expect(component.files[0].title).toBe('uploaded.mp4');
+    expect(component.uploadError).toBeNull();
+  });
+
+  it('shows an upload error when dropped file upload fails', async () => {
+    const importService = getImportServiceMock();
+    const uploadError = new Error('upload failed');
+    importService.files.mockReturnValue(of([]));
+    importService.uploadFile.mockReturnValue(throwError(() => uploadError));
+
+    const fixture = TestBed.createComponent(ImportComponent);
+    const component = fixture.componentInstance;
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const droppedFile = new File(['video content'], 'uploaded.mp4', { type: 'video/mp4' });
+    await component.onDrop({
+      preventDefault: vi.fn(),
+      dataTransfer: {
+        files: {
+          item: vi.fn().mockReturnValue(droppedFile)
+        }
+      }
+    } as unknown as DragEvent);
+    await fixture.whenStable();
+
+    expect(importService.uploadFile).toHaveBeenCalledWith(droppedFile);
+    expect(component.uploadError).toBe('Failed to upload file. Please try again.');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Error uploading file:', uploadError);
+
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.upload-error')?.textContent).toContain('Failed to upload file. Please try again.');
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('rejects non-media files before upload', async () => {
+    const importService = getImportServiceMock();
+    importService.files.mockReturnValue(of([]));
+
+    const fixture = TestBed.createComponent(ImportComponent);
+    const component = fixture.componentInstance;
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const invalidFile = new File(['not media'], 'notes.txt', { type: 'text/plain' });
+    await component.onDrop({
+      preventDefault: vi.fn(),
+      dataTransfer: {
+        files: {
+          item: vi.fn().mockReturnValue(invalidFile)
+        }
+      }
+    } as unknown as DragEvent);
+    await fixture.whenStable();
+
+    expect(importService.uploadFile).not.toHaveBeenCalled();
+    expect(component.uploadError).toBe('Only audio and video files are allowed.');
+
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.upload-error')?.textContent).toContain('Only audio and video files are allowed.');
   });
 });
