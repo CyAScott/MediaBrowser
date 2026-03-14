@@ -7,7 +7,7 @@ import { UsersService } from './services/users.service';
   selector: 'app-root',
   imports: [RouterOutlet, NavigationTabsComponent],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
 export class App {
   protected readonly title = signal('render');

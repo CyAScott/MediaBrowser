@@ -4,26 +4,31 @@
   </div>
   
   <div class="meta-content" #metaGrid>
-    <div class="meta-grid" *ngIf="!isLoading && metaMembers.length > 0">
-      <a class="result-card" 
-           *ngFor="let metaMember of metaMembers;" 
-           [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}"
-           [title]="metaMember.name"
-           [routerLink]="'/search'"
-           [queryParams]="metaMember.queryParams"
-           (click)="clearPagePositionState()">
-        <div class="card-overlay">
-          <div class="meta-info">
-            <div class="meta-name">{{ metaMember.name }}</div>
-          </div>
-        </div>
-      </a>
-    </div>
+    @if (!isLoading && metaMembers.length > 0) {
+      <div class="meta-grid">
+        @for (metaMember of metaMembers; track $index) {
+          <a class="result-card" 
+               [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}"
+               [title]="metaMember.name"
+               [routerLink]="'/search'"
+               [queryParams]="metaMember.queryParams"
+               (click)="clearPagePositionState()">
+            <div class="card-overlay">
+              <div class="meta-info">
+                <div class="meta-name">{{ metaMember.name }}</div>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+    }
     
     <!-- Empty state -->
-    <div class="empty-state" *ngIf="!isLoading && metaMembers.length === 0">
-      <span>No {{ type }} members found</span>
-    </div>
+    @if (!isLoading && metaMembers.length === 0) {
+      <div class="empty-state">
+        <span>No {{ type }} members found</span>
+      </div>
+    }
   </div>
   
   <!-- Full screen spinner overlay -->

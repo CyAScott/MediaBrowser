@@ -2,38 +2,45 @@
   (scroll)="onScroll($event)"
   #searchResults
   class="search-content">
-  <div *ngIf="results.length > 0" class="search-grid">
-    <a 
-        (mousedown)="onCardClick()"
-        [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
-        [routerLink]="['/player', result.id]"
-        [state]="{ mediaData: result }"
-        [title]="getTooltip(result)"
-        *ngFor="let result of results; trackBy: trackByResultId" 
-        class="result-card" >
-      <div class="card-overlay">
-        <i class="fa-solid fa-play"></i>
-        <a 
-          (click)="$event.stopPropagation()"
-          [routerLink]="['/edit', result.id]"
+  @if (results.length > 0) {
+    <div class="search-grid">
+    @for (result of results; track trackByResultId($index, result)) {
+      <a 
+          (mousedown)="onCardClick()"
+          [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
+          [routerLink]="['/player', result.id]"
           [state]="{ mediaData: result }"
-          class="settings-icon"
-          title="Edit media">
-          <i class="fa-solid fa-file-pen"></i>
-        </a>
-      </div>
-    </a>
-  </div>
+          [title]="getTooltip(result)"
+          class="result-card" >
+        <div class="card-overlay">
+          <i class="fa-solid fa-play"></i>
+          <a 
+            (click)="$event.stopPropagation()"
+            [routerLink]="['/edit', result.id]"
+            [state]="{ mediaData: result }"
+            class="settings-icon"
+            title="Edit media">
+            <i class="fa-solid fa-file-pen"></i>
+          </a>
+        </div>
+      </a>
+    }
+    </div>
+  }
   
   <!-- No more results indicator -->
-  <div *ngIf="!hasMoreResults && results.length > 0 && !isLoading" class="no-more-results">
-    <span>No more results to load</span>
-  </div>
+  @if (!hasMoreResults && results.length > 0 && !isLoading) {
+    <div class="no-more-results">
+      <span>No more results to load</span>
+    </div>
+  }
   
   <!-- Empty state -->
-  <div *ngIf="!isLoading && results.length === 0" class="empty-state">
-    <span>No results found</span>
-  </div>
+  @if (!isLoading && results.length === 0) {
+    <div class="empty-state">
+      <span>No results found</span>
+    </div>
+  }
 </div>
 
 <!-- Full screen spinner overlay -->

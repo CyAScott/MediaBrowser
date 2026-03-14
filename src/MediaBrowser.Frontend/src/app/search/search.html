@@ -20,9 +20,11 @@
         (change)="onSortChange()" 
         [(ngModel)]="sort" 
         class="sort-dropdown">
-        <option [value]="option.value" *ngFor="let option of sortOptions">
-          {{ option.label }}
-        </option>
+        @for (option of sortOptions; track option.value) {
+          <option [value]="option.value">
+            {{ option.label }}
+          </option>
+        }
       </select>
       
       <div class="sort-filter-container">
@@ -34,10 +36,10 @@
         </button>
         
         <!-- Sort options modal -->
-        <div 
-          (click)="closeSortModal()" 
-          *ngIf="showSortModal" 
-          class="sort-modal">
+        @if (showSortModal) {
+          <div 
+            (click)="closeSortModal()" 
+            class="sort-modal">
           <div (click)="$event.stopPropagation()" class="sort-modal-content">
             <div class="sort-modal-header">
               <span>Sort by</span>
@@ -46,17 +48,21 @@
               </button>
             </div>
             <div class="sort-modal-options">
-              <button 
-                (click)="selectSortOption(option.value)"
-                [class.selected]="option.value === sort"
-                *ngFor="let option of sortOptions" 
-                class="sort-option">
-                <span class="sort-option-label">{{ option.label }}</span>
-                <i class="fa-solid fa-check sort-option-check" *ngIf="option.value === sort"></i>
-              </button>
+              @for (option of sortOptions; track option.value) {
+                <button 
+                  (click)="selectSortOption(option.value)"
+                  [class.selected]="option.value === sort"
+                  class="sort-option">
+                  <span class="sort-option-label">{{ option.label }}</span>
+                  @if (option.value === sort) {
+                    <i class="fa-solid fa-check sort-option-check"></i>
+                  }
+                </button>
+              }
             </div>
           </div>
-        </div>
+          </div>
+        }
       </div>
       
       <button (click)="onSearch()" [disabled]="isLoading" class="search-button">

@@ -10,14 +10,17 @@
     autocomplete="off"
     class="form-input array-field"
     type="text"/>
-  <div *ngIf="showDropdown && filteredSuggestions.length > 0" class="typeahead-dropdown">
-    <div
-      (mousedown)="selectSuggestion(suggestion)"
-      (mouseenter)="highlightedIndex = i"
-      [class.highlighted]="i === highlightedIndex"
-      *ngFor="let suggestion of filteredSuggestions; let i = index"
-      class="typeahead-option">
-      {{ suggestion }}
+  @if (showDropdown && filteredSuggestions.length > 0) {
+    <div class="typeahead-dropdown">
+      @for (suggestion of filteredSuggestions; track $index; let i = $index) {
+        <div
+          (mousedown)="selectSuggestion(suggestion)"
+          (mouseenter)="highlightedIndex = i"
+          [class.highlighted]="i === highlightedIndex"
+          class="typeahead-option">
+          {{ suggestion }}
+        </div>
+      }
     </div>
-  </div>
+  }
 </div>

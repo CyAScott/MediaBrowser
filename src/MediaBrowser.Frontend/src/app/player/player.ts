@@ -34,7 +34,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly VOLUME_STORAGE_KEY = 'mediaBrowser_volume';
 
   private clearHideTimer(): void {
-    if (this.hideTimeout) {
+    if (this.hideTimeout !== null) {
       window.clearTimeout(this.hideTimeout);
       this.hideTimeout = null;
     }

@@ -57,6 +57,19 @@ jobs:
       with:
         dotnet-version: 10.x
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+
+    - name: Install frontend dependencies
+      working-directory: src/MediaBrowser.Frontend
+      run: npm ci
+
+    - name: Test Angular SPA
+      working-directory: src/MediaBrowser.Frontend
+      run: npm run coverage
+
     - name: Restore dependencies
       run: dotnet restore src/MediaBrowser.Tests/MediaBrowser.Tests.csproj
 

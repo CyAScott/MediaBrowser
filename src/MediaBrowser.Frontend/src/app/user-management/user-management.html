@@ -21,55 +21,65 @@
   </div>
 
   <!-- Users table section -->
-  <div class="users-section" *ngIf="!isLoading && users.length > 0">
-    <table class="users-table">
-      <thead>
-        <tr>
-          <th>Username</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of users">
-          <td class="username">{{user.username}}</td>
-          <td class="action">
-            <button 
-              class="delete-btn"
-              (click)="deleteUser(user.id)"
-              title="Delete this user">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (!isLoading && users.length > 0) {
+    <div class="users-section">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users; track user.id) {
+            <tr>
+              <td class="username">{{user.username}}</td>
+              <td class="action">
+                <button 
+                  class="delete-btn"
+                  (click)="deleteUser(user.id)"
+                  title="Delete this user">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   <!-- Loading state -->
-  <div class="loading-state" *ngIf="isLoading">
-    <p>Loading users...</p>
-  </div>
+  @if (isLoading) {
+    <div class="loading-state">
+      <p>Loading users...</p>
+    </div>
+  }
 
   <!-- Empty state -->
-  <div class="empty-state" *ngIf="!isLoading && users.length === 0">
-    <p>No users found.</p>
-  </div>
+  @if (!isLoading && users.length === 0) {
+    <div class="empty-state">
+      <p>No users found.</p>
+    </div>
+  }
 
   <!-- Modals -->
-  <app-change-password-modal 
-    *ngIf="isChangePasswordModalOpen"
-    (close)="closeChangePasswordModal()"
-    (userUpdating)="isLoading = true"
-    (userUpdatingFailed)="isLoading = false">
-  </app-change-password-modal>
+  @if (isChangePasswordModalOpen) {
+    <app-change-password-modal 
+      (close)="closeChangePasswordModal()"
+      (userUpdating)="isLoading = true"
+      (userUpdatingFailed)="isLoading = false">
+    </app-change-password-modal>
+  }
 
-  <app-add-user-modal 
-    *ngIf="isAddUserModalOpen"
-    (close)="closeAddUserModal()"
-    (userAdded)="onUserAdded()"
-    (userAdding)="isLoading = true"
-    (userAddingFailed)="isLoading = false">
-  </app-add-user-modal>
+  @if (isAddUserModalOpen) {
+    <app-add-user-modal 
+      (close)="closeAddUserModal()"
+      (userAdded)="onUserAdded()"
+      (userAdding)="isLoading = true"
+      (userAddingFailed)="isLoading = false">
+    </app-add-user-modal>
+  }
 
   <!-- Full screen spinner overlay -->
   <app-spinner [isLoading]="isLoading"></app-spinner>

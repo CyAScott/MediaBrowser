@@ -38,16 +38,20 @@
         />
       </div>
 
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
+      @if (errorMessage) {
+        <div class="error-message">
+          {{ errorMessage }}
+        </div>
+      }
 
       <button
         type="submit"
         class="login-button"
         [disabled]="isLoading || !username.trim() || !password.trim()"
       >
-        <span *ngIf="isLoading" class="loading-spinner"></span>
+        @if (isLoading) {
+          <span class="loading-spinner"></span>
+        }
         {{ isLoading ? 'Signing in...' : 'Sign In' }}
       </button>
     </form>

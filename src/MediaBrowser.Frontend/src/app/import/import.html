@@ -1,31 +1,37 @@
 <div class="import-container">
-  <div class="files-section" *ngIf="files.length > 0">
-    <table class="files-table">
-      <thead>
-        <tr>
-          <th>File Name</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let file of files">
-          <td class="filename">{{file.title}}</td>
-          <td class="action">
-            <a 
-              class="import-btn"
-              title="Import this file"
-              [routerLink]="['/import', file.title]"
-              [state]="{ mediaData: file }">
-              <i class="fa-solid fa-upload"></i>
-            </a>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  @if (files.length > 0) {
+    <div class="files-section">
+      <table class="files-table">
+        <thead>
+          <tr>
+            <th>File Name</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (file of files; track $index) {
+            <tr>
+              <td class="filename">{{file.title}}</td>
+              <td class="action">
+                <a 
+                  class="import-btn"
+                  title="Import this file"
+                  [routerLink]="['/import', file.title]"
+                  [state]="{ mediaData: file }">
+                  <i class="fa-solid fa-upload"></i>
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   <!-- Empty state -->
-  <div class="empty-state" *ngIf="files.length === 0">
-    <p>No media files found in the selected directory.</p>
-  </div>
+  @if (files.length === 0) {
+    <div class="empty-state">
+      <p>No media files found in the selected directory.</p>
+    </div>
+  }
 </div>
