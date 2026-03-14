@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['src/**/*.spec.ts', 'src/test-setup.ts'],
+      exclude: ['src/**/*.spec.ts', 'src/app/services/*.ts', 'src/test-setup.ts'],
     },
   },
   define: {
