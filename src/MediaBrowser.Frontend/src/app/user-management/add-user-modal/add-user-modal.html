@@ -45,14 +45,18 @@
       </div>
 
       <div class="message-area">
-        <div class="error-message" *ngIf="errorMessage">
-          <i class="fa-solid fa-exclamation-triangle"></i>
-          {{errorMessage}}
-        </div>
-        <div class="success-message" *ngIf="successMessage">
-          <i class="fa-solid fa-check-circle"></i>
-          {{successMessage}}
-        </div>
+        @if (errorMessage) {
+          <div class="error-message">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            {{errorMessage}}
+          </div>
+        }
+        @if (successMessage) {
+          <div class="success-message">
+            <i class="fa-solid fa-check-circle"></i>
+            {{successMessage}}
+          </div>
+        }
       </div>
 
       <div class="modal-footer">
@@ -63,14 +67,18 @@
           type="submit" 
           class="btn btn-primary" 
           [disabled]="isSubmitting">
-          <span *ngIf="isSubmitting">
-            <i class="fa-solid fa-spinner fa-spin"></i>
-            Adding...
-          </span>
-          <span *ngIf="!isSubmitting">
-            <i class="fa-solid fa-user-plus"></i>
-            Add User
-          </span>
+          @if (isSubmitting) {
+            <span>
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Adding...
+            </span>
+          }
+          @if (!isSubmitting) {
+            <span>
+              <i class="fa-solid fa-user-plus"></i>
+              Add User
+            </span>
+          }
         </button>
       </div>
     </form>

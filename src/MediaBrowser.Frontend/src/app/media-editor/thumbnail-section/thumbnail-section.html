@@ -1,12 +1,13 @@
-<div *ngIf="mediaData && !mediaData.mime.startsWith('image/')"
-  class="form-section thumbnail-section">
+@if (mediaData && !mediaData.mime.startsWith('image/')) {
+<div class="form-section thumbnail-section">
   <h3>Thumbnail Creation</h3>
   <p>Select one or more thumbnails and navigate through the thumbnails to select the final thumbnail:</p>
   <br/>
   <div class="thumbnail-container">
 
     <div class="thumbnail-selection-container">
-      <div class="video-container" *ngIf="mediaData.mime.startsWith('video/')">
+      @if (mediaData.mime.startsWith('video/')) {
+        <div class="video-container">
         <video
           (loadedmetadata)="onVideoMetadataLoaded()"
           (keydown.enter)="setThumbnailPreview()"
@@ -19,15 +20,16 @@
           Your browser does not support the video tag.
         </video>
         <div class="video-overlay"></div>
-      </div>
+        </div>
+      }
 
-      <div
+      @if (mediaData.mime.startsWith('audio/')) {
+        <div
         (click)="openFileBrowser()"
         (dragleave)="onDragLeave($event)"
         (dragover)="onDragOver($event)"
         (drop)="onDrop($event)"
         [class.drag-over]="isDragOver"
-        *ngIf="mediaData.mime.startsWith('audio/')" 
         class="thumbnail-drop">
         <div class="drop-content">
           <i class="fa-solid fa-cloud-upload-alt drop-icon"></i>
@@ -40,7 +42,8 @@
           accept="image/*"
           style="display: none"
           type="file" />
-      </div>
+        </div>
+      }
     </div>
 
     <div class="thumbnail-preview-container">
@@ -66,23 +69,34 @@
   </div>
 
   <div class="thumbnail-controls">
-    <button
-      (click)="setThumbnailPreview()"
-      [disabled]="isCreatingThumbnail || !mediaData"
-      *ngIf="showSetThumbnail"
-      class="thumbnail-button">
-      <i class="fa-solid fa-eye" *ngIf="!isCreatingThumbnail"></i>
-      <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
-      {{ isCreatingThumbnail ? 'Updating Preview...' : 'Set Preview Image' }}
-    </button>
-    <button
-      (click)="saveThumbnail()"
-      [disabled]="isCreatingThumbnail || !selectedThumbnail"
-      *ngIf="showSaveThumbnail"
-      class="thumbnail-button save-thumbnail-button">
-      <i class="fa-solid fa-camera" *ngIf="!isCreatingThumbnail"></i>
-      <i class="fa-solid fa-spinner fa-spin" *ngIf="isCreatingThumbnail"></i>
-      {{ isCreatingThumbnail ? 'Saving Thumbnail...' : 'Save Thumbnail' }}
-    </button>
+    @if (showSetThumbnail) {
+      <button
+        (click)="setThumbnailPreview()"
+        [disabled]="isCreatingThumbnail || !mediaData"
+        class="thumbnail-button">
+        @if (!isCreatingThumbnail) {
+          <i class="fa-solid fa-eye"></i>
+        }
+        @if (isCreatingThumbnail) {
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        }
+        {{ isCreatingThumbnail ? 'Updating Preview...' : 'Set Preview Image' }}
+      </button>
+    }
+    @if (showSaveThumbnail) {
+      <button
+        (click)="saveThumbnail()"
+        [disabled]="isCreatingThumbnail || !selectedThumbnail"
+        class="thumbnail-button save-thumbnail-button">
+        @if (!isCreatingThumbnail) {
+          <i class="fa-solid fa-camera"></i>
+        }
+        @if (isCreatingThumbnail) {
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        }
+        {{ isCreatingThumbnail ? 'Saving Thumbnail...' : 'Save Thumbnail' }}
+      </button>
+    }
   </div>
 </div>
+}

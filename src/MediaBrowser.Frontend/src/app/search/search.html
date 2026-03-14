@@ -36,10 +36,10 @@
         </button>
         
         <!-- Sort options modal -->
-        <div 
-          (click)="closeSortModal()" 
-          *ngIf="showSortModal" 
-          class="sort-modal">
+        @if (showSortModal) {
+          <div 
+            (click)="closeSortModal()" 
+            class="sort-modal">
           <div (click)="$event.stopPropagation()" class="sort-modal-content">
             <div class="sort-modal-header">
               <span>Sort by</span>
@@ -54,12 +54,15 @@
                   [class.selected]="option.value === sort"
                   class="sort-option">
                   <span class="sort-option-label">{{ option.label }}</span>
-                  <i class="fa-solid fa-check sort-option-check" *ngIf="option.value === sort"></i>
+                  @if (option.value === sort) {
+                    <i class="fa-solid fa-check sort-option-check"></i>
+                  }
                 </button>
               }
             </div>
           </div>
-        </div>
+          </div>
+        }
       </div>
       
       <button (click)="onSearch()" [disabled]="isLoading" class="search-button">

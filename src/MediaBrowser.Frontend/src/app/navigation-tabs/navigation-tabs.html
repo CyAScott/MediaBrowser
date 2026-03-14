@@ -1,117 +1,119 @@
-<nav class="navigation-tabs" *ngIf="usersService.isAuthenticated()">
-  <div class="tab-list">
-    <a 
-      [class.active]="isActiveRoute('/search')"
-      [queryParams]="{ sort: defaultSort }"
-      [routerLink]="['/search']"
-      class="tab-button">
-      <span class="tab-icon"><i class="fa fa-film"></i></span>
-    </a>
+@if (usersService.isAuthenticated()) {
+  <nav class="navigation-tabs">
+    <div class="tab-list">
+      <a 
+        [class.active]="isActiveRoute('/search')"
+        [queryParams]="{ sort: defaultSort }"
+        [routerLink]="['/search']"
+        class="tab-button">
+        <span class="tab-icon"><i class="fa fa-film"></i></span>
+      </a>
 
-    <!-- Desktop metadata links -->
-    <a 
-      [class.active]="isActiveRoute('/meta/cast')"
-      [routerLink]="['/meta/cast']"
-      class="tab-button desktop-only"
-      title="Cast">
-      <span class="tab-icon"><i class="fa fa-user"></i></span>
-    </a>
-    <a 
-      [class.active]="isActiveRoute('/meta/directors')"
-      [routerLink]="['/meta/directors']"
-      class="tab-button desktop-only"
-      title="Directors">
-      <span class="tab-icon"><i class="fa fa-video-camera"></i></span>
-    </a>
-    <a 
-      [class.active]="isActiveRoute('/meta/genres')"
-      [routerLink]="['/meta/genres']"
-      class="tab-button desktop-only"
-      title="Genres">
-      <span class="tab-icon"><i class="fa fa-tag"></i></span>
-    </a>
-    <a 
-      [class.active]="isActiveRoute('/meta/producers')"
-      [routerLink]="['/meta/producers']"
-      class="tab-button desktop-only"
-      title="Producers">
-      <span class="tab-icon"><i class="fa-solid fa-building"></i></span>
-    </a>
-    <a 
-      [class.active]="isActiveRoute('/meta/writers')"
-      [routerLink]="['/meta/writers']"
-      class="tab-button desktop-only"
-      title="Writers">
-      <span class="tab-icon"><i class="fa fa-pencil"></i></span>
-    </a>
+      <!-- Desktop metadata links -->
+      <a 
+        [class.active]="isActiveRoute('/meta/cast')"
+        [routerLink]="['/meta/cast']"
+        class="tab-button desktop-only"
+        title="Cast">
+        <span class="tab-icon"><i class="fa fa-user"></i></span>
+      </a>
+      <a 
+        [class.active]="isActiveRoute('/meta/directors')"
+        [routerLink]="['/meta/directors']"
+        class="tab-button desktop-only"
+        title="Directors">
+        <span class="tab-icon"><i class="fa fa-video-camera"></i></span>
+      </a>
+      <a 
+        [class.active]="isActiveRoute('/meta/genres')"
+        [routerLink]="['/meta/genres']"
+        class="tab-button desktop-only"
+        title="Genres">
+        <span class="tab-icon"><i class="fa fa-tag"></i></span>
+      </a>
+      <a 
+        [class.active]="isActiveRoute('/meta/producers')"
+        [routerLink]="['/meta/producers']"
+        class="tab-button desktop-only"
+        title="Producers">
+        <span class="tab-icon"><i class="fa-solid fa-building"></i></span>
+      </a>
+      <a 
+        [class.active]="isActiveRoute('/meta/writers')"
+        [routerLink]="['/meta/writers']"
+        class="tab-button desktop-only"
+        title="Writers">
+        <span class="tab-icon"><i class="fa fa-pencil"></i></span>
+      </a>
 
-    <!-- Mobile dropdown container -->
-    <div class="dropdown-container mobile-only">
-      <button 
-        (click)="toggleDropdown()"
-        [class.active]="isMetaRouteActive()"
-        class="tab-button dropdown-toggle"
-        title="Browse metadata">
-        <span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span>
-        <span class="dropdown-arrow"><i class="fa fa-chevron-down"></i></span>
-      </button>
-      <div class="dropdown-menu" [class.show]="isDropdownOpen">
-        <a 
-          (click)="navigateToMeta('cast')"
-          [routerLink]="['/meta/cast']"
-          class="dropdown-item"
-          title="Cast">
-          <i class="fa fa-user"></i> Cast
-        </a>
-        <a 
-          (click)="navigateToMeta('directors')"
-          [routerLink]="['/meta/directors']"
-          class="dropdown-item"
-          title="Directors">
-          <i class="fa fa-video-camera"></i> Directors
-        </a>
-        <a 
-          (click)="navigateToMeta('genres')"
-          [routerLink]="['/meta/genres']"
-          class="dropdown-item"
-          title="Genres">
-          <i class="fa fa-tag"></i> Genres
-        </a>
-        <a 
-          (click)="navigateToMeta('producers')"
-          [routerLink]="['/meta/producers']"
-          class="dropdown-item"
-          title="Producers">
-          <i class="fa-solid fa-building"></i> Producers
-        </a>
-        <a 
-          (click)="navigateToMeta('writers')"
-          [routerLink]="['/meta/writers']"
-          class="dropdown-item"
-          title="Writers">
-          <i class="fa fa-pencil"></i> Writers
-        </a>
+      <!-- Mobile dropdown container -->
+      <div class="dropdown-container mobile-only">
+        <button 
+          (click)="toggleDropdown()"
+          [class.active]="isMetaRouteActive()"
+          class="tab-button dropdown-toggle"
+          title="Browse metadata">
+          <span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span>
+          <span class="dropdown-arrow"><i class="fa fa-chevron-down"></i></span>
+        </button>
+        <div class="dropdown-menu" [class.show]="isDropdownOpen">
+          <a 
+            (click)="navigateToMeta('cast')"
+            [routerLink]="['/meta/cast']"
+            class="dropdown-item"
+            title="Cast">
+            <i class="fa fa-user"></i> Cast
+          </a>
+          <a 
+            (click)="navigateToMeta('directors')"
+            [routerLink]="['/meta/directors']"
+            class="dropdown-item"
+            title="Directors">
+            <i class="fa fa-video-camera"></i> Directors
+          </a>
+          <a 
+            (click)="navigateToMeta('genres')"
+            [routerLink]="['/meta/genres']"
+            class="dropdown-item"
+            title="Genres">
+            <i class="fa fa-tag"></i> Genres
+          </a>
+          <a 
+            (click)="navigateToMeta('producers')"
+            [routerLink]="['/meta/producers']"
+            class="dropdown-item"
+            title="Producers">
+            <i class="fa-solid fa-building"></i> Producers
+          </a>
+          <a 
+            (click)="navigateToMeta('writers')"
+            [routerLink]="['/meta/writers']"
+            class="dropdown-item"
+            title="Writers">
+            <i class="fa fa-pencil"></i> Writers
+          </a>
+        </div>
       </div>
+      <a 
+        [class.active]="isActiveRoute('/import')"
+        [routerLink]="['/import']"
+        class="tab-button">
+        <span class="tab-icon"><i class="fa fa-upload"></i></span>
+      </a>
     </div>
-    <a 
-      [class.active]="isActiveRoute('/import')"
-      [routerLink]="['/import']"
-      class="tab-button">
-      <span class="tab-icon"><i class="fa fa-upload"></i></span>
-    </a>
-  </div>
-  <div class="tab-footer">
-    <a 
-      [routerLink]="['/user-management']"
-      class="tab-button"
-      title="User Management">
-      <span class="tab-icon"><i class="fa-solid fa-users-gear"></i></span>
-    </a>
-    <a 
-      (click)="logout()"
-      class="tab-button logout-button"
-      title="Logout">
-      <span class="tab-icon"><i class="fa fa-sign-out"></i></span>
-    </a>
-  </div>
-</nav>
+    <div class="tab-footer">
+      <a 
+        [routerLink]="['/user-management']"
+        class="tab-button"
+        title="User Management">
+        <span class="tab-icon"><i class="fa-solid fa-users-gear"></i></span>
+      </a>
+      <a 
+        (click)="logout()"
+        class="tab-button logout-button"
+        title="Logout">
+        <span class="tab-icon"><i class="fa fa-sign-out"></i></span>
+      </a>
+    </div>
+  </nav>
+}
