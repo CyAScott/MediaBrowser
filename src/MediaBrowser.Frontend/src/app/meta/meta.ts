@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, inject, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { MediaService } from '../services';
+import { MediaService, MediaTagType } from '../services';
 import { SearchComponent } from '../search/search';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SpinnerComponent } from '../spinner/spinner';
@@ -33,6 +33,13 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly SCROLL_KEY = '-scroll-position';
   private scrollListener?: (event: Event) => void;
   private routeSubscription?: Subscription;
+  private readonly routePrefixMap: Record<MediaTagType, string> = {
+    cast: 'cast',
+    directors: 'director',
+    genres: 'genre',
+    producers: 'producer',
+    writers: 'writer'
+  };
 
   async ngOnInit(): Promise<void> {
     this.routeSubscription = this.route.paramMap.subscribe(async (params) => {
@@ -104,27 +111,10 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
       let routePreFix = '';
       let results: string[] = [];
 
-      switch (this.type) {
-        case 'cast':
-          results = await firstValueFrom(this.mediaService.getAllCast());
-          routePreFix = 'cast';
-          break;
-        case 'directors':
-          results = await firstValueFrom(this.mediaService.getAllDirectors());
-          routePreFix = 'director';
-          break;
-        case 'genres':
-          results = await firstValueFrom(this.mediaService.getAllGenres());
-          routePreFix = 'genre';
-          break;
-        case 'producers':
-          results = await firstValueFrom(this.mediaService.getAllProducers());
-          routePreFix = 'producer';
-          break;
-        case 'writers':
-          results = await firstValueFrom(this.mediaService.getAllWriters());
-          routePreFix = 'writer';
-          break;
+      if (this.type in this.routePrefixMap) {
+        const tagType = this.type as MediaTagType;
+        results = await firstValueFrom(this.mediaService.getAllTags(tagType));
+        routePreFix = this.routePrefixMap[tagType];
       }
 
       this.metaMembers = results.map(name => ({

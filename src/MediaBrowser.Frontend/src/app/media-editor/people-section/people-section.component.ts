@@ -61,11 +61,11 @@ export class PeopleSectionComponent implements OnInit {
       PeopleSectionComponent.allPeople = JSON.parse(cachedPeopleValue);
     } else {
       PeopleSectionComponent.allPeople = {
-        cast: await firstValueFrom(this.mediaService.getAllCast()),
-        directors: await firstValueFrom(this.mediaService.getAllDirectors()),
-        genres: await firstValueFrom(this.mediaService.getAllGenres()),
-        producers: await firstValueFrom(this.mediaService.getAllProducers()),
-        writers: await firstValueFrom(this.mediaService.getAllWriters()),
+        cast: await firstValueFrom(this.mediaService.getAllTags('cast')),
+        directors: await firstValueFrom(this.mediaService.getAllTags('directors')),
+        genres: await firstValueFrom(this.mediaService.getAllTags('genres')),
+        producers: await firstValueFrom(this.mediaService.getAllTags('producers')),
+        writers: await firstValueFrom(this.mediaService.getAllTags('writers')),
       };
       localStorage.setItem(PeopleSectionComponent.CACHE_KEY, JSON.stringify(PeopleSectionComponent.allPeople));
     }

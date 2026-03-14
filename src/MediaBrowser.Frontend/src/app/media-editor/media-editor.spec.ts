@@ -51,11 +51,7 @@ describe('MediaEditorComponent', () => {
 
   let mediaServiceMock: {
     get: ReturnType<typeof vi.fn>;
-    getAllCast: ReturnType<typeof vi.fn>;
-    getAllDirectors: ReturnType<typeof vi.fn>;
-    getAllGenres: ReturnType<typeof vi.fn>;
-    getAllProducers: ReturnType<typeof vi.fn>;
-    getAllWriters: ReturnType<typeof vi.fn>;
+    getAllTags: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
     updateThumbnail: ReturnType<typeof vi.fn>;
   };
@@ -75,11 +71,7 @@ describe('MediaEditorComponent', () => {
 
     mediaServiceMock = {
       get: vi.fn().mockReturnValue(of(createMedia())),
-      getAllCast: vi.fn().mockReturnValue(of([])),
-      getAllDirectors: vi.fn().mockReturnValue(of([])),
-      getAllGenres: vi.fn().mockReturnValue(of([])),
-      getAllProducers: vi.fn().mockReturnValue(of([])),
-      getAllWriters: vi.fn().mockReturnValue(of([])),
+      getAllTags: vi.fn().mockReturnValue(of([])),
       update: vi.fn().mockReturnValue(of(createMedia())),
       updateThumbnail: vi.fn().mockReturnValue(of(void 0))
     };

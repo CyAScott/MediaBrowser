@@ -68,6 +68,8 @@ export interface UpdateThumbnailRequest {
   at: number;
 }
 
+export type MediaTagType = 'cast' | 'directors' | 'genres' | 'producers' | 'writers';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -87,24 +89,8 @@ export class MediaService {
     return this.apiService.get<SearchResponse>('/media/search', request);
   }
 
-  getAllCast(): Observable<string[]> {
-    return this.apiService.get<string[]>(`/media/cast`);
-  }
-
-  getAllDirectors(): Observable<string[]> {
-    return this.apiService.get<string[]>(`/media/directors`);
-  }
-
-  getAllGenres(): Observable<string[]> {
-    return this.apiService.get<string[]>('/media/genres');
-  }
-
-  getAllProducers(): Observable<string[]> {
-    return this.apiService.get<string[]>('/media/producers');
-  }
-
-  getAllWriters(): Observable<string[]> {
-    return this.apiService.get<string[]>('/media/writers');
+  getAllTags(tagType: MediaTagType): Observable<string[]> {
+    return this.apiService.get<string[]>(`/media/${tagType}`);
   }
 
   updateFanartThumbnail(id: string, request: UpdateThumbnailRequest): Observable<void> {

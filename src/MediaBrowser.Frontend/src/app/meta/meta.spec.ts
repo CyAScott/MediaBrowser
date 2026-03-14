@@ -7,13 +7,11 @@ import { SearchComponent } from '../search/search';
 import { MediaService } from '../services';
 import { MetaComponent } from './meta';
 
+type MetaTagType = 'cast' | 'directors' | 'genres' | 'producers' | 'writers';
+
 interface MetaMocks {
   mediaService: {
-    getAllCast: ReturnType<typeof vi.fn>;
-    getAllDirectors: ReturnType<typeof vi.fn>;
-    getAllGenres: ReturnType<typeof vi.fn>;
-    getAllProducers: ReturnType<typeof vi.fn>;
-    getAllWriters: ReturnType<typeof vi.fn>;
+    getAllTags: ReturnType<typeof vi.fn>;
   };
   routeParamMap$: BehaviorSubject<ParamMap>;
 }
@@ -26,13 +24,16 @@ async function createComponent(overrides?: {
   writers?: string[];
 }): Promise<{ component: MetaComponent; mocks: MetaMocks }> {
   const routeParamMap$ = new BehaviorSubject(convertToParamMap({ type: '' }));
+  const valuesByType: Record<MetaTagType, string[]> = {
+    cast: overrides?.cast ?? ['Cast One', 'Cast Two'],
+    directors: overrides?.directors ?? ['Director One'],
+    genres: overrides?.genres ?? ['Genre One'],
+    producers: overrides?.producers ?? ['Producer One'],
+    writers: overrides?.writers ?? ['Writer One']
+  };
   const mocks: MetaMocks = {
     mediaService: {
-      getAllCast: vi.fn().mockReturnValue(of(overrides?.cast ?? ['Cast One', 'Cast Two'])),
-      getAllDirectors: vi.fn().mockReturnValue(of(overrides?.directors ?? ['Director One'])),
-      getAllGenres: vi.fn().mockReturnValue(of(overrides?.genres ?? ['Genre One'])),
-      getAllProducers: vi.fn().mockReturnValue(of(overrides?.producers ?? ['Producer One'])),
-      getAllWriters: vi.fn().mockReturnValue(of(overrides?.writers ?? ['Writer One']))
+      getAllTags: vi.fn((tagType: MetaTagType) => of(valuesByType[tagType]))
     },
     routeParamMap$
   };
@@ -71,7 +72,8 @@ describe('MetaComponent', () => {
 
     expect(component.type).toBe('cast');
     expect((component as any).scrollPosition).toBe(135);
-    expect(mocks.mediaService.getAllCast).toHaveBeenCalledTimes(1);
+    expect(mocks.mediaService.getAllTags).toHaveBeenCalledTimes(1);
+    expect(mocks.mediaService.getAllTags).toHaveBeenCalledWith('cast');
     expect(component.metaMembers).toEqual([
       {
         name: 'Keanu Reeves',
@@ -161,17 +163,17 @@ describe('MetaComponent', () => {
     });
 
     const cases = [
-      { type: 'directors', expectedPrefix: 'director', serviceSpy: mocks.mediaService.getAllDirectors },
-      { type: 'genres', expectedPrefix: 'genre', serviceSpy: mocks.mediaService.getAllGenres },
-      { type: 'producers', expectedPrefix: 'producer', serviceSpy: mocks.mediaService.getAllProducers },
-      { type: 'writers', expectedPrefix: 'writer', serviceSpy: mocks.mediaService.getAllWriters }
+      { type: 'directors', expectedPrefix: 'director' },
+      { type: 'genres', expectedPrefix: 'genre' },
+      { type: 'producers', expectedPrefix: 'producer' },
+      { type: 'writers', expectedPrefix: 'writer' }
     ] as const;
 
     for (const testCase of cases) {
       component.type = testCase.type;
       await component.loadMetaInfo();
 
-      expect(testCase.serviceSpy).toHaveBeenCalled();
+      expect(mocks.mediaService.getAllTags).toHaveBeenCalledWith(testCase.type);
       expect(component.metaMembers[0].imageUrl).toContain(`/api/media/${testCase.expectedPrefix}/`);
       expect(component.metaMembers[0].queryParams).toEqual({
         [testCase.type]: [component.metaMembers[0].name],
@@ -219,7 +221,7 @@ describe('MetaComponent', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const detectChangesSpy = vi.spyOn((component as any).cdr, 'detectChanges');
 
-    mocks.mediaService.getAllCast.mockReturnValueOnce(throwError(() => new Error('network failed')));
+    mocks.mediaService.getAllTags.mockReturnValueOnce(throwError(() => new Error('network failed')));
     component.type = 'cast';
 
     await component.loadMetaInfo();

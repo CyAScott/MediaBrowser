@@ -22,11 +22,7 @@ describe('PeopleSectionComponent', () => {
   };
 
   let mediaServiceMock: {
-    getAllCast: ReturnType<typeof vi.fn>;
-    getAllDirectors: ReturnType<typeof vi.fn>;
-    getAllGenres: ReturnType<typeof vi.fn>;
-    getAllProducers: ReturnType<typeof vi.fn>;
-    getAllWriters: ReturnType<typeof vi.fn>;
+    getAllTags: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -40,11 +36,7 @@ describe('PeopleSectionComponent', () => {
     };
 
     mediaServiceMock = {
-      getAllCast: vi.fn().mockReturnValue(of(loadedPeople.cast)),
-      getAllDirectors: vi.fn().mockReturnValue(of(loadedPeople.directors)),
-      getAllGenres: vi.fn().mockReturnValue(of(loadedPeople.genres)),
-      getAllProducers: vi.fn().mockReturnValue(of(loadedPeople.producers)),
-      getAllWriters: vi.fn().mockReturnValue(of(loadedPeople.writers))
+      getAllTags: vi.fn((tagType: keyof PeopleData) => of(loadedPeople[tagType]))
     };
 
     await TestBed.configureTestingModule({
@@ -65,11 +57,7 @@ describe('PeopleSectionComponent', () => {
     await fixture.componentInstance.ngOnInit();
 
     expect(PeopleSectionComponent.allPeople).toEqual(loadedPeople);
-    expect(mediaServiceMock.getAllCast).not.toHaveBeenCalled();
-    expect(mediaServiceMock.getAllDirectors).not.toHaveBeenCalled();
-    expect(mediaServiceMock.getAllGenres).not.toHaveBeenCalled();
-    expect(mediaServiceMock.getAllProducers).not.toHaveBeenCalled();
-    expect(mediaServiceMock.getAllWriters).not.toHaveBeenCalled();
+    expect(mediaServiceMock.getAllTags).not.toHaveBeenCalled();
   });
 
   it('fetches people lists and caches them when cache is empty', async () => {
@@ -78,11 +66,12 @@ describe('PeopleSectionComponent', () => {
     const fixture = TestBed.createComponent(PeopleSectionComponent);
     await fixture.componentInstance.ngOnInit();
 
-    expect(mediaServiceMock.getAllCast).toHaveBeenCalledTimes(1);
-    expect(mediaServiceMock.getAllDirectors).toHaveBeenCalledTimes(1);
-    expect(mediaServiceMock.getAllGenres).toHaveBeenCalledTimes(1);
-    expect(mediaServiceMock.getAllProducers).toHaveBeenCalledTimes(1);
-    expect(mediaServiceMock.getAllWriters).toHaveBeenCalledTimes(1);
+    expect(mediaServiceMock.getAllTags).toHaveBeenCalledTimes(5);
+    expect(mediaServiceMock.getAllTags).toHaveBeenNthCalledWith(1, 'cast');
+    expect(mediaServiceMock.getAllTags).toHaveBeenNthCalledWith(2, 'directors');
+    expect(mediaServiceMock.getAllTags).toHaveBeenNthCalledWith(3, 'genres');
+    expect(mediaServiceMock.getAllTags).toHaveBeenNthCalledWith(4, 'producers');
+    expect(mediaServiceMock.getAllTags).toHaveBeenNthCalledWith(5, 'writers');
     expect(PeopleSectionComponent.allPeople).toEqual(loadedPeople);
     expect(setItemSpy).toHaveBeenCalledWith(PeopleSectionComponent.CACHE_KEY, JSON.stringify(loadedPeople));
 
