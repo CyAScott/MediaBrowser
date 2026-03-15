@@ -250,6 +250,42 @@ describe('ThumbnailSectionComponent', () => {
     previewSpy.mockRestore();
   });
 
+  it('does not add duplicate thumbnail when timestamp already exists', () => {
+    const fixture = TestBed.createComponent(ThumbnailSectionComponent);
+    const component = fixture.componentInstance;
+
+    component.mediaData = { mime: 'video/mp4', url: 'https://video.test/file.mp4' };
+    const setPreviewSpy = vi.spyOn(component.setPreview, 'emit');
+    const thumbnailEmitSpy = vi.spyOn(component.thumbnailChange, 'emit');
+
+    const existingThumbnail = {
+      thumbnail: 22,
+      thumbnailPreviewUrl: 'data:image/jpeg;base64,existing-frame',
+      selectedImageFile: null
+    };
+
+    component.thumbnails = [existingThumbnail];
+
+    const video = document.createElement('video');
+    video.currentTime = 22;
+    (video as HTMLVideoElement).focus = vi.fn();
+    component.videoPlayer = new ElementRef(video);
+
+    const previewSpy = vi.spyOn(component as any, 'generateThumbnailPreview');
+
+    component.setThumbnailPreview();
+
+    expect(component.thumbnails).toHaveLength(1);
+    expect(component.selectedThumbnailIndex).toBe(0);
+    expect(component.selectedThumbnail).toEqual(existingThumbnail);
+    expect(previewSpy).not.toHaveBeenCalled();
+    expect(thumbnailEmitSpy).toHaveBeenCalledWith(existingThumbnail);
+    expect(setPreviewSpy).toHaveBeenCalledTimes(1);
+    expect(video.focus).toHaveBeenCalledTimes(1);
+
+    previewSpy.mockRestore();
+  });
+
   it('returns early when creating thumbnail or media data is missing', () => {
     const fixture = TestBed.createComponent(ThumbnailSectionComponent);
     const component = fixture.componentInstance;
