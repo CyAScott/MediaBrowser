@@ -1,3 +1,4 @@
+global using System.Data.Common;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Text;
 global using System.Text.Json.Nodes;
@@ -6,4 +7,6 @@ global using MediaBrowser.Media.Import;
 global using MediaBrowser.Users;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.Data.Sqlite;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Diagnostics;

@@ -9,7 +9,8 @@ export interface SearchMediaRequest {
   genres?: string[];
   keywords?: string;
   producers?: string[];
-  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating';
+  seed?: number;
+  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' | 'random';
   skip?: number;
   take?: number;
   writers?: string[];
@@ -85,12 +86,20 @@ export class MediaService {
     return this.apiService.put<MediaReadModel>(`/media/${id}`, request);
   }
 
+  private readonly seed: number = (Math.random() * 0x100000000 | 0);
   search(request: SearchMediaRequest): Observable<SearchResponse> {    
+    request.seed ??= this.seed;
     return this.apiService.get<SearchResponse>('/media/search', request);
   }
 
   getAllTags(tagType: MediaTagType): Observable<string[]> {
     return this.apiService.get<string[]>(`/media/${tagType}`);
+  }
+
+  setThumbnailForTag(tagType: MediaTagType, name: string, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('thumbnail', file, file.name);
+    return this.apiService.post<void>(`/media/${tagType}/${name}/thumbnail`, formData);
   }
 
   updateFanartThumbnail(id: string, request: UpdateThumbnailRequest): Observable<void> {

@@ -2,9 +2,13 @@ namespace MediaBrowser.Media;
 
 public class SearchRequestExtensionsUnitTests
 {
-    IQueryable<MediaEntity> GetSampleMediaEntities() => new List<MediaEntity>
+    /* NOTE: sorting and keyword filtering logic is tested in the SearchRequestExtensionsIntegrationTests,
+     * EF functions and are not unit testable.
+     */
+    IEnumerable<MediaEntity> GetSampleMediaEntities()
     {
-        new()
+        var mediaId1 = Guid.NewGuid();
+        yield return new()
         {
             Id = Guid.NewGuid(),
             Path = "/a",
@@ -24,21 +28,66 @@ public class SearchRequestExtensionsUnitTests
             MtimeMs = 2,
             CreatedOn = new DateTime(2020, 1, 1),
             UpdatedOn = new DateTime(2020, 1, 2),
-            Ffprobe = null!,
-            Cast = new List<CastEntity> { new()
-                { Id = 1, MediaId = Guid.NewGuid(), Name = "John", Media = null! } },
-            Directors = new List<DirectorEntity> { new()
-                { Id = 1, MediaId = Guid.NewGuid(), Name = "Jane", Media = null! } },
-            Genres = new List<GenreEntity> { new()
-                { Id = 1, MediaId = Guid.NewGuid(), Name = "Action", Media = null! } },
-            Producers = new List<ProducerEntity> { new()
-                { Id = 1, MediaId = Guid.NewGuid(), Name = "Producer1", Media = null! } },
-            Writers = new List<WriterEntity> { new()
-                { Id = 1, MediaId = Guid.NewGuid(), Name = "Writer1", Media = null! } }
-        },
-        new()
+            Ffprobe = new()
+            {
+                Streams = [],
+                Format = null
+            },
+            Cast = new List<CastEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId1,
+                    Name = "John",
+                    Media = null!
+                }
+            },
+            Directors = new List<DirectorEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId1,
+                    Name = "Jane",
+                    Media = null!
+                }
+            },
+            Genres = new List<GenreEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId1,
+                    Name = "Action",
+                    Media = null!
+                }
+            },
+            Producers = new List<ProducerEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId1,
+                    Name = "Producer1",
+                    Media = null!
+                }
+            },
+            Writers = new List<WriterEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId1,
+                    Name = "Writer1",
+                    Media = null!
+                }
+            }
+        };
+        var mediaId2 = Guid.NewGuid();
+        yield return new()
         {
-            Id = Guid.NewGuid(),
+            Id = mediaId2,
             Path = "/b",
             Title = "B",
             OriginalTitle = "OrigB",
@@ -56,106 +105,235 @@ public class SearchRequestExtensionsUnitTests
             MtimeMs = 4,
             CreatedOn = new DateTime(2021, 1, 1),
             UpdatedOn = new DateTime(2021, 1, 2),
-            Ffprobe = null!,
-            Cast = new List<CastEntity> { new()
-                { Id = 2, MediaId = Guid.NewGuid(), Name = "Alice", Media = null! } },
-            Directors = new List<DirectorEntity> { new()
-                { Id = 2, MediaId = Guid.NewGuid(), Name = "Bob", Media = null! } },
-            Genres = new List<GenreEntity> { new()
-                { Id = 2, MediaId = Guid.NewGuid(), Name = "Drama", Media = null! } },
-            Producers = new List<ProducerEntity> { new()
-                { Id = 2, MediaId = Guid.NewGuid(), Name = "Producer2", Media = null! } },
-            Writers = new List<WriterEntity> { new()
-                { Id = 2, MediaId = Guid.NewGuid(), Name = "Writer2", Media = null! } }
+            Ffprobe = new()
+            {
+                Streams = [],
+                Format = null
+            },
+            Cast = new List<CastEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId2,
+                    Name = "Alice",
+                    Media = null!
+                }
+            },
+            Directors = new List<DirectorEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId2,
+                    Name = "Bob",
+                    Media = null!
+                }
+            },
+            Genres = new List<GenreEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId2,
+                    Name = "Drama",
+                    Media = null!
+                }
+            },
+            Producers = new List<ProducerEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId2,
+                    Name = "Producer2",
+                    Media = null!
+                }
+            },
+            Writers = new List<WriterEntity>
+            {
+                new()
+                {
+                    Id = 0,
+                    MediaId = mediaId2,
+                    Name = "Writer2",
+                    Media = null!
+                }
+            }
+        };
+    }
+
+    [Test(Description = "The search features should work with every SQL DB type."),
+     TestCase(DbType.MySql),
+     TestCase(DbType.Postgres),
+     TestCase(DbType.Sqlite),
+     TestCase(DbType.SqlServer)]
+    public async Task Test(DbType dbType)
+    {
+        await using var factory = new MediaBrowserWebApplicationFactory(dbType);
+
+        await factory.StartServerAsync();
+
+        await InsertTestData(factory);
+
+        using var scope = factory.Services.CreateScope();
+        await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+
+        await ApplySortAndPaginationSkipAndTake(db);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.Title, false);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.Title, true);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.CreatedOn, false);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.CreatedOn, true);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.Duration, false);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.Duration, true);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.UserStarRating, false);
+        await ApplySortAndPaginationSkipAndTake(db, Sort.UserStarRating, true);
+        for (var i = 0; i < 10; i++)
+        {
+            await ApplySortAndPaginationSkipAndTakeRandom(db, seed: 123 * i + 1);
         }
-    }.AsQueryable();
-
-    [Test]
-    public void ApplySortAndPaginationSortsByTitleAscending()
-    {
-        var request = new SearchRequest { Sort = Sort.Title, Descending = false, Skip = 0, Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.ApplySortAndPagination(query).ToList();
-        result[0].Title.ShouldBe("A");
-        result[1].Title.ShouldBe("B");
+        await CreateQueryFiltersByCast(db.MediaJoined);
+        await CreateQueryFiltersByDirectors(db.MediaJoined);
+        await CreateQueryFiltersByGenres(db.MediaJoined);
+        await CreateQueryFiltersByProducers(db.MediaJoined);
+        await CreateQueryFiltersByWriters(db.MediaJoined);
+        await CreateQueryNoFiltersReturnsAll(db.MediaJoined);
     }
 
-    [Test]
-    public void ApplySortAndPaginationSortsByTitleDescending()
+    async Task InsertTestData(MediaBrowserWebApplicationFactory factory)
     {
-        var request = new SearchRequest { Sort = Sort.Title, Descending = true, Skip = 0, Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.ApplySortAndPagination(query).ToList();
-        result[0].Title.ShouldBe("B");
-        result[1].Title.ShouldBe("A");
+        using var scope = factory.Services.CreateScope();
+        await using var db = scope.ServiceProvider.GetRequiredService<MediaDbContext>();
+        await db.Media.AddRangeAsync(GetSampleMediaEntities());
+        await db.SaveChangesAsync();
     }
 
-    [Test]
-    public void ApplySortAndPaginationSkipAndTake()
+    async Task ApplySortAndPaginationSkipAndTake(MediaDbContext db)
     {
         var request = new SearchRequest { Sort = Sort.Title, Descending = false, Skip = 1, Take = 1 };
-        var query = GetSampleMediaEntities();
-        var result = request.ApplySortAndPagination(query).ToList();
+        var result = await (await request.ApplySortAndPagination(db, db.MediaJoined)).ToListAsync();
         result.Count.ShouldBe(1);
         result[0].Title.ShouldBe("B");
     }
 
-    [Test]
-    public void CreateQueryFiltersByCast()
+    async Task ApplySortAndPaginationSkipAndTake(MediaDbContext db, Sort sort, bool descending)
+    {
+        var request = new SearchRequest { Sort = sort, Descending = descending, Skip = 0, Take = null };
+        var result = await (await request.ApplySortAndPagination(db, db.MediaJoined)).ToListAsync();
+        result.Count.ShouldBe(2);
+
+        switch (sort)
+        {
+            case Sort.Title:
+                if (descending)
+                {
+                    result[0].Title.ShouldBe("B");
+                    result[1].Title.ShouldBe("A");
+                }
+                else
+                {
+                    result[0].Title.ShouldBe("A");
+                    result[1].Title.ShouldBe("B");
+                }
+                break;
+            case Sort.CreatedOn:
+                if (descending)
+                {
+                    result[0].CreatedOn.ShouldNotBeNull().Year.ShouldBe(2021);
+                    result[1].CreatedOn.ShouldNotBeNull().Year.ShouldBe(2020);
+                }
+                else
+                {
+                    result[0].CreatedOn.ShouldNotBeNull().Year.ShouldBe(2020);
+                    result[1].CreatedOn.ShouldNotBeNull().Year.ShouldBe(2021);
+                }
+                break;
+            case Sort.Duration:
+                if (descending)
+                {
+                    result[0].Duration.ShouldNotBeNull().ShouldBe(20);
+                    result[1].Duration.ShouldNotBeNull().ShouldBe(10);
+                }
+                else
+                {
+                    result[0].Duration.ShouldNotBeNull().ShouldBe(10);
+                    result[1].Duration.ShouldNotBeNull().ShouldBe(20);
+                }
+                break;
+            case Sort.UserStarRating:
+                if (descending)
+                {
+                    result[0].UserStarRating.ShouldNotBeNull().ShouldBe(5);
+                    result[1].UserStarRating.ShouldNotBeNull().ShouldBe(3);
+                }
+                else
+                {
+                    result[0].UserStarRating.ShouldNotBeNull().ShouldBe(3);
+                    result[1].UserStarRating.ShouldNotBeNull().ShouldBe(5);
+                }
+                break;
+        }
+    }
+
+    async Task ApplySortAndPaginationSkipAndTakeRandom(MediaDbContext db, int seed)
+    {
+        // With a fixed seed, the random order should be consistent across multiple calls, even with different providers that implement the random sorting differently.
+        var ascendingRequest = new SearchRequest { Sort = Sort.Random, Descending = false, Seed = seed, Skip = 0, Take = null };
+        var ascendingResults = await (await ascendingRequest.ApplySortAndPagination(db, db.MediaJoined)).ToListAsync();
+        ascendingResults.Count.ShouldBe(2);
+
+        var descendingRequest = new SearchRequest { Sort = Sort.Random, Descending = true, Seed = seed, Skip = 0, Take = null };
+        var descendingResults = await (await descendingRequest.ApplySortAndPagination(db, db.MediaJoined)).ToListAsync();
+        descendingResults.Count.ShouldBe(2);
+
+        ascendingResults[0].Id.ShouldBe(descendingResults[1].Id);
+        ascendingResults[1].Id.ShouldBe(descendingResults[0].Id);
+    }
+
+    async Task CreateQueryFiltersByCast(IQueryable<MediaEntity> query)
     {
         var request = new SearchRequest { Cast = "John", Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.CreateQuery(query).ToList();
+        var result = await request.CreateQuery(query).ToListAsync();
         result.Count.ShouldBe(1);
         result[0].Title.ShouldBe("A");
     }
 
-    [Test]
-    public void CreateQueryFiltersByDirectors()
+    async Task CreateQueryFiltersByDirectors(IQueryable<MediaEntity> query)
     {
         var request = new SearchRequest { Directors = "Bob", Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.CreateQuery(query).ToList();
+        var result = await request.CreateQuery(query).ToListAsync();
         result.Count.ShouldBe(1);
         result[0].Title.ShouldBe("B");
     }
 
-    [Test]
-    public void CreateQueryFiltersByGenres()
+    async Task CreateQueryFiltersByGenres(IQueryable<MediaEntity> query)
     {
         var request = new SearchRequest { Genres = "Drama", Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.CreateQuery(query).ToList();
+        var result = await request.CreateQuery(query).ToListAsync();
         result.Count.ShouldBe(1);
         result[0].Title.ShouldBe("B");
     }
 
-    [Test]
-    public void CreateQueryFiltersByProducers()
+    async Task CreateQueryFiltersByProducers(IQueryable<MediaEntity> query)
     {
         var request = new SearchRequest { Producers = "Producer2", Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.CreateQuery(query).ToList();
+        var result = await request.CreateQuery(query).ToListAsync();
         result.Count.ShouldBe(1);
         result[0].Title.ShouldBe("B");
     }
 
-    [Test]
-    public void CreateQueryFiltersByWriters()
+    async Task CreateQueryFiltersByWriters(IQueryable<MediaEntity> query)
     {
         var request = new SearchRequest { Writers = "Writer1", Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.CreateQuery(query).ToList();
+        var result = await request.CreateQuery(query).ToListAsync();
         result.Count.ShouldBe(1);
         result[0].Title.ShouldBe("A");
     }
 
-    [Test]
-    public void CreateQueryNoFiltersReturnsAll()
+    async Task CreateQueryNoFiltersReturnsAll(IQueryable<MediaEntity> query)
     {
         var request = new SearchRequest { Take = 2 };
-        var query = GetSampleMediaEntities();
-        var result = request.CreateQuery(query).ToList();
+        var result = await request.CreateQuery(query).ToListAsync();
         result.Count.ShouldBe(2);
     }
 }

@@ -29,6 +29,7 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
   metaMembers: MetaMember[] = [];
   isLoading: boolean = false;
   type: string = '';
+  uploadingMembers = new Set<string>();
   private scrollPosition: number = 0;
   private readonly SCROLL_KEY = '-scroll-position';
   private scrollListener?: (event: Event) => void;
@@ -40,6 +41,15 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
     producers: 'producer',
     writers: 'writer'
   };
+
+  private isSupportedTagType(tagType: string): tagType is MediaTagType {
+    return tagType in this.routePrefixMap;
+  }
+
+  private getImageUrl(tagType: MediaTagType, name: string, cacheBust?: number): string {
+    const baseUrl = `/api/media/${this.routePrefixMap[tagType]}/${encodeURIComponent(name)}/thumbnail`;
+    return cacheBust ? `${baseUrl}?t=${cacheBust}` : baseUrl;
+  }
 
   async ngOnInit(): Promise<void> {
     this.routeSubscription = this.route.paramMap.subscribe(async (params) => {
@@ -108,18 +118,16 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
     
     try {
 
-      let routePreFix = '';
       let results: string[] = [];
 
-      if (this.type in this.routePrefixMap) {
+      if (this.isSupportedTagType(this.type)) {
         const tagType = this.type as MediaTagType;
         results = await firstValueFrom(this.mediaService.getAllTags(tagType));
-        routePreFix = this.routePrefixMap[tagType];
       }
 
       this.metaMembers = results.map(name => ({
         name,
-        imageUrl: `/api/media/${encodeURIComponent(routePreFix)}/${encodeURIComponent(name)}/thumbnail`,
+        imageUrl: this.getImageUrl(this.type as MediaTagType, name),
         queryParams: { [this.type]: [name], sort: SearchComponent.DEFAULT_SORT }
       }));
       
@@ -140,5 +148,38 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearPagePositionState(): void {
     SearchComponent.clearPagePositionState();
+  }
+
+  isUploading(name: string): boolean {
+    return this.uploadingMembers.has(name);
+  }
+
+  openThumbnailUpload(event: MouseEvent, input: HTMLInputElement): void {
+    event.preventDefault();
+    event.stopPropagation();
+    input.click();
+  }
+
+  async onThumbnailSelected(event: Event, metaMember: MetaMember): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file || !this.isSupportedTagType(this.type)) {
+      return;
+    }
+
+    const tagType = this.type;
+    this.uploadingMembers.add(metaMember.name);
+
+    try {
+      await firstValueFrom(this.mediaService.setThumbnailForTag(tagType, metaMember.name, file));
+      metaMember.imageUrl = this.getImageUrl(tagType, metaMember.name, Date.now());
+    } catch (error) {
+      console.error('Thumbnail upload error:', error);
+    } finally {
+      this.uploadingMembers.delete(metaMember.name);
+      input.value = '';
+      this.cdr.detectChanges();
+    }
   }
 }

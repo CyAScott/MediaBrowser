@@ -1,3 +1,5 @@
+using System.Data.Common;
+
 namespace MediaBrowser;
 
 public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer>
@@ -47,7 +49,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
         Directory.CreateDirectory(tempDirectory);
 
         var sqlLiteFile = Path.Combine(tempDirectory, $"media-browser-{TestContext.CurrentContext.Test.ID}.db");
-        var sqlLiteConnectionString = $"Data Source={sqlLiteFile}";
+        var sqlLiteConnectionString = $"Data Source={sqlLiteFile};Pooling=False";
 
         CastDirectory = Path.Combine(tempDirectory, "cast");
         Directory.CreateDirectory(CastDirectory);
@@ -88,6 +90,8 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
         });
     }
     public CancellationTokenSource CancellationTokenSource { get; }
+
+    public DbConnection? Connection { get; private set; }
     public DbType DbType { get; }
     public List<JsonObject> ConfigurationFiles { get; }
     public string CastDirectory { get; }
@@ -113,15 +117,21 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
 
     public async Task StartServerAsync()
     {
-        await this.CleanDatabase(cancellationToken: CancellationTokenSource.Token);
+        Connection = await this.CleanDatabase(cancellationToken: CancellationTokenSource.Token);
         StartServer();
         await Installer.OnStartup(Services, CancellationTokenSource.Token);
     }
-    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles);
+    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles, Connection);
 
     public string GetJwtForTestUser(UserReadModel? user = null)
     {
         var userConfig = Services.GetRequiredService<UserConfig>();
         return userConfig.GetJwt(user?.Id ?? Guid.NewGuid(), user?.Username ?? "testUser").Jwt;
+    }
+    protected override void Dispose(bool disposing)
+    {
+        Connection?.Close();
+        Connection?.Dispose();
+        base.Dispose(disposing);
     }
 }

@@ -12,6 +12,7 @@ type MetaTagType = 'cast' | 'directors' | 'genres' | 'producers' | 'writers';
 interface MetaMocks {
   mediaService: {
     getAllTags: ReturnType<typeof vi.fn>;
+    setThumbnailForTag: ReturnType<typeof vi.fn>;
   };
   routeParamMap$: BehaviorSubject<ParamMap>;
 }
@@ -33,7 +34,8 @@ async function createComponent(overrides?: {
   };
   const mocks: MetaMocks = {
     mediaService: {
-      getAllTags: vi.fn((tagType: MetaTagType) => of(valuesByType[tagType]))
+      getAllTags: vi.fn((tagType: MetaTagType) => of(valuesByType[tagType])),
+      setThumbnailForTag: vi.fn(() => of(void 0))
     },
     routeParamMap$
   };
@@ -254,5 +256,60 @@ describe('MetaComponent', () => {
     component.clearPagePositionState();
 
     expect(clearSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the thumbnail file picker without triggering card navigation', async () => {
+    const { component } = await createComponent();
+    const input = document.createElement('input');
+    const clickSpy = vi.spyOn(input, 'click');
+    const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+
+    component.openThumbnailUpload({ preventDefault, stopPropagation } as unknown as MouseEvent, input);
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(stopPropagation).toHaveBeenCalledTimes(1);
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('uploads selected thumbnail and refreshes image URL for matching member', async () => {
+    const { component, mocks } = await createComponent();
+    const detectChangesSpy = vi.spyOn((component as any).cdr, 'detectChanges');
+    const input = document.createElement('input');
+    const file = new File(['thumb'], 'thumb.png', { type: 'image/png' });
+    const metaMember = {
+      name: 'Keanu Reeves',
+      imageUrl: '/api/media/cast/Keanu%20Reeves/thumbnail',
+      queryParams: { cast: ['Keanu Reeves'], sort: SearchComponent.DEFAULT_SORT }
+    };
+
+    Object.defineProperty(input, 'files', { value: [file], configurable: true });
+    component.type = 'cast';
+
+    await component.onThumbnailSelected({ target: input } as unknown as Event, metaMember);
+
+    expect(mocks.mediaService.setThumbnailForTag).toHaveBeenCalledWith('cast', 'Keanu Reeves', file);
+    expect(metaMember.imageUrl).toContain('/api/media/cast/Keanu%20Reeves/thumbnail?t=');
+    expect(component.isUploading('Keanu Reeves')).toBe(false);
+    expect(detectChangesSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips thumbnail upload when the current type is unsupported', async () => {
+    const { component, mocks } = await createComponent();
+    const input = document.createElement('input');
+    const file = new File(['thumb'], 'thumb.png', { type: 'image/png' });
+    const metaMember = {
+      name: 'Keanu Reeves',
+      imageUrl: '/api/media/cast/Keanu%20Reeves/thumbnail',
+      queryParams: { cast: ['Keanu Reeves'], sort: SearchComponent.DEFAULT_SORT }
+    };
+
+    Object.defineProperty(input, 'files', { value: [file], configurable: true });
+    component.type = 'unknown';
+
+    await component.onThumbnailSelected({ target: input } as unknown as Event, metaMember);
+
+    expect(mocks.mediaService.setThumbnailForTag).not.toHaveBeenCalled();
+    expect(metaMember.imageUrl).toBe('/api/media/cast/Keanu%20Reeves/thumbnail');
   });
 });

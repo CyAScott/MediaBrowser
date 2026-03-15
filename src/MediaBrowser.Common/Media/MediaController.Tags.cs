@@ -21,7 +21,7 @@ partial class MediaController
         _ => mediaConfig.WritersDirectory
     };
 
-    [HttpGet("{tagType}/{name}/thumbnail")]
+    [HttpGet("{tagType}/{name}/thumbnail"), HttpGet("{tagType}s/{name}/thumbnail")]
     public ActionResult GetThumbnail(TagType tagType, string name)
     {
         var filePath = Path.Combine(GetTagDirectory(tagType), $"{name}.jpg");
@@ -40,7 +40,7 @@ partial class MediaController
         return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), "image/jpeg");
     }
 
-    [HttpPost("{tagType}/{name}/thumbnail")]
+    [HttpPost("{tagType}/{name}/thumbnail"), HttpPost("{tagType}s/{name}/thumbnail")]
     public async Task<ActionResult> SetThumbnail(TagType tagType, string name, [FromForm] SetTagThumbnailRequest request)
     {
         if (!IsNameValid(name))

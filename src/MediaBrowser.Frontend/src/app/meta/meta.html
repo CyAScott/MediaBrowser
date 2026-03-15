@@ -7,18 +7,37 @@
     @if (!isLoading && metaMembers.length > 0) {
       <div class="meta-grid">
         @for (metaMember of metaMembers; track $index) {
-          <a class="result-card" 
-               [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}"
-               [title]="metaMember.name"
-               [routerLink]="'/search'"
-               [queryParams]="metaMember.queryParams"
-               (click)="clearPagePositionState()">
-            <div class="card-overlay">
-              <div class="meta-info">
-                <div class="meta-name">{{ metaMember.name }}</div>
+          <div
+            class="result-card"
+            [ngStyle]="{'backgroundImage':'url(' + metaMember.imageUrl + ')'}">
+            <a
+              class="result-link"
+              [title]="metaMember.name"
+              [routerLink]="'/search'"
+              [queryParams]="metaMember.queryParams"
+              (click)="clearPagePositionState()">
+              <div class="card-overlay">
+                <div class="meta-info">
+                  <div class="meta-name">{{ metaMember.name }}</div>
+                </div>
               </div>
-            </div>
-          </a>
+            </a>
+            <button
+              type="button"
+              class="upload-icon"
+              [disabled]="isUploading(metaMember.name)"
+              [title]="isUploading(metaMember.name) ? 'Uploading thumbnail...' : 'Upload thumbnail'"
+              (click)="openThumbnailUpload($event, thumbnailInput)">
+              <i [class]="isUploading(metaMember.name) ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-cloud-upload-alt'"></i>
+            </button>
+            <input
+              #thumbnailInput
+              type="file"
+              accept="image/*"
+              class="thumbnail-input"
+              (click)="$event.stopPropagation()"
+              (change)="onThumbnailSelected($event, metaMember)">
+          </div>
         }
       </div>
     }

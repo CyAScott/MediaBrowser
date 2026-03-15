@@ -188,10 +188,22 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     }
 
     if (this.videoPlayer) {
+      const currentTimestamp = this.videoPlayer.nativeElement.currentTime;
+      const existingThumbnailIndex = this.thumbnails.findIndex((thumbnail) => thumbnail.thumbnail === currentTimestamp);
+
+      if (existingThumbnailIndex !== -1) {
+        this.selectedThumbnailIndex = existingThumbnailIndex;
+        this.selectedThumbnail = this.thumbnails[existingThumbnailIndex];
+        this.onThumbnailChange();
+        this.videoPlayer.nativeElement.focus();
+        this.setPreview.emit();
+        return;
+      }
+
       this.selectedThumbnailIndex = this.thumbnails.length;
       this.selectedThumbnail = {
         selectedImageFile: null,
-        thumbnail: this.videoPlayer.nativeElement.currentTime,
+        thumbnail: currentTimestamp,
         thumbnailPreviewUrl: this.generateThumbnailPreview(this.videoPlayer.nativeElement),
       };
       this.thumbnails.push(this.selectedThumbnail);

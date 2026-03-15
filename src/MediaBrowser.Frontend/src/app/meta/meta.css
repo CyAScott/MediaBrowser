@@ -40,9 +40,35 @@
   height: auto;
 }
 
+.meta-grid .result-link {
+  position: absolute;
+  inset: 0;
+  display: block;
+  text-decoration: none;
+}
+
 .meta-info {
   text-align: center;
   width: 100%;
+}
+
+.upload-icon {
+  position: absolute;
+  background: none;
+  bottom: 8px;
+  border: none;
+  left: 8px;
+  color: var(--fg1);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 1.25rem;
+  z-index: 10;
+  opacity: 0.7;
+  text-shadow: 0.25rem 0.25rem 1rem black;
+}
+
+.thumbnail-input {
+  display: none;
 }
 
 .meta-name {
