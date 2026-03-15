@@ -20,7 +20,7 @@ interface CacheData {
  * - keywords: string search term
  * - cast: array of cast member names
  * - genres: array of genre names  
- * - sort: sort field ('title' | 'createdOn' | 'duration' | 'userStarRating')
+ * - sort: sort field ('title' | 'createdOn' | 'duration' | 'userStarRating' | 'random')
  * - descending: boolean for sort direction
  * 
  * Example URLs:
@@ -43,7 +43,8 @@ export class SearchComponent implements OnInit {
     { value: 'title', label: 'Title' },
     { value: 'createdOn', label: 'Created On' },
     { value: 'duration', label: 'Duration' },
-    { value: 'userStarRating', label: 'Rating' }
+    { value: 'userStarRating', label: 'Rating' },
+    { value: 'random', label: 'Random' }
   ] as const;
   static readonly DEFAULT_SORT = 'title';
   
@@ -55,7 +56,7 @@ export class SearchComponent implements OnInit {
   genres: string[] = [];
   keywords: string = '';
   producers: string[] = [];
-  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' = SearchComponent.DEFAULT_SORT;
+  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' | 'random' = SearchComponent.DEFAULT_SORT;
   writers: string[] = [];
   
   // UI state
@@ -338,7 +339,7 @@ export class SearchComponent implements OnInit {
     this.onSearch();
   }
 
-  selectSortOption(sortValue: 'title' | 'createdOn' | 'duration' | 'userStarRating'): void {
+  selectSortOption(sortValue: 'title' | 'createdOn' | 'duration' | 'userStarRating' | 'random'): void {
     this.sort = sortValue;
     this.showSortModal = false;
     this.onSearch();
