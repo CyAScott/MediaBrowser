@@ -10,7 +10,7 @@ public class SqliteUdfInterceptor : DbConnectionInterceptor
         return Task.CompletedTask;
     }
 
-    static private void RegisterUdfs(SqliteConnection connection)
+    public static void RegisterUdfs(SqliteConnection connection)
     {
         connection.CreateFunction("seeded_random", (long seed, Guid id) =>
         {

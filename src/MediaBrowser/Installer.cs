@@ -5,7 +5,7 @@ public class Installer
     public const string Version = "v1";
 
     public const string CliArgsKey = "CliArgs", TestConfigsKey = "TestConfigs";
-    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs)
+    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs, DbConnection? connection = null)
     {
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration(configurationBuilder =>
@@ -15,7 +15,8 @@ public class Installer
             })
             .ConfigureAppConfiguration(ConfigureSettings)
             .ConfigureServices(ConfigureServices)
-            .ConfigureServices(MediaInstaller.ConfigureServices)
+            .ConfigureServices((context, services) =>
+                MediaInstaller.ConfigureServices(context, services, connection))
             .ConfigureServices(ImportInstaller.ConfigureServices)
             .ConfigureServices(UserInstaller.ConfigureServices)
             .ConfigureWebHostDefaults(webBuilder => webBuilder.Configure(ConfigureApp));

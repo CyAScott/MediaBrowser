@@ -1,8 +1,11 @@
+using System.Data.Common;
+using MediaBrowser.Media;
+
 namespace MediaBrowser;
 
 public static partial class TestDatabaseCleaner
 {
-    public async static Task CleanDatabase(this MediaBrowserWebApplicationFactory factory, CancellationToken cancellationToken = default)
+    public async static Task<DbConnection> CleanDatabase(this MediaBrowserWebApplicationFactory factory, CancellationToken cancellationToken = default)
     {
         var config = factory.GetConfiguration();
 
@@ -28,21 +31,18 @@ public static partial class TestDatabaseCleaner
         switch (factory.DbType)
         {
             case DbType.MySql:
-                await CleanMySql(dbConnectionString, dbName, cancellationToken);
-                break;
+                return await CleanMySql(dbConnectionString, dbName, cancellationToken);
             case DbType.Postgres:
-                await CleanPostgres(dbConnectionString, dbName, cancellationToken);
-                break;
+                return await CleanPostgres(dbConnectionString, dbName, cancellationToken);
+            default:
             case DbType.Sqlite:
-                await CleanSqlite(connectionString, cancellationToken);
-                break;
+                return await CleanSqlite(connectionString, cancellationToken);
             case DbType.SqlServer:
-                await CleanSqlServer(dbConnectionString, dbName, cancellationToken);
-                break;
+                return await CleanSqlServer(dbConnectionString, dbName, cancellationToken);
         }
     }
 
-    async static private Task CleanMySql(string connectionString, string dbName, CancellationToken cancellationToken = default)
+    async static private Task<MySqlConnection> CleanMySql(string connectionString, string dbName, CancellationToken cancellationToken = default)
     {
         await using var connection = new MySqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
@@ -58,16 +58,30 @@ public static partial class TestDatabaseCleaner
             command.CommandText = $"CREATE DATABASE {dbName}; ";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
+
+        return new($"{connectionString};Database={dbName};");
     }
 
-    async static private Task CleanPostgres(string connectionString, string dbName, CancellationToken cancellationToken = default)
+    async static private Task<NpgsqlConnection> CleanPostgres(string connectionString, string dbName, CancellationToken cancellationToken = default)
     {
+        // Clear all Npgsql connection pools
+        NpgsqlConnection.ClearAllPools();
+
         await using var connection = new NpgsqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
+        await using (var terminateCmd = connection.CreateCommand())
+        {
+            terminateCmd.CommandText = $@"
+                SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = '{dbName}' AND pid <> pg_backend_pid();";
+            await terminateCmd.ExecuteNonQueryAsync(cancellationToken);
+        }
+
         await using (var command = connection.CreateCommand())
         {
-            command.CommandText = $"DROP DATABASE {dbName};";
+            command.CommandText = $"DROP DATABASE IF EXISTS {dbName};";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
 
@@ -76,14 +90,17 @@ public static partial class TestDatabaseCleaner
             command.CommandText = $"CREATE DATABASE {dbName}; ";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
+
+        return new($"{connectionString};Database={dbName};");
     }
 
-    async static private Task CleanSqlite(string connectionString, CancellationToken cancellationToken = default)
+    async static private Task<SqliteConnection> CleanSqlite(string connectionString, CancellationToken cancellationToken = default)
     {
         // NOTE: For SQLite, we can't drop the database since it's just a file,
         // so instead we need to drop all tables in the database to clean it.
-        await using var connection = new SqliteConnection(connectionString);
+        var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
+        SqliteUdfInterceptor.RegisterUdfs(connection);
 
         var tables = new List<string>();
         await using (var command = connection.CreateCommand())
@@ -102,24 +119,37 @@ public static partial class TestDatabaseCleaner
             command.CommandText = $"DROP TABLE IF EXISTS \"{table}\"";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
+
+        return connection;
     }
 
-    async static private Task CleanSqlServer(string connectionString, string dbName, CancellationToken cancellationToken = default)
+    async static private Task<SqlConnection> CleanSqlServer(string connectionString, string dbName, CancellationToken cancellationToken = default)
     {
+        // Clear all SqlClient connection pools
+        SqlConnection.ClearAllPools();
+
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(cancellationToken);
 
         await using (var command = connection.CreateCommand())
         {
-            command.CommandText = $"DROP DATABASE IF EXISTS {dbName};";
+            command.CommandText = $"ALTER DATABASE [{dbName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;";
+            try { await command.ExecuteNonQueryAsync(cancellationToken); } catch { /* ignore if db doesn't exist */ }
+        }
+
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = $"DROP DATABASE IF EXISTS [{dbName}];";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
 
         await using (var command = connection.CreateCommand())
         {
-            command.CommandText = $"CREATE DATABASE {dbName}; ";
+            command.CommandText = $"CREATE DATABASE [{dbName}]; ";
             await command.ExecuteNonQueryAsync(cancellationToken);
         }
+
+        return new($"{connectionString};Database={dbName};");
     }
 
     /// <summary>
