@@ -1,7 +1,3 @@
-using Microsoft.Data.SqlClient;
-using MySqlConnector;
-using Npgsql;
-
 namespace MediaBrowser.Media;
 
 static class MediaInstaller
@@ -17,29 +13,57 @@ static class MediaInstaller
         switch (dbConfig.DbType)
         {
             case DbType.MySql:
-                connection ??= new MySqlConnection(dbConfig.MySqlConnectionString);
                 services.AddDbContext<MediaDbContext, MediaMySqlDbContext>(options =>
-                    options.UseMySql(connection, ServerVersion.AutoDetect((MySqlConnection)connection)));
+                {
+                    if (connection == null)
+                    {
+                        options.UseMySql(dbConfig.MySqlConnectionString, ServerVersion.AutoDetect(dbConfig.MySqlConnectionString));
+                    }
+                    else
+                    {
+                        options.UseMySql(connection, ServerVersion.AutoDetect((MySqlConnection)connection));
+                    }
+                });
                 break;
             case DbType.Postgres:
-                connection ??= new NpgsqlConnection(dbConfig.PostgresConnectionString);
                 services.AddDbContext<MediaDbContext, MediaPostgresDbContext>(options =>
-                    options.UseNpgsql(connection));
+                {
+                    if (connection == null)
+                    {
+                        options.UseNpgsql(dbConfig.PostgresConnectionString);
+                    }
+                    else
+                    {
+                        options.UseNpgsql(connection);
+                    }
+                });
                 break;
             default:
             case DbType.Sqlite:
-                if (connection == null)
-                {
-                    connection = new SqliteConnection(dbConfig.SqliteConnectionString);
-                    SqliteUdfInterceptor.RegisterUdfs((SqliteConnection)connection);
-                }
                 services.AddDbContext<MediaDbContext, MediaSqliteDbContext>(options =>
-                    options.UseSqlite(connection).AddInterceptors(new SqliteUdfInterceptor()));
+                {
+                    if (connection == null)
+                    {
+                        options.UseSqlite(dbConfig.SqliteConnectionString).AddInterceptors(new SqliteUdfInterceptor());
+                    }
+                    else
+                    {
+                        options.UseSqlite(connection);
+                    }
+                });
                 break;
             case DbType.SqlServer:
-                connection ??= new SqlConnection(dbConfig.SqlServerConnectionString);
                 services.AddDbContext<MediaDbContext, MediaSqlServerDbContext>(options =>
-                    options.UseSqlServer(connection));
+                {
+                    if (connection == null)
+                    {
+                        options.UseSqlServer(dbConfig.SqlServerConnectionString);
+                    }
+                    else
+                    {
+                        options.UseSqlServer(connection);
+                    }
+                });
                 break;
         }
     }
