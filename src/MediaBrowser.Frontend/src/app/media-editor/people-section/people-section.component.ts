@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output, QueryList, ViewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { MediaService } from '../../services';
@@ -21,6 +21,12 @@ export interface PeopleData {
 })
 export class PeopleSectionComponent implements OnInit {
   private mediaService: MediaService = inject(MediaService);
+
+  @ViewChildren('castInput') private castInputs!: QueryList<TypeaheadInputComponent>;
+  @ViewChildren('directorsInput') private directorsInputs!: QueryList<TypeaheadInputComponent>;
+  @ViewChildren('genresInput') private genresInputs!: QueryList<TypeaheadInputComponent>;
+  @ViewChildren('producersInput') private producersInputs!: QueryList<TypeaheadInputComponent>;
+  @ViewChildren('writersInput') private writersInputs!: QueryList<TypeaheadInputComponent>;
 
   @Input() peopleData: PeopleData = {
     cast: [],
@@ -53,6 +59,27 @@ export class PeopleSectionComponent implements OnInit {
   addArrayItem(arrayName: keyof PeopleData): void {
     this.peopleData[arrayName].push('');
     this.onPeopleChange();
+    this.focusNewlyAddedInput(arrayName);
+  }
+
+  private focusNewlyAddedInput(arrayName: keyof PeopleData): void {
+    setTimeout(() => {
+      const inputsByType: Record<keyof PeopleData, QueryList<TypeaheadInputComponent>> = {
+        cast: this.castInputs,
+        directors: this.directorsInputs,
+        genres: this.genresInputs,
+        producers: this.producersInputs,
+        writers: this.writersInputs
+      };
+
+      const inputList = inputsByType[arrayName];
+      if (!inputList) {
+        return;
+      }
+
+      const newlyAddedInput = inputList.toArray().at(-1);
+      newlyAddedInput?.focus();
+    });
   }
 
   async ngOnInit(): Promise<void> {

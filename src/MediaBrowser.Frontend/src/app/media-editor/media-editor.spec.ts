@@ -47,7 +47,7 @@ function createMedia(overrides: Partial<MediaReadModel> = {}): MediaReadModel {
 
 describe('MediaEditorComponent', () => {
   let routeParams: Record<string, string | null>;
-  let currentNavigation: { extras?: { state?: Record<string, unknown> } } | null;
+  let currentNavigation: { extras?: { state?: Record<string, unknown> }; previousNavigation?: unknown } | null;
 
   let mediaServiceMock: {
     get: ReturnType<typeof vi.fn>;
@@ -67,7 +67,10 @@ describe('MediaEditorComponent', () => {
 
   beforeEach(async () => {
     routeParams = {};
-    currentNavigation = null;
+    currentNavigation = {
+      extras: { state: {} },
+      previousNavigation: {}
+    };
 
     mediaServiceMock = {
       get: vi.fn().mockReturnValue(of(createMedia())),
@@ -103,7 +106,8 @@ describe('MediaEditorComponent', () => {
         {
           provide: Router,
           useValue: {
-            currentNavigation: vi.fn(() => currentNavigation)
+            currentNavigation: vi.fn(() => currentNavigation),
+            navigate: vi.fn().mockResolvedValue(true)
           }
         },
         {

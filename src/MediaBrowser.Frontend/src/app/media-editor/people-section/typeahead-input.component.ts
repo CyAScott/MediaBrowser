@@ -132,6 +132,12 @@ export class TypeaheadInputComponent implements ControlValueAccessor, OnInit, On
     }
   }
 
+  focus(): void {
+    if (this.inputElement) {
+      this.inputElement.nativeElement.focus();
+    }
+  }
+
   writeValue(value: string): void {
     this.displayValue = value || '';
   }
