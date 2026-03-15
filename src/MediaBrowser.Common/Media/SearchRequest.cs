@@ -9,6 +9,10 @@ public record SearchRequest
     public string? Genres { get; init; }
     public string? Keywords { get; init; }
     public string? Producers { get; init; }
+    /// <summary>
+    /// This is a seed value used to ensure pagination is consistent across multiple random sort requests.
+    /// </summary>
+    public int Seed { get; init; }
     public string? Writers { get; init; }
     public Sort Sort { get; init; } = Sort.CreatedOn;
     [Range(0, int.MaxValue)]
@@ -21,15 +25,40 @@ public static class SearchRequestExtensions
 {
     extension(SearchRequest request)
     {
-        public IQueryable<MediaEntity> ApplySortAndPagination(IQueryable<MediaEntity> query)
+        public async Task<IQueryable<MediaEntity>> ApplySortAndPagination(MediaDbContext context, IQueryable<MediaEntity> query)
         {
+            var isDescending = request.Descending;
+
+            if (request.Sort == Sort.Random && context.Type == DbType.Postgres)
+            {
+                // PostgreSQL's random() is not seedable per-query, but setseed() sets the seed for the session.
+                // To achieve deterministic pagination, we set the seed at the start of each request.
+                await context.Database.ExecuteSqlRawAsync("SELECT setseed({0})", request.Seed / (double)int.MaxValue);
+            }
+
             query = request.Sort switch
             {
-                Sort.Title => request.Descending ? query.OrderByDescending(m => m.Title) : query.OrderBy(m => m.Title),
-                Sort.CreatedOn => request.Descending ? query.OrderByDescending(m => m.CreatedOn) : query.OrderBy(m => m.CreatedOn),
-                Sort.Duration => request.Descending ? query.OrderByDescending(m => m.Duration) : query.OrderBy(m => m.Duration),
-                Sort.UserStarRating => request.Descending ? query.OrderByDescending(m => m.UserStarRating) : query.OrderBy(m => m.UserStarRating),
-                _ => query
+                Sort.Title => isDescending ? query.OrderByDescending(m => m.Title) : query.OrderBy(m => m.Title),
+                Sort.CreatedOn => isDescending ? query.OrderByDescending(m => m.CreatedOn) : query.OrderBy(m => m.CreatedOn),
+                Sort.Duration => isDescending ? query.OrderByDescending(m => m.Duration) : query.OrderBy(m => m.Duration),
+                Sort.UserStarRating => isDescending ? query.OrderByDescending(m => m.UserStarRating) : query.OrderBy(m => m.UserStarRating),
+                // Default random sort
+                _ => context.Type switch
+                {
+                    DbType.MySql => isDescending
+                        ? query.OrderByDescending(m => RandomDbFunctions.MySqlRand(request.Seed))
+                        : query.OrderBy(m => RandomDbFunctions.MySqlRand(request.Seed)),
+                    DbType.Postgres => isDescending
+                        ? query.OrderByDescending(m => RandomDbFunctions.PgRandom())
+                        : query.OrderBy(m => RandomDbFunctions.PgRandom()),
+                    DbType.SqlServer => isDescending
+                        ? query.OrderByDescending(m => RandomDbFunctions.SqlChecksum(request.Seed, m.Id))
+                        : query.OrderBy(m => RandomDbFunctions.SqlChecksum(request.Seed, m.Id)),
+                    // Default SQLite
+                    _ => isDescending
+                        ? query.OrderByDescending(m => RandomDbFunctions.SqliteSeededRandom(request.Seed, m.Id))
+                        : query.OrderBy(m => RandomDbFunctions.SqliteSeededRandom(request.Seed, m.Id))
+                }
             };
 
             query = query.Skip(request.Skip);
@@ -115,7 +144,8 @@ public enum Sort
     Title,
     CreatedOn,
     Duration,
-    UserStarRating
+    UserStarRating,
+    Random
 }
 
 [Equatable, ExcludeFromCodeCoverage(Justification = "POCO")]

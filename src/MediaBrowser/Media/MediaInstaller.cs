@@ -23,7 +23,8 @@ static class MediaInstaller
             default:
             case DbType.Sqlite:
                 services.AddDbContext<MediaDbContext, MediaSqliteDbContext>(options =>
-                    options.UseSqlite(dbConfig.SqliteConnectionString));
+                    options.UseSqlite(dbConfig.SqliteConnectionString)
+                        .AddInterceptors(new SqliteUdfInterceptor()));
                 break;
             case DbType.SqlServer:
                 services.AddDbContext<MediaDbContext, MediaSqlServerDbContext>(options =>

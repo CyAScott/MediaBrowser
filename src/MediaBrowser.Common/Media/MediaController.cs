@@ -49,7 +49,7 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
 
         var count = await query.CountAsync();
 
-        query = request.ApplySortAndPagination(query);
+        query = await request.ApplySortAndPagination(context, query);
 
         var results = await query.ToListAsync();
 
