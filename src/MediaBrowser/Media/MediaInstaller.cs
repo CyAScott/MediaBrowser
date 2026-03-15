@@ -28,9 +28,13 @@ static class MediaInstaller
                 break;
             default:
             case DbType.Sqlite:
-                connection ??= new SqliteConnection(dbConfig.SqliteConnectionString);
+                if (connection == null)
+                {
+                    connection = new SqliteConnection(dbConfig.SqliteConnectionString);
+                    SqliteUdfInterceptor.RegisterUdfs((SqliteConnection)connection);
+                }
                 services.AddDbContext<MediaDbContext, MediaSqliteDbContext>(options =>
-                    options.UseSqlite(connection));
+                    options.UseSqlite(connection).AddInterceptors(new SqliteUdfInterceptor()));
                 break;
             case DbType.SqlServer:
                 connection ??= new SqlConnection(dbConfig.SqlServerConnectionString);
