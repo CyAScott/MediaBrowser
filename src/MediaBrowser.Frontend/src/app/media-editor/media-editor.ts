@@ -150,7 +150,11 @@ export class MediaEditorComponent implements OnInit {
       }
       SearchComponent.clearCachedResults();
       PeopleSectionComponent.clearCacheIfStale(this.getPeopleData());
-      this.location.back();
+      if (this.hasNavigationHistory) {
+        this.location.back();
+      } else if (this.filename) {
+        this.router.navigate(['/search'], { queryParams: { sort: SearchComponent.DEFAULT_SORT } });
+      }
     } catch (error) {
       console.error('Error saving media changes:', error);
     } finally {
@@ -160,7 +164,11 @@ export class MediaEditorComponent implements OnInit {
   }
 
   cancel(): void {
-    this.location.back();
+    if (this.hasNavigationHistory) {
+      this.location.back();
+    } else {
+      this.router.navigate(['/search'], { queryParams: { sort: SearchComponent.DEFAULT_SORT } });
+    }
   }
 
   // Helper methods for formatted display
