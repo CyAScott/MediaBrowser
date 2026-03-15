@@ -1,9 +1,11 @@
 @if (!isLoading) {
   <div class="editor-container">
     <div class="editor-header">
-      <button class="back-button" (click)="cancel()">
-        <i class="fa-solid fa-chevron-left"></i>
-      </button>
+      @if (hasNavigationHistory) {
+        <button class="back-button" (click)="cancel()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+      }
       <h1>Edit Media</h1>
       <div class="header-actions">
         <button class="cancel-button" (click)="cancel()" [disabled]="isSaving">

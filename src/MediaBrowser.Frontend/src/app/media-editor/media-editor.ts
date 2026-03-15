@@ -42,6 +42,10 @@ export class MediaEditorComponent implements OnInit {
     this.navigation = this.router.currentNavigation();
   }
   
+  get hasNavigationHistory(): boolean {
+    return this.navigation?.previousNavigation != null;
+  }
+
   filename: string | null = null;
   isCreatingThumbnail: boolean = false;
   isLoading: boolean = false;
