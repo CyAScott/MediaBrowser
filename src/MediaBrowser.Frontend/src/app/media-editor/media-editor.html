@@ -6,7 +6,7 @@
           <i class="fa-solid fa-chevron-left"></i>
         </button>
       }
-      <h1>Edit Media</h1>
+      <h1>{{ mediaId === null ? 'Import Media' : 'Edit Media' }}</h1>
       <div class="header-actions">
         <button class="cancel-button" (click)="cancel()" [disabled]="isSaving">
           Cancel
