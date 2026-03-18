@@ -41,6 +41,8 @@ public class Nfo(MediaConfig mediaConfig)
             throw new ParseNfoException(1, "Invalid or missing media ID");
         }
 
+        var parentId = Guid.TryParse(xmlDoc.SelectSingleNode("//parentId")?.InnerText, out var parentIdValue) ? parentIdValue : (Guid?)null;
+
         var hash = xmlDoc.SelectSingleNode("//md5")?.InnerText;
         if (string.IsNullOrWhiteSpace(hash) || hash.Length != 32)
         {
@@ -99,7 +101,7 @@ public class Nfo(MediaConfig mediaConfig)
         };
 
         var media = MediaEntity.Create(
-            mediaId: mediaId,
+            mediaId: mediaId, parentId: parentId,
             fileInfo: fileInfo,
             ffprobe: ffprobeResponse,
             request: request,
@@ -113,7 +115,8 @@ public class Nfo(MediaConfig mediaConfig)
             height: int.TryParse(xmlDoc.SelectSingleNode("//height")?.InnerText ?? string.Empty, out var height) ? height : null,
             width: int.TryParse(xmlDoc.SelectSingleNode("//width")?.InnerText ?? string.Empty, out var width) ? width : null,
             ctimeMs: long.TryParse(xmlDoc.SelectSingleNode("//ctime")?.InnerText ?? string.Empty, out var ctimeMs) ? ctimeMs : null,
-            mtimeMs: long.TryParse(xmlDoc.SelectSingleNode("//mtimeMs")?.InnerText ?? string.Empty, out var mtimeMs) ? mtimeMs : null);
+            mtimeMs: long.TryParse(xmlDoc.SelectSingleNode("//mtimeMs")?.InnerText ?? string.Empty, out var mtimeMs) ? mtimeMs : null,
+            start: double.TryParse(xmlDoc.SelectSingleNode("//start")?.InnerText ?? string.Empty, out var start) ? start : null);
 
         return media;
     }

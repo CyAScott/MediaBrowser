@@ -90,5 +90,12 @@ VALUES ('20251017193532_Thumbnail', '9.0.9');
 INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
 VALUES ('20260306204644_ExpandPasswordLength', '9.0.9');
 
+ALTER TABLE "media" ADD "parent_id" TEXT NULL;
+
+ALTER TABLE "media" ADD "start" REAL NULL;
+
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260316031929_Chapters', '9.0.9');
+
 COMMIT;
 

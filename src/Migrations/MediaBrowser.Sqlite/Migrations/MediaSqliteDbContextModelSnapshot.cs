@@ -177,6 +177,11 @@ namespace MediaBrowser.Migrations
                         .HasColumnName("original_title")
                         .HasAnnotation("Relational:JsonPropertyName", "originalTitle");
 
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("parent_id")
+                        .HasAnnotation("Relational:JsonPropertyName", "parentId");
+
                     b.Property<string>("Path")
                         .IsRequired()
                         .HasMaxLength(500)
@@ -200,6 +205,11 @@ namespace MediaBrowser.Migrations
                         .HasColumnType("INTEGER")
                         .HasColumnName("size")
                         .HasAnnotation("Relational:JsonPropertyName", "size");
+
+                    b.Property<double?>("Start")
+                        .HasColumnType("REAL")
+                        .HasColumnName("start")
+                        .HasAnnotation("Relational:JsonPropertyName", "start");
 
                     b.Property<double?>("Thumbnail")
                         .HasColumnType("REAL")

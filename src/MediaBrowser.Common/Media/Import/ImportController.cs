@@ -118,11 +118,11 @@ public class ImportController(Ffmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             thumbnail: request.Thumbnail);
         await context.Media.AddAsync(media);
 
-        await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{hash}.nfo"));
+        await nfo.Save(media, mediaConfig.MediaFileLocation(media, ".nfo"));
 
         if (request.Thumbnail != null && ffprobe.Value.mime.StartsWith("video/", StringComparison.InvariantCulture))
         {
-            var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{hash}.jpg");
+            var thumbnailLocation = mediaConfig.MediaFileLocation(media, ".jpg");
             if (!await ffmpeg.TryExtractThumbnail(file.Path,
                 outputPath: thumbnailLocation,
                 at: TimeSpan.FromSeconds(request.Thumbnail.Value)))
@@ -131,13 +131,12 @@ public class ImportController(Ffmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
             }
 
             System.IO.File.Copy(thumbnailLocation,
-                destFileName: Path.Combine(mediaConfig.MediaDirectory, $"{hash}-fanart.jpg"), true);
+                destFileName: mediaConfig.MediaFileLocation(media, "-fanart.jpg"), true);
         }
 
         await context.SaveChangesAsync();
 
-        var newFilePath = Path.Combine(mediaConfig.MediaDirectory,
-            $"{hash}.{mediaConfig.GetExtensionFromMime(ffprobe.Value.mime)}");
+        var newFilePath = mediaConfig.MediaFileLocation(media);
 
         System.IO.File.Move(file.Path, newFilePath);
 

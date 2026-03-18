@@ -179,6 +179,8 @@ public class MediaControllerTests
 
         await UpdateThumbnailWithFileTests(mediaConfig, mediaClient, testVideoFile, testImageFile);
         await UpdateThumbnailWithTimestampTests(mediaConfig, mediaClient, testVideoFile, testImageFile);
+
+        await AddChapterTests(mediaClient, testVideoFile, testImageFile);
     }
 
     async Task StreamTests(MediaConfig mediaConfig, MediaClient mediaClient, MediaReadModel testFile)
@@ -496,6 +498,107 @@ public class MediaControllerTests
                 At = 0.5
             });
             response.StatusCode.ShouldBe(HttpStatusCode.OK, "The fanart thumbnail should be updated successfully since we are using a valid timestamp, so it should return 204 Ok.");
+        }
+    }
+
+    async Task AddChapterTests(MediaClient mediaClient, MediaReadModel testVideoFile, MediaReadModel testImageFile)
+    {
+        var chapterRequest = new AddChapterRequest
+        {
+            Title = "Chapter 1",
+            OriginalTitle = "Chapter 1 Original",
+            Description = "A test chapter",
+            Cast = ["cast1"],
+            Directors = ["director1"],
+            Genres = ["genre1"],
+            Producers = ["producer1"],
+            Writers = ["writer1"],
+            Start = 0,
+            Duration = testVideoFile.Duration!.Value / 2,
+            Thumbnail = 0.1
+        };
+        using (var response = await mediaClient.AddChapter(testVideoFile.Id, chapterRequest))
+        {
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, "Should add chapter to video successfully");
+            response.Content.ShouldNotBeNull();
+            response.Content.Title.ShouldBe("Chapter 1");
+            response.Content.ParentId.ShouldBe(testVideoFile.Id);
+        }
+
+        // Should fail for image (NotFound)
+        using (var response = await mediaClient.AddChapter(testImageFile.Id, chapterRequest))
+        {
+            response.StatusCode.ShouldBe(HttpStatusCode.NotFound, "Should not allow adding chapter to image");
+        }
+
+        // Should fail with invalid tag (ExpectationFailed)
+        var invalidTagRequest = new AddChapterRequest
+        {
+            Title = "Invalid Tag Chapter",
+            OriginalTitle = "Invalid Tag Chapter",
+            Description = "Invalid tag test",
+            Cast = ["_invalid_"],
+            Directors = [],
+            Genres = [],
+            Producers = [],
+            Writers = [],
+            Start = 0,
+            Duration = testVideoFile.Duration!.Value / 2,
+            Thumbnail = 0.1
+        };
+        using (var response = await mediaClient.AddChapter(testVideoFile.Id, invalidTagRequest))
+        {
+            response.StatusCode.ShouldBe(HttpStatusCode.ExpectationFailed, "Should fail with invalid tag");
+        }
+
+        // Should fail with invalid range (RangeNotSatisfiable)
+        var invalidRangeRequest = new AddChapterRequest
+        {
+            Title = "Invalid Range Chapter",
+            OriginalTitle = "Invalid Range Chapter",
+            Description = "Invalid range test",
+            Cast = [],
+            Directors = [],
+            Genres = [],
+            Producers = [],
+            Writers = [],
+            Start = testVideoFile.Duration!.Value,
+            Duration = 10,
+            Thumbnail = 0.1
+        };
+        using (var response = await mediaClient.AddChapter(testVideoFile.Id, invalidRangeRequest))
+        {
+            response.StatusCode.ShouldBe(HttpStatusCode.RequestedRangeNotSatisfiable, "Should fail with invalid range");
+        }
+
+        // Should succeed for video with thumbnail
+        var chapterWithThumbRequest = new AddChapterRequest
+        {
+            Title = "Chapter with Thumb",
+            OriginalTitle = "Chapter with Thumb",
+            Description = "Chapter with thumbnail",
+            Cast = [],
+            Directors = [],
+            Genres = [],
+            Producers = [],
+            Writers = [],
+            Start = 0.5,
+            Duration = 0.25,
+            Thumbnail = 0.5
+        };
+        using (var response = await mediaClient.AddChapter(testVideoFile.Id, chapterWithThumbRequest))
+        {
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, "Should add chapter with thumbnail to video successfully");
+            response.Content.ShouldNotBeNull();
+            response.Content.Title.ShouldBe("Chapter with Thumb");
+            response.Content.ParentId.ShouldBe(testVideoFile.Id);
+
+            using var thumbnailResponse = await mediaClient.StreamThumbnail(response.Content.Id);
+            const string message = "This should return the thumbnail successfully since we are using a valid chapter ID and the chapter has a thumbnail.";
+            thumbnailResponse.StatusCode.ShouldBe(HttpStatusCode.OK, message);
+            thumbnailResponse.Content.ShouldNotBeNull(message);
+            thumbnailResponse.Content.Headers.ContentLength.ShouldNotBeNull(message).ShouldNotBe(0, message);
+            thumbnailResponse.Content.Headers.ContentType.ShouldNotBeNull(message).MediaType.ShouldBe("image/jpeg", message);
         }
     }
 

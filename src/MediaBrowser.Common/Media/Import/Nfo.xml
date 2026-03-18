@@ -32,6 +32,8 @@
     {{/each}}
   </writers>
   <stats>
+    <parentId>{{parentId}}</parentId>
+    <start>{{start}}</start>
     <ctime>{{ctimeMs}}</ctime>
     <duration>{{duration}}</duration>
     <ffprobe>{{ffprobe}}</ffprobe>

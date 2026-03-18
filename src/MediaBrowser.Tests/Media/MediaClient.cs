@@ -8,6 +8,9 @@ public class MediaClient(HttpClient client)
     public Task<HttpResponseMessage<MediaReadModel>> Update(Guid id, UpdateMediaRequest request) =>
         client.PutAsync<MediaReadModel, UpdateMediaRequest>($"/api/media/{id}", request);
 
+    public Task<HttpResponseMessage<MediaReadModel>> AddChapter(Guid id, AddChapterRequest request) =>
+        client.PostAsync<MediaReadModel, AddChapterRequest>($"/api/media/{id}/chapters", request);
+
     public Task<HttpResponseMessage<SearchResponse>> Search(SearchRequest request)
     {
         var query = new Dictionary<string, object?>

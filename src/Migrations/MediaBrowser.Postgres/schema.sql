@@ -190,5 +190,27 @@ BEGIN
     VALUES ('20260306204654_ExpandPasswordLength', '9.0.9');
     END IF;
 END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20260316031955_Chapters') THEN
+    ALTER TABLE media ADD parent_id uuid;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20260316031955_Chapters') THEN
+    ALTER TABLE media ADD start double precision;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20260316031955_Chapters') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20260316031955_Chapters', '9.0.9');
+    END IF;
+END $EF$;
 COMMIT;
 
