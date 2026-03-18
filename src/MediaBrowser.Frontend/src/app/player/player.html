@@ -27,7 +27,7 @@
         autoplay
         class="video-element"
         controls>
-        <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+        <source [src]="getMediaSourceUrl()" [type]="mediaData.mime">
         Your browser does not support the video tag.
       </video>
     }
@@ -41,7 +41,7 @@
         autoplay
         class="audio-element"
         controls>
-        <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+        <source [src]="getMediaSourceUrl()" [type]="mediaData.mime">
         Your browser does not support the audio element.
       </audio>
     }

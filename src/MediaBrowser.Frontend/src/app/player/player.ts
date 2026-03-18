@@ -132,4 +132,17 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     const element = event.target as HTMLVideoElement | HTMLAudioElement;
     this.saveVolume(element.volume);
   }
+
+  getMediaSourceUrl(): string {
+    if (!this.mediaData) {
+      return '';
+    }
+
+    if (this.mediaData.start == null || this.mediaData.duration == null) {
+      return this.mediaData.url;
+    }
+
+    const end = this.mediaData.start + this.mediaData.duration;
+    return `${this.mediaData.url}#t=${this.mediaData.start},${end}`;
+  }
 }
