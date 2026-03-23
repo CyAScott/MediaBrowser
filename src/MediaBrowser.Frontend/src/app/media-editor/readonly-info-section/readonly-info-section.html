@@ -9,8 +9,18 @@
       </div>
 
       <div class="readonly-item">
+        <label>Start</label>
+        <span>{{ mediaData.start ? formatDuration(mediaData.start) : 'N/A' }}</span>
+      </div>
+
+      <div class="readonly-item">
         <label>Duration</label>
-        <span>{{ formatDuration(mediaData.duration) }}</span>
+        <span>{{ formatDuration(mediaData.duration ?? 0) }}</span>
+      </div>
+
+      <div class="readonly-item">
+        <label>Parent ID</label>
+        <span>{{ mediaData.parentId ?? 'N/A' }}</span>
       </div>
 
       <div class="readonly-item">
@@ -41,11 +51,6 @@
       <div class="readonly-item">
         <label>MIME Type</label>
         <span>{{ mediaData.mime }}</span>
-      </div>
-
-      <div class="readonly-item">
-        <label>Rating</label>
-        <span>{{ mediaData.rating }}</span>
       </div>
 
       <div class="readonly-item">

@@ -46,7 +46,7 @@ export interface MediaReadModel {
   thumbnailUrl?: string;
   fanartUrl?: string;
   start?: number;
-  parentId?: number;
+  parentId?: string;
 }
 
 export interface SearchResponse {

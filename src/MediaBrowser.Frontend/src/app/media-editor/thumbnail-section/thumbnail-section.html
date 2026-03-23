@@ -9,7 +9,7 @@
       @if (mediaData.mime.startsWith('video/')) {
         <div class="video-container">
         <video
-          (loadedmetadata)="onVideoMetadataLoaded()"
+          (seeked)="onVideoMetadataLoaded()"
           (keydown.enter)="setThumbnailPreview()"
           [src]="getVideoUrl()"
           #videoPlayer

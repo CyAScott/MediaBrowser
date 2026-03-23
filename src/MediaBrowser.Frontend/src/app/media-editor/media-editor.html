@@ -2,65 +2,65 @@
   <div class="editor-container">
     <div class="editor-header">
       @if (hasNavigationHistory) {
-        <button class="back-button" (click)="cancel()">
+        <button class="back-button" (click)="cancel()" [disabled]="readWriteInProgress">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
       }
-      <h1>{{ mediaId === null ? 'Import Media' : 'Edit Media' }}</h1>
+      <h1>{{ headerTitle }}</h1>
       <div class="header-actions">
-        <button class="cancel-button" (click)="cancel()" [disabled]="isSaving">
+        <button class="cancel-button" (click)="cancel()" [disabled]="readWriteInProgress">
           Cancel
         </button>
-        <button class="save-button" (click)="saveChanges()" [disabled]="isSaving">
+        <button class="save-button" (click)="saveChanges()" [disabled]="readWriteInProgress">
           @if (!isSaving) {
             <i class="fa-solid fa-floppy-disk"></i>
           }
           @if (isSaving) {
             <i class="fa-solid fa-spinner fa-spin"></i>
           }
-          Save Changes
+          {{ saveButtonText }}
         </button>
       </div>
     </div>
 
-    @if (mediaData) {
+    @if (mediaData && !isLoading) {
       <div class="editor-content">
-      <div>
-        <app-title-section
-          (titleDataChange)="onTitleDataChange($event)"
-          [titleData]="getTitleData()">
-        </app-title-section>
+        <div>
+          <app-title-section
+            (titleDataChange)="onTitleDataChange($event)"
+            [titleData]="titleData">
+          </app-title-section>
 
-        <app-rating-section
-          (ratingChange)="onRatingChange($event)"
-          [rating]="editableData.userStarRating ?? null">
-        </app-rating-section>
+          <app-rating-section
+            (ratingChange)="onRatingChange($event)"
+            [rating]="editableData.userStarRating ?? null">
+          </app-rating-section>
 
-        <app-people-section
-          (peopleDataChange)="onPeopleDataChange($event)"
-          [peopleData]="getPeopleData()">
-        </app-people-section>
+          <app-people-section
+            (peopleDataChange)="onPeopleDataChange($event)"
+            [peopleData]="peopleData">
+          </app-people-section>
 
-        <app-readonly-info-section
-          [mediaData]="getReadOnlyData()"
-          [showSection]="!filename">
-        </app-readonly-info-section>
+          <app-readonly-info-section
+            [mediaData]="readOnlyData"
+            [showSection]="mode === 'Edit'">
+          </app-readonly-info-section>
 
-        <app-thumbnail-section
-          (saveThumbnailEvent)="onSaveThumbnail()"
-          (setPreview)="onSetThumbnailPreview()"
-          (thumbnailChange)="onThumbnailChange($event)"
-          [initialThumbnail]="thumbnail"
-          [isCreatingThumbnail]="isCreatingThumbnail"
-          [mediaData]="getThumbnailMediaData()"
-          [showSaveThumbnail]="mediaData.mime.startsWith('video/') && mediaId !== null"
-          [showSetThumbnail]="mediaData.mime.startsWith('video/')">
-        </app-thumbnail-section>
-      </div>
+          <app-thumbnail-section
+            (saveThumbnailEvent)="onSaveThumbnail()"
+            (setPreview)="onSetThumbnailPreview()"
+            (thumbnailChange)="onThumbnailChange($event)"
+            [initialThumbnail]="thumbnail"
+            [isCreatingThumbnail]="isCreatingThumbnail"
+            [mediaData]="thumbnailMediaData"
+            [showSaveThumbnail]="mediaData.mime.startsWith('video/') && mode === 'Edit'"
+            [showSetThumbnail]="mediaData.mime.startsWith('video/')">
+          </app-thumbnail-section>
+        </div>
       </div>
     }
-
-    <!-- Full screen spinner overlay -->
-    <app-spinner [isLoading]="isCreatingThumbnail || isLoading || isSaving"></app-spinner>
   </div>
 }
+
+<!-- Full screen spinner overlay -->
+<app-spinner [isLoading]="readWriteInProgress"></app-spinner>

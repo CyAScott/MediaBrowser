@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, inject, Input, OnInit, Output, ViewChild } from '@angular/core';
 
 export interface ThumbnailData {
   thumbnail: number | null;
@@ -9,6 +9,7 @@ export interface ThumbnailData {
 
 export interface MediaThumbnailData {
   mime: string;
+  start?: number;
   url?: string;
 }
 
@@ -18,8 +19,8 @@ export interface MediaThumbnailData {
   templateUrl: './thumbnail-section.html',
   styleUrls: ['../media-editor.css', './thumbnail-section.css']
 })
-export class ThumbnailSectionComponent implements AfterViewInit {
-  @Input() initialThumbnail: ThumbnailData | null = null;
+export class ThumbnailSectionComponent implements OnInit {
+  @Input() initialThumbnail: ThumbnailData | undefined = undefined;
   @Input() isCreatingThumbnail: boolean = false;
   @Input() mediaData!: MediaThumbnailData;
   @Input() showSaveThumbnail: boolean = false;
@@ -33,7 +34,14 @@ export class ThumbnailSectionComponent implements AfterViewInit {
   @ViewChild('videoPlayer') videoPlayer?: ElementRef<HTMLVideoElement>;
 
   private cdr = inject(ChangeDetectorRef);
-  private generateThumbnailPreview(videoElement: HTMLVideoElement): string {
+
+  isDragOver: boolean = false;
+  isLoading: boolean = true;
+  selectedThumbnail: ThumbnailData | null = null;
+  selectedThumbnailIndex: number = -1;
+  thumbnails: ThumbnailData[] = [];
+
+  generateThumbnailPreview(videoElement: HTMLVideoElement): string {
     try {
       // Create a canvas element to capture the video frame
       const canvas = document.createElement('canvas');
@@ -58,7 +66,12 @@ export class ThumbnailSectionComponent implements AfterViewInit {
       return '';
     }
   }
-  private handleImageFile(file: File): void {
+
+  getVideoUrl(): string {
+    return this.mediaData?.url ? `${this.mediaData.url}#t=${this.mediaData.start ?? 0}` : '';
+  }
+
+  handleImageFile(file: File): void {
     if (!file.type.startsWith('image/')) {
       console.error('Please select an image file');
       return;
@@ -85,31 +98,16 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     };
     reader.readAsDataURL(file);
   }
-  private onThumbnailChange(): void {
-    if (this.selectedThumbnail) {
-      this.thumbnailChange.emit(this.selectedThumbnail);
-    }
+
+  nextThumbnail(): void {
+    this.selectedThumbnailIndex++;
+    this.selectedThumbnail = this.thumbnails[this.selectedThumbnailIndex];
+    this.onThumbnailChange();
+    this.videoPlayer?.nativeElement.focus();
   }
 
-  isDragOver: boolean = false;
-  selectedThumbnail: ThumbnailData | null = null;
-  selectedThumbnailIndex: number = -1;
-  thumbnails: ThumbnailData[] = [];
-
-  getVideoUrl(): string {
-    return this.mediaData?.url || '';
-  }
-  
-  ngAfterViewInit(): void {
-    // Ensure video is muted when view initializes
-    setTimeout(() => {
-      if (this.initialThumbnail) {
-        this.thumbnails = [this.initialThumbnail];
-        this.selectedThumbnail = this.initialThumbnail;
-        this.selectedThumbnailIndex = 0;
-        this.onThumbnailChange();
-      }
-    }, 0);
+  ngOnInit(): void {
+    this.isLoading = true;
   }
 
   onDragLeave(event: DragEvent): void {
@@ -136,6 +134,12 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     }
   }
 
+  onThumbnailChange(): void {
+    if (this.selectedThumbnail) {
+      this.thumbnailChange.emit(this.selectedThumbnail);
+    }
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -145,28 +149,33 @@ export class ThumbnailSectionComponent implements AfterViewInit {
   }
 
   onVideoMetadataLoaded(): void {
+    if (!this.isLoading) {
+      return;
+    }
+
+    this.isLoading = false;
+
+    let thumbnail = this.initialThumbnail;
+
+    if (thumbnail) {
+      this.thumbnails = [thumbnail];
+      this.selectedThumbnail = thumbnail;
+      this.selectedThumbnailIndex = 0;
+      this.onThumbnailChange();
+      this.cdr.detectChanges();
+    }
+
     if (this.videoPlayer) {
-      // Ensure video is muted
-      this.videoPlayer.nativeElement.muted = true;
-      this.videoPlayer.nativeElement.volume = 0;
-
-      if (typeof this.selectedThumbnail?.thumbnail === 'number') {
-        this.videoPlayer.nativeElement.currentTime = this.selectedThumbnail!.thumbnail!;
-      }
-
       this.videoPlayer.nativeElement.focus();
+      if (thumbnail?.thumbnailPreviewUrl === '' && typeof thumbnail?.thumbnail === 'number') {
+          thumbnail.thumbnailPreviewUrl = this.generateThumbnailPreview(this.videoPlayer!.nativeElement);
+          this.cdr.detectChanges();
+      }
     }
   }
 
   openFileBrowser(): void {
     this.fileInput?.nativeElement.click();
-  }
-
-  nextThumbnail(): void {
-    this.selectedThumbnailIndex++;
-    this.selectedThumbnail = this.thumbnails[this.selectedThumbnailIndex];
-    this.onThumbnailChange();
-    this.videoPlayer?.nativeElement.focus();
   }
 
   previousThumbnail(): void {
@@ -188,7 +197,7 @@ export class ThumbnailSectionComponent implements AfterViewInit {
     }
 
     if (this.videoPlayer) {
-      const currentTimestamp = this.videoPlayer.nativeElement.currentTime;
+      const currentTimestamp = this.videoPlayer.nativeElement.currentTime; 
       const existingThumbnailIndex = this.thumbnails.findIndex((thumbnail) => thumbnail.thumbnail === currentTimestamp);
 
       if (existingThumbnailIndex !== -1) {
