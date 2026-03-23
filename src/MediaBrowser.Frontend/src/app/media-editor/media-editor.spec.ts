@@ -9,7 +9,7 @@ import { ImportComponent } from '../import/import';
 import { SearchComponent } from '../search/search';
 import { PeopleData, PeopleSectionComponent } from './people-section/people-section.component';
 import { ThumbnailData } from './thumbnail-section/thumbnail-section.component';
-import { MediaEditorComponent } from './media-editor';
+import { MediaEditorComponent, MediaEditorMode } from './media-editor';
 
 function createMedia(overrides: Partial<MediaReadModel> = {}): MediaReadModel {
   return {
@@ -47,12 +47,15 @@ function createMedia(overrides: Partial<MediaReadModel> = {}): MediaReadModel {
 
 describe('MediaEditorComponent', () => {
   let routeParams: Record<string, string | null>;
+  let queryParams: Record<string, string | null>;
+  let routePath: string | undefined;
   let currentNavigation: { extras?: { state?: Record<string, unknown> }; previousNavigation?: unknown } | null;
 
   let mediaServiceMock: {
     get: ReturnType<typeof vi.fn>;
     getAllTags: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
+    addChapter: ReturnType<typeof vi.fn>;
     updateThumbnail: ReturnType<typeof vi.fn>;
   };
 
@@ -67,6 +70,8 @@ describe('MediaEditorComponent', () => {
 
   beforeEach(async () => {
     routeParams = {};
+    queryParams = {};
+    routePath = undefined;
     currentNavigation = {
       extras: { state: {} },
       previousNavigation: {}
@@ -76,6 +81,7 @@ describe('MediaEditorComponent', () => {
       get: vi.fn().mockReturnValue(of(createMedia())),
       getAllTags: vi.fn().mockReturnValue(of([])),
       update: vi.fn().mockReturnValue(of(createMedia())),
+      addChapter: vi.fn().mockReturnValue(of(createMedia({ id: 'chapter-id' }))),
       updateThumbnail: vi.fn().mockReturnValue(of(void 0))
     };
 
@@ -114,8 +120,22 @@ describe('MediaEditorComponent', () => {
           provide: ActivatedRoute,
           useValue: {
             snapshot: {
+              routeConfig: {
+                get path() {
+                  return routePath;
+                }
+              },
               paramMap: {
-                get: (key: string) => routeParams[key] ?? null
+                get: (key: string) => routeParams[key] ?? null,
+                has: (key: string) => Object.prototype.hasOwnProperty.call(routeParams, key),
+                getAll: (key: string) => routeParams[key] ? [routeParams[key]!] : [],
+                keys: Object.keys(routeParams)
+              },
+              queryParamMap: {
+                get: (key: string) => queryParams[key] ?? null,
+                has: (key: string) => Object.prototype.hasOwnProperty.call(queryParams, key),
+                getAll: (key: string) => queryParams[key] ? [queryParams[key]!] : [],
+                keys: Object.keys(queryParams)
               }
             }
           }
@@ -140,7 +160,7 @@ describe('MediaEditorComponent', () => {
 
     expect(mediaServiceMock.get).toHaveBeenCalledWith('media-1');
     expect(component.mediaId).toBe('media-1');
-    expect(component.filename).toBeNull();
+    expect(component.filename).toBeUndefined();
     expect(component.editableData.title).toBe('Title One');
     expect(component.thumbnail).toEqual({
       selectedImageFile: null,
@@ -164,7 +184,9 @@ describe('MediaEditorComponent', () => {
     const fixture = TestBed.createComponent(MediaEditorComponent);
     const component = fixture.componentInstance;
 
-    await component.loadMediaById('media-1');
+    component.mediaId = 'media-1';
+    await component.loadMedia();
+    component.setThumbnail();
 
     expect(mediaServiceMock.get).not.toHaveBeenCalled();
     expect(component.mediaData?.title).toBe('State Title');
@@ -184,19 +206,14 @@ describe('MediaEditorComponent', () => {
     expect(importServiceMock.readFileInfo).toHaveBeenCalledWith('movie.mp4');
     expect(convertSpy).toHaveBeenCalledTimes(1);
     expect(component.filename).toBe('movie.mp4');
-    expect(component.thumbnail).toBeNull();
+    expect(component.thumbnail).toEqual({
+      selectedImageFile: null,
+      thumbnail: 0,
+      thumbnailPreviewUrl: ''
+    });
     expect(component.mediaData?.title).toBe('import-file.mp4');
 
     convertSpy.mockRestore();
-  });
-
-  it('throws when loadMediaToImport has no filename or media data', async () => {
-    routeParams['fileName'] = null;
-
-    const fixture = TestBed.createComponent(MediaEditorComponent);
-    const component = fixture.componentInstance;
-
-    await expect(component.loadMediaToImport()).rejects.toThrow('No media data or filename found');
   });
 
   it('logs initialization errors and exits loading state', async () => {
@@ -222,7 +239,7 @@ describe('MediaEditorComponent', () => {
     const fixture = TestBed.createComponent(MediaEditorComponent);
     const component = fixture.componentInstance;
 
-    component.mediaData = null;
+    component.mediaData = undefined;
 
     await component.saveChanges();
 
@@ -238,7 +255,9 @@ describe('MediaEditorComponent', () => {
     const fixture = TestBed.createComponent(MediaEditorComponent);
     const component = fixture.componentInstance;
 
+    routeParams['fileName'] = 'movie.mp4';
     component.filename = 'movie.mp4';
+    component.mode = MediaEditorMode.Import;
     component.mediaData = createMedia({ mime: 'video/mp4' });
     component.thumbnail = {
       selectedImageFile: null,
@@ -254,7 +273,7 @@ describe('MediaEditorComponent', () => {
     });
     expect(mediaServiceMock.updateThumbnail).not.toHaveBeenCalled();
     expect(searchCacheSpy).toHaveBeenCalledTimes(1);
-    expect(peopleCacheSpy).toHaveBeenCalledWith(component.getPeopleData());
+    expect(peopleCacheSpy).toHaveBeenCalledWith(component.peopleData);
     expect(locationMock.back).toHaveBeenCalledTimes(1);
 
     searchCacheSpy.mockRestore();
@@ -265,7 +284,9 @@ describe('MediaEditorComponent', () => {
     const fixture = TestBed.createComponent(MediaEditorComponent);
     const component = fixture.componentInstance;
 
+    routeParams['fileName'] = 'movie.mp4';
     component.filename = 'movie.mp4';
+    component.mode = MediaEditorMode.Import;
     component.mediaData = createMedia();
     component.thumbnail = {
       selectedImageFile: { name: 'thumb.jpg' } as File,
@@ -285,6 +306,7 @@ describe('MediaEditorComponent', () => {
 
     component.mediaId = 'media-77';
     component.mediaData = createMedia({ id: 'media-77' });
+    component.mode = MediaEditorMode.Edit;
 
     await component.saveChanges();
 
@@ -293,6 +315,30 @@ describe('MediaEditorComponent', () => {
     });
     expect(importServiceMock.import).not.toHaveBeenCalled();
     expect(locationMock.back).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds chapter when route is chapter mode and id exists', async () => {
+    routePath = 'edit/:id/chapter';
+    routeParams['id'] = 'media-parent';
+    routeParams['start'] = '12.5';
+    routeParams['end'] = '40.5';
+
+    const fixture = TestBed.createComponent(MediaEditorComponent);
+    const component = fixture.componentInstance;
+
+    await component.ngOnInit();
+    await component.saveChanges();
+
+    expect(component.mode).toBe(MediaEditorMode.AddChapter);
+    expect(component.chapterStart).toBe(12.5);
+    expect(component.chapterDuration).toBe(28);
+    expect(mediaServiceMock.addChapter).toHaveBeenCalledWith('media-parent', {
+      ...component.editableData,
+      duration: 28,
+      start: 12.5,
+      thumbnail: 12.5
+    });
+    expect(mediaServiceMock.update).not.toHaveBeenCalled();
   });
 
   it('handles saveChanges errors and always resets saving flag', async () => {
@@ -315,32 +361,23 @@ describe('MediaEditorComponent', () => {
     errorSpy.mockRestore();
   });
 
-  it('supports cancel, formatting, getters and event handlers', () => {
+  it('supports cancel, getters and event handlers', () => {
     const fixture = TestBed.createComponent(MediaEditorComponent);
     const component = fixture.componentInstance;
 
     component.mediaData = createMedia();
-    component.setEditableData(component.mediaData);
+    component.setEditableData();
 
     component.cancel();
     expect(locationMock.back).toHaveBeenCalledTimes(1);
 
-    expect(component.formatDuration()).toBe('00:00:0.000');
-    expect(component.formatDuration(3661.5)).toBe('01:01:1.500');
-
-    const localeSpy = vi.spyOn(Date.prototype, 'toLocaleString').mockReturnValue('formatted date');
-    expect(component.formatDateTime('12345')).toBe('formatted date');
-    localeSpy.mockRestore();
-
-    expect(component.formatFileSize(1048576)).toBe('1.00 MB');
-
-    expect(component.getTitleData()).toEqual({
+    expect(component.titleData).toEqual({
       title: component.editableData.title,
       originalTitle: component.editableData.originalTitle,
       description: component.editableData.description
     });
 
-    expect(component.getReadOnlyData()).toEqual({
+    expect(component.readOnlyData).toEqual({
       id: component.mediaData.id,
       duration: component.mediaData.duration,
       size: component.mediaData.size,
@@ -350,13 +387,15 @@ describe('MediaEditorComponent', () => {
       width: component.mediaData.width,
       height: component.mediaData.height,
       mime: component.mediaData.mime,
-      rating: component.mediaData.rating,
-      published: component.mediaData.published
+      published: component.mediaData.published,
+      start: component.mediaData.start,
+      parentId: component.mediaData.parentId
     });
 
-    expect(component.getThumbnailMediaData()).toEqual({
+    expect(component.thumbnailMediaData ).toEqual({
       mime: component.mediaData.mime,
-      url: component.mediaData.url
+      url: component.mediaData.url,
+      start: component.mediaData.start
     });
 
     component.onTitleDataChange({ title: 'T2', originalTitle: 'O2', description: 'D2' });
@@ -371,7 +410,7 @@ describe('MediaEditorComponent', () => {
     };
 
     component.onPeopleDataChange(people);
-    expect(component.getPeopleData()).toEqual(people);
+    expect(component.peopleData).toEqual(people);
 
     const thumbnail: ThumbnailData = {
       selectedImageFile: null,
@@ -391,7 +430,7 @@ describe('MediaEditorComponent', () => {
     const fixture = TestBed.createComponent(MediaEditorComponent);
     const component = fixture.componentInstance;
 
-    component.mediaId = null;
+    component.mediaId = undefined;
 
     await component.onSaveThumbnail();
 

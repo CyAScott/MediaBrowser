@@ -35,11 +35,60 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
 
         media.Update(request);
 
-        await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
+        await nfo.Save(media, mediaConfig.MediaFileLocation(media, ".nfo"));
 
         await context.SaveChangesAsync();
 
         return media.ToReadModel(mediaConfig);
+    }
+
+    [HttpPost("{id:guid}/chapters")]
+    public async Task<ActionResult<MediaReadModel>> AddChapter(Guid id, [FromBody] AddChapterRequest request)
+    {
+        var media = await context.MediaJoined.Where(m => m.Id == id && m.ParentId == null).FirstOrDefaultAsync();
+        if (media == null || media.IsImage())
+        {
+            return NotFound();
+        }
+
+        if (request.Cast
+            .Concat(request.Directors)
+            .Concat(request.Genres)
+            .Concat(request.Producers)
+            .Concat(request.Writers)
+            .Any(it => !IsNameValid(it)))
+        {
+            return StatusCode(StatusCodes.Status417ExpectationFailed);
+        }
+
+        if (request.Start + request.Duration > media.Duration)
+        {
+            return StatusCode(StatusCodes.Status416RangeNotSatisfiable);
+        }
+
+        var chapter = media.CreateChapter(request);
+
+        await nfo.Save(chapter, mediaConfig.MediaFileLocation(chapter, ".nfo"));
+
+        await context.AddAsync(chapter);
+
+        await context.SaveChangesAsync();
+
+        if (request.Thumbnail != null && chapter.Mime.StartsWith("video/", StringComparison.InvariantCulture))
+        {
+            var thumbnailLocation = mediaConfig.MediaFileLocation(chapter, ".jpg");
+            if (!await ffmpeg.TryExtractThumbnail(mediaConfig.MediaFileLocation(chapter),
+                    outputPath: thumbnailLocation,
+                    at: TimeSpan.FromSeconds(request.Thumbnail.Value)))
+            {
+                return StatusCode(StatusCodes.Status406NotAcceptable);
+            }
+
+            System.IO.File.Copy(thumbnailLocation,
+                destFileName: mediaConfig.MediaFileLocation(chapter, "-fanart.jpg"), true);
+        }
+
+        return chapter.ToReadModel(mediaConfig);
     }
 
     [HttpGet("search")]
@@ -62,13 +111,13 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
 
     [HttpGet("{id:guid}/file")]
     public Task<ActionResult> Stream(Guid id) =>
-        ReadFile(id, media => $".{mediaConfig.GetExtensionFromMime(media.Mime)}", media => media.Mime, true);
+        ReadFile(id, media => mediaConfig.MediaFileLocation(media), etag: true);
 
     [HttpGet("{id:guid}/file/thumbnail-fanart")]
     public Task<ActionResult> StreamFanartThumbnail(Guid id) =>
         ReadFile(id,
-            media => media.Mime.StartsWith("image/", StringComparison.InvariantCulture) ? $".{mediaConfig.GetExtensionFromMime(media.Mime)}" : "-fanart.jpg",
-            media => media.Mime.StartsWith("image/", StringComparison.InvariantCulture) ? media.Mime : "image/jpeg");
+            media => media.IsImage() ? mediaConfig.MediaFileLocation(media) : mediaConfig.MediaFileLocation(media, "-fanart.jpg"),
+            media => media.IsImage() ? media.Mime : "image/jpeg");
 
     [HttpPost("{id:guid}/file/thumbnail-fanart")]
     public Task<ActionResult> UpdateFanartThumbnailWithTimestamp(Guid id, [FromBody] UpdateThumbnailRequest request) =>
@@ -77,8 +126,8 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
     [HttpGet("{id:guid}/file/thumbnail")]
     public Task<ActionResult> StreamThumbnail(Guid id) =>
         ReadFile(id,
-            media => media.Mime.StartsWith("image/", StringComparison.InvariantCulture) ? $".{mediaConfig.GetExtensionFromMime(media.Mime)}" : ".jpg",
-            media => media.Mime.StartsWith("image/", StringComparison.InvariantCulture) ? media.Mime : "image/jpeg");
+            media => media.IsImage() ? mediaConfig.MediaFileLocation(media) : mediaConfig.MediaFileLocation(media, ".jpg"),
+            media => media.IsImage() ? media.Mime : "image/jpeg");
 
     [HttpPost("{id:guid}/file/thumbnail")]
     public Task<ActionResult> UpdateThumbnailWithTimestamp(Guid id, [FromBody] UpdateThumbnailRequest request) =>
@@ -93,13 +142,12 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
             return NotFound();
         }
 
-        if (media.Mime.StartsWith("image/", StringComparison.InvariantCulture))
+        if (media.IsImage())
         {
             return StatusCode(StatusCodes.Status406NotAcceptable);
         }
 
-        var extension = request.IsPrimary ? ".jpg" : "-fanart.jpg";
-        var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
+        var thumbnailLocation = mediaConfig.MediaFileLocation(media, request.IsPrimary ? ".jpg" : "-fanart.jpg");
 
         var (result, success) = await UpdateThumbnail(request.Thumbnail, thumbnailLocation);
 
@@ -109,16 +157,15 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
         }
 
         media.Thumbnail = null;
-        await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
+        await nfo.Save(media, mediaConfig.MediaFileLocation(media, ".nfo"));
         await context.SaveChangesAsync();
 
         return result;
     }
 
     async Task<ActionResult> ReadFile(Guid id,
-        Func<MediaEntity, string> extension,
-        Func<MediaEntity, string> mime,
-        bool etag = false)
+        Func<MediaEntity, string> filePathFactory,
+        Func<MediaEntity, string>? mimeFactory = null, bool etag = false)
     {
         var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
         if (media == null)
@@ -126,7 +173,7 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
             return NotFound();
         }
 
-        var filePath = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension(media)}");
+        var filePath = filePathFactory(media);
         if (!System.IO.File.Exists(filePath))
         {
             return NotFound();
@@ -149,7 +196,9 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
         }
         Response.Headers.LastModified = fileInfo.LastWriteTimeUtc.ToString("R");
 
-        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mime(media),
+        mimeFactory ??= it => it.Mime;
+
+        return File(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read), mimeFactory(media),
             enableRangeProcessing: true);
     }
 
@@ -187,18 +236,18 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
             return NotFound();
         }
 
-        if (!media.Mime.StartsWith("video/", StringComparison.InvariantCulture))
+        if (media.IsImage())
         {
             return StatusCode(StatusCodes.Status406NotAcceptable);
         }
 
-        var filePath = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.{mediaConfig.GetExtensionFromMime(media.Mime)}");
+        var filePath = mediaConfig.MediaFileLocation(media);
         if (!System.IO.File.Exists(filePath))
         {
             return NotFound();
         }
 
-        var thumbnailLocation = Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}{extension}");
+        var thumbnailLocation = mediaConfig.MediaFileLocation(media, extension);
         if (!await ffmpeg.TryExtractThumbnail(filePath,
             outputPath: thumbnailLocation,
             at: TimeSpan.FromSeconds(at)))
@@ -210,7 +259,7 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
         if (isPrimary)
         {
             media.Thumbnail = at;
-            await nfo.Save(media, Path.Combine(mediaConfig.MediaDirectory, $"{media.Md5}.nfo"));
+            await nfo.Save(media, mediaConfig.MediaFileLocation(media, ".nfo"));
             await context.SaveChangesAsync();
         }
 

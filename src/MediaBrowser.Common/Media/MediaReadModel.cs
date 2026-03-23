@@ -33,6 +33,9 @@ public partial class MediaReadModel
     [JsonPropertyName("duration")]
     public required double? Duration { get; init; }
 
+    [JsonPropertyName("start")]
+    public double? Start { get; set; }
+
     [JsonPropertyName("md5")]
     public required string Md5 { get; init; }
 
@@ -86,4 +89,7 @@ public partial class MediaReadModel
 
     [JsonPropertyName("fanartThumbnail")]
     public required string? FanartThumbnailUrl { get; init; }
+
+    [JsonPropertyName("parentId")]
+    public Guid? ParentId { get; init; }
 }

@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angula
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Navigation, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { MediaReadModel, MediaService, UpdateMediaRequest } from '../services';
+import { AddChapterRequest, MediaReadModel, MediaService, UpdateMediaRequest } from '../services';
 import { firstValueFrom } from 'rxjs';
 import { ImportService } from '../services/import.service';
 import { SpinnerComponent } from '../spinner/spinner';
@@ -14,6 +14,12 @@ import { ReadonlyInfoSectionComponent, MediaReadOnlyData } from './readonly-info
 import { ThumbnailSectionComponent, ThumbnailData, MediaThumbnailData } from './thumbnail-section/thumbnail-section.component';
 import { ImportComponent } from '../import/import';
 import { SearchComponent } from '../search/search';
+
+export enum MediaEditorMode {
+  Edit = 'Edit',
+  Import = 'Import',
+  AddChapter = 'AddChapter'
+}
 
 @Component({
   selector: 'app-media-editor',
@@ -45,16 +51,12 @@ export class MediaEditorComponent implements OnInit {
   get hasNavigationHistory(): boolean {
     return this.navigation?.previousNavigation != null;
   }
+  get readWriteInProgress(): boolean {
+    return this.isCreatingThumbnail || this.isLoading || this.isSaving;
+  }
 
-  filename: string | null = null;
-  isCreatingThumbnail: boolean = false;
-  isLoading: boolean = false;
-  isSaving: boolean = false;
-  mediaData: MediaReadModel | null = null;
-  mediaId: string | null = null;
-  thumbnail: ThumbnailData | null = null;
-
-  // Form fields for editable properties
+  chapterDuration?: number;
+  chapterStart?: number;
   editableData: UpdateMediaRequest = {
     cast: [],
     directors: [],
@@ -65,17 +67,51 @@ export class MediaEditorComponent implements OnInit {
     title: '',
     writers: [],
   };
+  filename?: string;
+  isCreatingThumbnail: boolean = false;
+  isLoading: boolean = false;
+  isSaving: boolean = false;
+  mediaData?: MediaReadModel;
+  mediaId?: string;
+  mode: MediaEditorMode = MediaEditorMode.Edit;
+  thumbnail?: ThumbnailData;
 
+  // init component based on route params and load media data if needed
   async ngOnInit(): Promise<void> {
     try {
       this.isLoading = true;
-      this.mediaId = this.route.snapshot.paramMap.get('id');
-      if (this.mediaId) {
-        await this.loadMediaById(this.mediaId);
+
+      if (this.route.snapshot.paramMap.has('fileName')) {
+        this.mode = MediaEditorMode.Import;
+
+        // set route params
+        this.chapterStart = undefined;
+        this.chapterDuration = undefined;
+        this.filename = this.route.snapshot.paramMap.get('fileName')!;
+        this.mediaId = undefined;
+      } else if (this.route.snapshot.paramMap.has('start') && this.route.snapshot.paramMap.has('end')) {
+        this.mode = MediaEditorMode.AddChapter;
+        
+        // set route params
+        this.chapterStart = Number(this.route.snapshot.paramMap.get('start'));
+        this.chapterDuration = Number(this.route.snapshot.paramMap.get('end')) - this.chapterStart;
+        this.filename = undefined;
+        this.mediaId = this.route.snapshot.paramMap.get('id')!;
       } else {
-        await this.loadMediaToImport();
+        this.mode = MediaEditorMode.Edit;
+
+        // set route params
+        this.chapterStart = undefined;
+        this.chapterDuration = undefined;
+        this.filename = undefined;
+        this.mediaId = this.route.snapshot.paramMap.get('id')!;
       }
-      this.setEditableData(this.mediaData!);
+
+      // read the media data based on the mode and route params
+      await this.loadMedia();
+
+      this.setEditableData();
+      this.setThumbnail();
     } catch (error) {
       console.error('Error during initialization:', error);
     } finally {
@@ -83,50 +119,83 @@ export class MediaEditorComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
+  async loadMedia(): Promise<void> {
+    this.mediaData = this.navigation?.extras.state?.['mediaData'];
 
-  async loadMediaById(id: string): Promise<void> {
-    this.filename = null;
-    this.mediaData = this.navigation?.extras.state?.['mediaData'] ?? await firstValueFrom(this.mediaService.get(id));
-    this.thumbnail = {
-      selectedImageFile: null,
-      thumbnail: this.mediaData!.thumbnail!,
-      thumbnailPreviewUrl: this.mediaData!.thumbnailUrl || ''
-    };
-  }
-
-  async loadMediaToImport(): Promise<void> {
-    this.filename = this.route.snapshot.paramMap.get('fileName');
-    this.mediaData = this.navigation?.extras.state?.['mediaData'] ??
-      ImportComponent.convertToMediaReadModel(await firstValueFrom(this.importService.readFileInfo(this.filename!)));
-    this.thumbnail = null;
-
-    if (!this.mediaData || !this.filename) {
-      throw new Error('No media data or filename found');
+    if (this.mode === MediaEditorMode.Import) {
+      this.mediaData ??= ImportComponent.convertToMediaReadModel(await firstValueFrom(this.importService.readFileInfo(this.filename!)));
+    } else if (this.mediaData?.id !== this.mediaId) {
+      this.mediaData = await firstValueFrom(this.mediaService.get(this.mediaId!));
     }
   }
-
-  setEditableData(mediaData: MediaReadModel): void {
+  setThumbnail(): void {
+    if (this.mode === MediaEditorMode.AddChapter) {
+      this.thumbnail = {
+        selectedImageFile: null,
+        thumbnail: this.chapterStart!,
+        thumbnailPreviewUrl: ''
+      };
+    } else if (this.mode === MediaEditorMode.Edit) {
+      this.thumbnail = {
+        selectedImageFile: null,
+        thumbnail: this.mediaData!.thumbnail!,
+        thumbnailPreviewUrl: this.mediaData!.thumbnailUrl || ''
+      };
+    } else {
+      this.thumbnail = {
+        selectedImageFile: null,
+        thumbnail: 0,
+        thumbnailPreviewUrl: ''
+      };
+    }
+    console.log('Initial thumbnail set:', this.thumbnail);
+  }
+  setEditableData(): void {
     this.editableData = {
-      cast: [...mediaData.cast],
-      description: mediaData.description,
-      directors: [...mediaData.directors],
-      genres: [...mediaData.genres],
-      originalTitle: mediaData.originalTitle,
-      producers: [...mediaData.producers],
-      title: mediaData.title,
-      userStarRating: mediaData.userStarRating,
-      writers: [...mediaData.writers],
+      cast: [...this.mediaData!.cast],
+      description: this.mediaData!.description,
+      directors: [...this.mediaData!.directors],
+      genres: [...this.mediaData!.genres],
+      originalTitle: this.mediaData!.originalTitle,
+      producers: [...this.mediaData!.producers],
+      title: this.mediaData!.title,
+      userStarRating: this.mediaData!.userStarRating,
+      writers: [...this.mediaData!.writers],
     };
   }
 
+  // save and cancel methods
   async saveChanges(): Promise<void> {
     if (!this.mediaData) {
       return;
     }
 
     this.isSaving = true;
+
     try {
-      if (this.filename) {
+      if (this.mode === MediaEditorMode.AddChapter) {
+
+        let thumbnailData: number | undefined;
+
+        if (typeof this.thumbnail?.thumbnail === 'number') {
+          thumbnailData = this.thumbnail.thumbnail;
+        } else if (this.mediaData?.mime.startsWith('video/')) {
+          thumbnailData = this.chapterStart!;
+        }
+
+        const chapterRequest: AddChapterRequest = {
+          ...this.editableData,
+          duration: this.chapterDuration!,
+          start: this.chapterStart!,
+          thumbnail: thumbnailData
+        };
+
+        await firstValueFrom(this.mediaService.addChapter(this.mediaId!, chapterRequest));
+      } else if (this.mode === MediaEditorMode.Edit) {
+        this.mediaData = await firstValueFrom(this.mediaService.update(this.mediaId!, {
+          ...this.editableData
+        }));
+      } else if (this.mode === MediaEditorMode.Import) {
 
         let thumbnail = this.thumbnail?.thumbnail ?? undefined;
         if (!this.thumbnail?.selectedImageFile 
@@ -135,7 +204,7 @@ export class MediaEditorComponent implements OnInit {
           thumbnail = 0;
         }
 
-        const media = await firstValueFrom(this.importService.import(this.filename, {
+        const media = await firstValueFrom(this.importService.import(this.filename!, {
           ...this.editableData,
           thumbnail: thumbnail
         }));
@@ -143,18 +212,12 @@ export class MediaEditorComponent implements OnInit {
         if (this.thumbnail?.selectedImageFile) {
           await firstValueFrom(this.mediaService.updateThumbnail(media.id, this.thumbnail.selectedImageFile));
         }
-      } else if (this.mediaId) {
-        await firstValueFrom(this.mediaService.update(this.mediaId, {
-          ...this.editableData
-        }));
       }
+
       SearchComponent.clearCachedResults();
-      PeopleSectionComponent.clearCacheIfStale(this.getPeopleData());
-      if (this.hasNavigationHistory) {
-        this.location.back();
-      } else if (this.filename) {
-        this.router.navigate(['/search'], { queryParams: { sort: SearchComponent.DEFAULT_SORT } });
-      }
+      PeopleSectionComponent.clearCacheIfStale(this.peopleData);
+
+      this.cancel();
     } catch (error) {
       console.error('Error saving media changes:', error);
     } finally {
@@ -162,7 +225,6 @@ export class MediaEditorComponent implements OnInit {
       this.cdr.detectChanges();
     }
   }
-
   cancel(): void {
     if (this.hasNavigationHistory) {
       this.location.back();
@@ -171,37 +233,15 @@ export class MediaEditorComponent implements OnInit {
     }
   }
 
-  // Helper methods for formatted display
-  formatDuration(seconds?: number): string {
-    seconds ??= 0;
-
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = (seconds % 60).toFixed(3);
-    
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }
-
-  formatDateTime(epochMs: string): string {
-    const date = new Date(parseInt(epochMs));
-    return date.toLocaleString();
-  }
-
-  formatFileSize(bytes?: number): string {
-    const mb = (bytes ?? 0) / (1024 * 1024);
-    return `${mb.toFixed(2)} MB`;
-  }
-
   // Component data getters
-  getTitleData(): TitleData {
+  get titleData(): TitleData {
     return {
       title: this.editableData.title,
       originalTitle: this.editableData.originalTitle,
       description: this.editableData.description
     };
   }
-
-  getPeopleData(): PeopleData {
+  get peopleData(): PeopleData {
     return {
       cast: this.editableData.cast,
       directors: this.editableData.directors,
@@ -210,41 +250,49 @@ export class MediaEditorComponent implements OnInit {
       writers: this.editableData.writers
     };
   }
-
-  getReadOnlyData(): MediaReadOnlyData {
+  get readOnlyData(): MediaReadOnlyData {
     return {
-      id: this.mediaData!.id,
-      duration: this.mediaData!.duration,
-      size: this.mediaData!.size,
-      md5: this.mediaData!.md5,
       ctimeMs: this.mediaData!.ctimeMs,
-      mtimeMs: this.mediaData!.mtimeMs,
-      width: this.mediaData!.width,
+      duration: this.mediaData!.duration,
       height: this.mediaData!.height,
+      id: this.mediaData!.id,
+      md5: this.mediaData!.md5,
       mime: this.mediaData!.mime,
-      rating: this.mediaData!.rating,
-      published: this.mediaData!.published
+      mtimeMs: this.mediaData!.mtimeMs,
+      parentId: this.mediaData!.parentId,
+      published: this.mediaData!.published,
+      size: this.mediaData!.size,
+      start: this.mediaData!.start,
+      width: this.mediaData!.width,
     };
   }
-
-  getThumbnailMediaData(): MediaThumbnailData {
+  get saveButtonText(): string {
+    if (this.mode === MediaEditorMode.AddChapter) {
+      return 'Add Chapter';
+    }
+    if (this.mode === MediaEditorMode.Import) {
+      return 'Import File';
+    }
+    return 'Save Changes';
+  }
+  get thumbnailMediaData(): MediaThumbnailData {
     return {
       mime: this.mediaData!.mime,
+      start: this.chapterStart ?? this.mediaData!.start,
       url: this.mediaData!.url
     };
   }
+  get headerTitle(): string {
+    if (this.mode === MediaEditorMode.AddChapter) {
+      return 'Add Chapter';
+    }
+    if (this.mode === MediaEditorMode.Import) {
+      return 'Import Media';
+    }
+    return 'Edit Media';
+  }
 
   // Component event handlers
-  onTitleDataChange(titleData: TitleData): void {
-    this.editableData.title = titleData.title;
-    this.editableData.originalTitle = titleData.originalTitle;
-    this.editableData.description = titleData.description;
-  }
-
-  onRatingChange(rating: number): void {
-    this.editableData.userStarRating = rating;
-  }
-
   onPeopleDataChange(peopleData: PeopleData): void {
     this.editableData.cast = peopleData.cast;
     this.editableData.directors = peopleData.directors;
@@ -252,16 +300,9 @@ export class MediaEditorComponent implements OnInit {
     this.editableData.producers = peopleData.producers;
     this.editableData.writers = peopleData.writers;
   }
-
-  onThumbnailChange(thumbnail: ThumbnailData): void {
-    this.thumbnail = thumbnail;
+  onRatingChange(rating: number): void {
+    this.editableData.userStarRating = rating;
   }
-
-  onSetThumbnailPreview(): void {
-    // The thumbnail component handles the preview generation internally
-    // This method can be used for any additional logic if needed
-  }
-
   async onSaveThumbnail(): Promise<void> {
     if (!this.mediaId) {
       return;
@@ -281,5 +322,17 @@ export class MediaEditorComponent implements OnInit {
       this.isCreatingThumbnail = false;
       this.cdr.detectChanges();
     }
+  }
+  onSetThumbnailPreview(): void {
+    // The thumbnail component handles the preview generation internally
+    // This method can be used for any additional logic if needed
+  }
+  onThumbnailChange(thumbnail: ThumbnailData): void {
+    this.thumbnail = thumbnail;
+  }
+  onTitleDataChange(titleData: TitleData): void {
+    this.editableData.title = titleData.title;
+    this.editableData.originalTitle = titleData.originalTitle;
+    this.editableData.description = titleData.description;
   }
 }

@@ -218,6 +218,31 @@ BEGIN
     VALUES (N'20260306204659_ExpandPasswordLength', N'9.0.9');
 END;
 
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260316032003_Chapters'
+)
+BEGIN
+    ALTER TABLE [media] ADD [parent_id] uniqueidentifier NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260316032003_Chapters'
+)
+BEGIN
+    ALTER TABLE [media] ADD [start] float NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260316032003_Chapters'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260316032003_Chapters', N'9.0.9');
+END;
+
 COMMIT;
 GO
 

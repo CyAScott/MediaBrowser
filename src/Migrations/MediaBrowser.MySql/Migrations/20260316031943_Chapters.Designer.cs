@@ -3,38 +3,48 @@ using System;
 using MediaBrowser;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace MediaBrowser.Migrations
 {
-    [DbContext(typeof(MediaSqliteDbContext))]
-    partial class MediaSqliteDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MediaMySqlDbContext))]
+    [Migration("20260316031943_Chapters")]
+    partial class Chapters
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("MediaBrowser.Media.Cast.CastEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("id")
                         .HasAnnotation("Relational:JsonPropertyName", "id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("media_id")
                         .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("cast_member")
                         .HasAnnotation("Relational:JsonPropertyName", "name");
 
@@ -52,20 +62,22 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("id")
                         .HasAnnotation("Relational:JsonPropertyName", "id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("media_id")
                         .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("director")
                         .HasAnnotation("Relational:JsonPropertyName", "name");
 
@@ -83,20 +95,22 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("id")
                         .HasAnnotation("Relational:JsonPropertyName", "id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("media_id")
                         .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("genre")
                         .HasAnnotation("Relational:JsonPropertyName", "name");
 
@@ -114,127 +128,127 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id")
                         .HasAnnotation("Relational:JsonPropertyName", "id");
 
                     b.Property<DateTime?>("CreatedOn")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("created_on")
                         .HasAnnotation("Relational:JsonPropertyName", "createdOn");
 
                     b.Property<long>("CtimeMs")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("ctime_ms")
                         .HasAnnotation("Relational:JsonPropertyName", "ctimeMs");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(2000)")
                         .HasColumnName("description")
                         .HasAnnotation("Relational:JsonPropertyName", "description");
 
                     b.Property<double?>("Duration")
-                        .HasColumnType("REAL")
+                        .HasColumnType("double")
                         .HasColumnName("duration")
                         .HasAnnotation("Relational:JsonPropertyName", "duration");
 
                     b.Property<string>("Ffprobe")
                         .IsRequired()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("JSON")
                         .HasColumnName("ffprobe")
                         .HasAnnotation("Relational:JsonPropertyName", "ffprobe");
 
                     b.Property<int?>("Height")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("height")
                         .HasAnnotation("Relational:JsonPropertyName", "height");
 
                     b.Property<string>("Md5")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(32)")
                         .HasColumnName("md5")
                         .HasAnnotation("Relational:JsonPropertyName", "md5");
 
                     b.Property<string>("Mime")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("mime")
                         .HasAnnotation("Relational:JsonPropertyName", "mime");
 
                     b.Property<long>("MtimeMs")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("mtime_ms")
                         .HasAnnotation("Relational:JsonPropertyName", "mtimeMs");
 
                     b.Property<string>("OriginalTitle")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("original_title")
                         .HasAnnotation("Relational:JsonPropertyName", "originalTitle");
 
                     b.Property<Guid?>("ParentId")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("parent_id")
                         .HasAnnotation("Relational:JsonPropertyName", "parentId");
 
                     b.Property<string>("Path")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(500)")
                         .HasColumnName("path")
                         .HasAnnotation("Relational:JsonPropertyName", "path");
 
                     b.Property<string>("Published")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("published")
                         .HasAnnotation("Relational:JsonPropertyName", "published");
 
                     b.Property<double?>("Rating")
-                        .HasColumnType("REAL")
+                        .HasColumnType("double")
                         .HasColumnName("rating")
                         .HasAnnotation("Relational:JsonPropertyName", "rating");
 
                     b.Property<long?>("Size")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("bigint")
                         .HasColumnName("size")
                         .HasAnnotation("Relational:JsonPropertyName", "size");
 
                     b.Property<double?>("Start")
-                        .HasColumnType("REAL")
+                        .HasColumnType("double")
                         .HasColumnName("start")
                         .HasAnnotation("Relational:JsonPropertyName", "start");
 
                     b.Property<double?>("Thumbnail")
-                        .HasColumnType("REAL")
+                        .HasColumnType("double")
                         .HasColumnName("thumbnail")
                         .HasAnnotation("Relational:JsonPropertyName", "thumbnail");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(200)")
                         .HasColumnName("title")
                         .HasAnnotation("Relational:JsonPropertyName", "title");
 
                     b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("TEXT")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("updated_on")
                         .HasAnnotation("Relational:JsonPropertyName", "updatedOn");
 
                     b.Property<int?>("UserStarRating")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("user_star_rating")
                         .HasAnnotation("Relational:JsonPropertyName", "userStarRating");
 
                     b.Property<int?>("Width")
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("width")
                         .HasAnnotation("Relational:JsonPropertyName", "width");
 
@@ -247,20 +261,22 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("id")
                         .HasAnnotation("Relational:JsonPropertyName", "id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("media_id")
                         .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("producer")
                         .HasAnnotation("Relational:JsonPropertyName", "name");
 
@@ -278,20 +294,22 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasColumnName("id")
                         .HasAnnotation("Relational:JsonPropertyName", "id");
 
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
                     b.Property<Guid>("MediaId")
                         .HasMaxLength(36)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("media_id")
                         .HasAnnotation("Relational:JsonPropertyName", "mediaId");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("writer")
                         .HasAnnotation("Relational:JsonPropertyName", "name");
 
@@ -309,19 +327,19 @@ namespace MediaBrowser.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
+                        .HasColumnType("char(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(125)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(125)")
                         .HasColumnName("password_hash");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("user_name");
 
                     b.HasKey("Id");

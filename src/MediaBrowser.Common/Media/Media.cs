@@ -20,6 +20,7 @@ public partial class MediaEntity
 
     [Column("mime"), JsonPropertyName("mime")]
     public required string Mime { get; init; }
+    public bool IsImage() => Mime.StartsWith("image/", StringComparison.InvariantCulture);
 
     [Column("size"), JsonPropertyName("size")]
     public required long? Size { get; init; }
@@ -32,6 +33,9 @@ public partial class MediaEntity
 
     [Column("duration"), JsonPropertyName("duration")]
     public required double? Duration { get; set; }
+
+    [Column("start"), JsonPropertyName("start")]
+    public double? Start { get; set; }
 
     [Column("md5"), JsonPropertyName("md5"), MaxLength(32)]
     public required string Md5 { get; init; }
@@ -62,6 +66,9 @@ public partial class MediaEntity
 
     [Column("thumbnail"), JsonPropertyName("thumbnail")]
     public double? Thumbnail { get; set; }
+
+    [Column("parent_id"), JsonPropertyName("parentId")]
+    public Guid? ParentId { get; init; }
 
     [JsonPropertyName("cast"), UnorderedEquality]
     public ICollection<CastEntity> Cast { get; set; } = [];
@@ -106,10 +113,12 @@ public partial class MediaEntity
         Writers = Writers.Select(it => it.Name).ToList(),
         Url = $"/api/Media/{Id}/file",
         Thumbnail = Thumbnail,
-        ThumbnailUrl = Mime.StartsWith("image/", StringComparison.InvariantCulture) || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}.jpg"))
+        ThumbnailUrl = IsImage() || File.Exists(config.MediaFileLocation(this, ".jpg"))
             ? $"/api/Media/{Id}/file/thumbnail" : null,
-        FanartThumbnailUrl = Mime.StartsWith("image/", StringComparison.InvariantCulture) || File.Exists(System.IO.Path.Combine(config.MediaDirectory, $"{Md5}-fanart.jpg"))
-            ? $"/api/Media/{Id}/file/thumbnail-fanart" : null
+        FanartThumbnailUrl = IsImage() || File.Exists(config.MediaFileLocation(this, "-fanart.jpg"))
+            ? $"/api/Media/{Id}/file/thumbnail-fanart" : null,
+        Start = Start,
+        ParentId = ParentId
     };
 
     public static MediaEntity Create(
@@ -125,7 +134,8 @@ public partial class MediaEntity
         Guid? mediaId = null,
         double? thumbnail = null,
         int? height = null, int? width = null,
-        long? ctimeMs = null, long? mtimeMs = null)
+        long? ctimeMs = null, long? mtimeMs = null,
+        Guid? parentId = null, double? start = null, double? duration = null)
     {
         var castEntities = new List<CastEntity>();
         var directorEntities = new List<DirectorEntity>();
@@ -149,7 +159,7 @@ public partial class MediaEntity
             Size = fileInfo.Length,
             Width = width ?? ffprobe.Streams?.Select(it => it.Width).OfType<int>().Cast<int?>().FirstOrDefault(),
             Height = height ?? ffprobe.Streams?.Select(it => it.Height).OfType<int>().Cast<int?>().FirstOrDefault(),
-            Duration = double.Parse(ffprobe.Format?.Duration ?? "0", CultureInfo.InvariantCulture),
+            Duration = duration ?? double.Parse(ffprobe.Format?.Duration ?? "0", CultureInfo.InvariantCulture),
             Md5 = hash,
             Rating = request.Rating,
             UserStarRating = request.UserStarRating,
@@ -157,6 +167,8 @@ public partial class MediaEntity
             MtimeMs = mtimeMs ?? Convert.ToInt64((fileInfo.LastWriteTimeUtc - DateTime.UnixEpoch).TotalMilliseconds),
             Ffprobe = ffprobe,
             Thumbnail = thumbnail,
+            Start = start,
+            ParentId = parentId,
 
             Cast = castEntities,
             Directors = directorEntities,
@@ -208,6 +220,48 @@ public partial class MediaEntity
             .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
             .Select(name => new WriterEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList();
     }
+
+    public MediaEntity CreateChapter(AddChapterRequest request) => new()
+    {
+        Id = Guid.CreateVersion7(),
+        CtimeMs = CtimeMs,
+        CreatedOn = CreatedOn,
+        UpdatedOn = UpdatedOn,
+        Path = Path,
+        Title = request.Title,
+        OriginalTitle = request.OriginalTitle,
+        Description = request.Description,
+        Mime = Mime,
+        Size = Size,
+        Width = Width,
+        Height = Height,
+        Duration = request.Duration,
+        Md5 = Md5,
+        Rating = request.Rating,
+        UserStarRating = request.UserStarRating,
+        Published = Published,
+        MtimeMs = MtimeMs,
+        Ffprobe = Ffprobe,
+        Thumbnail = request.Thumbnail,
+        Start = request.Start,
+        ParentId = Id,
+
+        Cast = request.Cast
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new CastEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList(),
+        Directors = request.Directors
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new DirectorEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList(),
+        Genres = request.Genres
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new GenreEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList(),
+        Producers = request.Producers
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new ProducerEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList(),
+        Writers = request.Writers
+            .Where(name => !string.IsNullOrWhiteSpace(name)).Distinct()
+            .Select(name => new WriterEntity {Id = 0, Media = this, MediaId = Id, Name = name}).ToList()
+    };
 }
 
 public class MediaEntityConfiguration(DbType type) : IEntityTypeConfiguration<MediaEntity>

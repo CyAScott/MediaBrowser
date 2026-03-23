@@ -27,6 +27,14 @@ public class MediaConfig(IConfiguration configuration)
         return ext;
     }
 
+    /// <summary>
+    /// Creates a file location for a media file based on its MD5 hash and optional parent ID.
+    /// If the media has a parent ID, it appends it to the file name to allow for multiple files with the same hash (e.g., different chapters).
+    /// The extension is determined from the media's MIME type, or can be overridden with the optional extension parameter.
+    /// </summary>
+    public string MediaFileLocation(MediaEntity media, string? extension = null) =>
+        Path.Combine(MediaDirectory, $"{media.Md5}{(media.ParentId == null || extension == null ? "" : $".{media.Id}")}{extension ?? $".{GetExtensionFromMime(media.Mime)}"}");
+
     public string MediaDirectory { get; } = configuration["media:mediaDirectory"]!;
     public string ProducersDirectory { get; } = configuration["media:producersDirectory"]!;
     public string WritersDirectory { get; } = configuration["media:writersDirectory"]!;

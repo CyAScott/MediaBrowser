@@ -56,31 +56,7 @@ export class PeopleSectionComponent implements OnInit {
     }
   }
 
-  addArrayItem(arrayName: keyof PeopleData): void {
-    this.peopleData[arrayName].push('');
-    this.onPeopleChange();
-    this.focusNewlyAddedInput(arrayName);
-  }
-
-  private focusNewlyAddedInput(arrayName: keyof PeopleData): void {
-    setTimeout(() => {
-      const inputsByType: Record<keyof PeopleData, QueryList<TypeaheadInputComponent>> = {
-        cast: this.castInputs,
-        directors: this.directorsInputs,
-        genres: this.genresInputs,
-        producers: this.producersInputs,
-        writers: this.writersInputs
-      };
-
-      const inputList = inputsByType[arrayName];
-      if (!inputList) {
-        return;
-      }
-
-      const newlyAddedInput = inputList.toArray().at(-1);
-      newlyAddedInput?.focus();
-    });
-  }
+  // initialize allPeople from cache or API on component init
 
   async ngOnInit(): Promise<void> {
     const cachedPeopleValue = localStorage.getItem(PeopleSectionComponent.CACHE_KEY);
@@ -98,8 +74,30 @@ export class PeopleSectionComponent implements OnInit {
     }
   }
 
-  onPeopleChange(): void {
-    this.peopleDataChange.emit(this.peopleData);
+  // Add/remove items from each array and emit changes
+
+  addArrayItem(arrayName: keyof PeopleData): void {
+    this.peopleData[arrayName].push('');
+    this.onPeopleChange();
+
+    // Focus the newly added input after it appears in the DOM
+    setTimeout(() => {
+      const inputsByType: Record<keyof PeopleData, QueryList<TypeaheadInputComponent>> = {
+        cast: this.castInputs,
+        directors: this.directorsInputs,
+        genres: this.genresInputs,
+        producers: this.producersInputs,
+        writers: this.writersInputs
+      };
+
+      const inputList = inputsByType[arrayName];
+      if (!inputList) {
+        return;
+      }
+
+      const newlyAddedInput = inputList.toArray().at(-1);
+      newlyAddedInput?.focus();
+    });
   }
 
   removeArrayItem(arrayName: keyof PeopleData, index: number): void {
@@ -133,6 +131,10 @@ export class PeopleSectionComponent implements OnInit {
   }
 
   // Handle suggestion selection for updating array values
+  onPeopleChange(): void {
+    this.peopleDataChange.emit(this.peopleData);
+  }
+
   onSuggestionSelected(arrayName: keyof PeopleData, index: number, selectedValue: string): void {
     this.peopleData[arrayName][index] = selectedValue;
     this.onPeopleChange();

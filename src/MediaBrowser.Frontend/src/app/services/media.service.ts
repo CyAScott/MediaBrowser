@@ -45,6 +45,8 @@ export interface MediaReadModel {
   thumbnail?: number;
   thumbnailUrl?: string;
   fanartUrl?: string;
+  start?: number;
+  parentId?: string;
 }
 
 export interface SearchResponse {
@@ -65,6 +67,12 @@ export interface UpdateMediaRequest {
   writers: string[];
 }
 
+export interface AddChapterRequest extends UpdateMediaRequest {
+  thumbnail?: number;
+  duration: number;
+  start: number;
+};
+
 export interface UpdateThumbnailRequest {
   at: number;
 }
@@ -84,6 +92,10 @@ export class MediaService {
 
   update(id: string, request: UpdateMediaRequest): Observable<MediaReadModel> {
     return this.apiService.put<MediaReadModel>(`/media/${id}`, request);
+  }
+
+  addChapter(id: string, request: AddChapterRequest): Observable<MediaReadModel> {
+    return this.apiService.post<MediaReadModel>(`/media/${id}/chapters`, request);
   }
 
   private readonly seed: number = (Math.random() * 0x100000000 | 0);

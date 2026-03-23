@@ -27,15 +27,15 @@ export class TypeaheadInputComponent implements ControlValueAccessor, OnInit, On
   showDropdown: boolean = false;
   highlightedIndex: number = -1;
 
-  private onChange = (value: string) => {};
-  private onDocumentClick(event: Event): void {
+  onChange = (value: string) => {};
+  onDocumentClick(event: Event): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.typeahead-container')) {
       this.showDropdown = false;
     }
   }
-  private onTouched = () => {};
-  private updateFilteredSuggestions(): void {
+  onTouched = () => {};
+  updateFilteredSuggestions(): void {
     if (!this.displayValue) {
       this.filteredSuggestions = [];
       return;

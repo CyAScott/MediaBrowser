@@ -2,17 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 export interface MediaReadOnlyData {
-  id: string;
-  duration?: number;
-  size?: number;
-  md5: string;
   ctimeMs: string;
-  mtimeMs: string;
-  width?: number;
+  duration?: number;
   height?: number;
+  id: string;
+  md5: string;
   mime: string;
-  rating?: number;
+  mtimeMs: string;
+  parentId?: string;
   published?: string;
+  size?: number;
+  start?: number;
+  width?: number;
 }
 
 @Component({
@@ -25,7 +26,7 @@ export class ReadonlyInfoSectionComponent {
   @Input() mediaData!: MediaReadOnlyData;
   @Input() showSection: boolean = true;
 
-  formatDateTime(epochMs: string): string {
+  static formatDateTime(epochMs: string): string {
     const date = new Date(parseInt(epochMs));
     return date.toLocaleString();
   }
@@ -40,12 +41,22 @@ export class ReadonlyInfoSectionComponent {
     return `${hours ? `${hours}:` : ''}${minutes.toString().padStart(hours ? 2 : 1, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
+  static formatFileSize(bytes?: number): string {
+    bytes ??= 0;
+
+    const mb = bytes / (1024 * 1024);
+    return `${mb.toFixed(2)} MB`;
+  }
+
+  formatDateTime(epochMs: string): string {
+    return ReadonlyInfoSectionComponent.formatDateTime(epochMs);
+  }
+
   formatDuration(seconds?: number): string {
     return ReadonlyInfoSectionComponent.formatDuration(seconds);
   }
 
   formatFileSize(bytes?: number): string {
-    const mb = (bytes ?? 0) / (1024 * 1024);
-    return `${mb.toFixed(2)} MB`;
+    return ReadonlyInfoSectionComponent.formatFileSize(bytes);
   }
 }

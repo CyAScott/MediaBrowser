@@ -25,27 +25,28 @@ describe('ThumbnailSectionComponent', () => {
     expect(component.getVideoUrl()).toBe('');
 
     component.mediaData = { mime: 'video/mp4', url: 'https://video.test/file.mp4' };
-    expect(component.getVideoUrl()).toBe('https://video.test/file.mp4');
+    expect(component.getVideoUrl()).toBe('https://video.test/file.mp4#t=0');
+
+    component.mediaData = { mime: 'video/mp4', url: 'https://video.test/file.mp4', start: 10 };
+    expect(component.getVideoUrl()).toBe('https://video.test/file.mp4#t=10');
   });
 
-  it('loads initial thumbnail in ngAfterViewInit and emits the selection', () => {
-    vi.useFakeTimers();
-
+  it('loads initial thumbnail in onVideoMetadataLoaded and emits the selection', () => {
     const fixture = TestBed.createComponent(ThumbnailSectionComponent);
     const component = fixture.componentInstance;
     const emitSpy = vi.spyOn(component.thumbnailChange, 'emit');
 
     component.initialThumbnail = initialThumbnail;
-    component.ngAfterViewInit();
+    component.ngOnInit(); // Sets isLoading = true
 
-    vi.runAllTimers();
+    // Simulate video metadata loaded event
+    component.onVideoMetadataLoaded();
 
     expect(component.thumbnails).toEqual([initialThumbnail]);
     expect(component.selectedThumbnail).toEqual(initialThumbnail);
     expect(component.selectedThumbnailIndex).toBe(0);
     expect(emitSpy).toHaveBeenCalledWith(initialThumbnail);
-
-    vi.useRealTimers();
+    expect(component.isLoading).toBe(false);
   });
 
   it('handles drag over/leave and drop states', () => {
@@ -87,6 +88,9 @@ describe('ThumbnailSectionComponent', () => {
     } as unknown as DragEvent;
 
     component.onDrop(dropWrongFile);
+    // Based on implementation, this logs "Please select an image file" via handleImageFile
+    // But handleImageFile is called. We need to spy on console.error OR handleImageFile.
+    // The previous test expected errorSpy to be called.
     expect(errorSpy).toHaveBeenCalledWith('Please select an image file');
     errorSpy.mockRestore();
   });
@@ -133,37 +137,44 @@ describe('ThumbnailSectionComponent', () => {
     errorSpy.mockRestore();
   });
 
-  it('mutes/focuses video and applies selected timestamp when metadata loads', () => {
+  it('focuses video and generates preview if missing when metadata loads', () => {
     const fixture = TestBed.createComponent(ThumbnailSectionComponent);
     const component = fixture.componentInstance;
 
+    // Mock CDR to prevent ViewChild overwrite
+    (component as any).cdr = { detectChanges: vi.fn() };
+
     const video = document.createElement('video');
-    video.currentTime = 2;
     (video as HTMLVideoElement).focus = vi.fn();
+    // Helper to bypass canvas errors if generateThumbnailPreview is called
+    vi.spyOn(component as any, 'generateThumbnailPreview').mockReturnValue('mock-preview');
 
     component.videoPlayer = new ElementRef(video);
-    component.selectedThumbnail = {
+    component.initialThumbnail = {
       thumbnail: 14,
-      thumbnailPreviewUrl: 'preview',
+      thumbnailPreviewUrl: '',
       selectedImageFile: null
     };
 
+    component.ngOnInit();
     component.onVideoMetadataLoaded();
 
-    expect(video.muted).toBe(true);
-    expect(video.volume).toBe(0);
-    expect(video.currentTime).toBe(14);
     expect(video.focus).toHaveBeenCalledTimes(1);
+    expect(component.initialThumbnail.thumbnailPreviewUrl).toBe('mock-preview');
 
-    component.selectedThumbnail = {
-      thumbnail: null,
-      thumbnailPreviewUrl: 'preview',
+    // Check scenario where thumbnail does not need generation
+    component.initialThumbnail = {
+      thumbnail: 14,
+      thumbnailPreviewUrl: 'existing-preview',
       selectedImageFile: null
     };
-    video.currentTime = 7;
+    (component as any).generateThumbnailPreview.mockClear();
 
+    // Reset loading state
+    component.ngOnInit();
     component.onVideoMetadataLoaded();
-    expect(video.currentTime).toBe(7);
+
+    expect((component as any).generateThumbnailPreview).not.toHaveBeenCalled();
   });
 
   it('opens file browser and navigates thumbnails while emitting updates', () => {

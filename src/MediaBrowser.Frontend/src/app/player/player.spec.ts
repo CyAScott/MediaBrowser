@@ -48,6 +48,7 @@ function createMediaReadModel(id = 'media-1', mime = 'video/mp4'): MediaReadMode
     producers: [],
     writers: [],
     url: `https://example.com/${id}`,
+    duration: 120,
     thumbnailUrl: `https://example.com/${id}.jpg`
   };
 }
@@ -97,7 +98,23 @@ async function createComponent(overrides?: {
 
 describe('PlayerComponent', () => {
   beforeEach(() => {
-    localStorage.clear();
+    let store: Record<string, string> = {};
+    const localStorageMock = {
+      getItem: vi.fn((key: string) => store[key] || null),
+      setItem: vi.fn((key: string, value: string) => {
+        store[key] = value.toString();
+      }),
+      clear: vi.fn(() => {
+        store = {};
+      }),
+      removeItem: vi.fn((key: string) => {
+        delete store[key];
+      }),
+      key: vi.fn(),
+      length: 0,
+    };
+    vi.stubGlobal('localStorage', localStorageMock);
+    
     vi.useFakeTimers();
     vi.restoreAllMocks();
   });
@@ -119,7 +136,8 @@ describe('PlayerComponent', () => {
     const fromNavigation = createMediaReadModel('from-nav');
     const { component, mocks } = await createComponent({ navigationMediaData: fromNavigation });
 
-    await component.loadMediaById('ignored-id');
+    component.mediaId = 'from-nav';
+    await component.loadMedia();
 
     expect(mocks.mediaService.get).not.toHaveBeenCalled();
     expect(component.mediaData?.id).toBe('from-nav');
@@ -129,7 +147,8 @@ describe('PlayerComponent', () => {
     const fromService = createMediaReadModel('from-service');
     const { component, mocks } = await createComponent({ serviceMediaData: fromService });
 
-    await component.loadMediaById('from-service');
+    component.mediaId = 'from-service';
+    await component.loadMedia();
 
     expect(mocks.mediaService.get).toHaveBeenCalledWith('from-service');
     expect(component.mediaData?.id).toBe('from-service');
@@ -140,9 +159,10 @@ describe('PlayerComponent', () => {
     const { component, mocks } = await createComponent();
     mocks.mediaService.get.mockReturnValueOnce(throwError(() => new Error('network failed')));
 
-    await component.loadMediaById('broken');
+    component.mediaId = 'broken';
+    await component.loadMedia();
 
-    expect(component.mediaData).toBeNull();
+    expect(component.mediaData).toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -171,6 +191,76 @@ describe('PlayerComponent', () => {
     const { component, mocks } = await createComponent();
 
     component.editMedia();
+
+    expect(mocks.router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('toggles chapter panel visibility', async () => {
+    const { component } = await createComponent();
+
+    component.mediaData = createMediaReadModel();
+    const video = document.createElement('video');
+    Object.defineProperty(video, 'duration', { value: 120 });
+    // @ts-ignore
+    video.pause = vi.fn();
+    component.videoElement = new ElementRef(video);
+    
+    expect(component.chapterPanelVisible).toBe(false);
+
+    component.toggleChapterPanel();
+    expect(component.chapterPanelVisible).toBe(true);
+
+    component.toggleChapterPanel();
+    expect(component.chapterPanelVisible).toBe(false);
+  });
+
+  it('updates chapter range and seeks media element while dragging handles', async () => {
+    const { component } = await createComponent();
+    component.chapterStart = 10;
+    component.chapterEnd = 40;
+
+    const video = document.createElement('video');
+    component.videoElement = new ElementRef(video);
+
+    component.onRangeInput('start', {
+      target: { value: '15' }
+    } as unknown as Event);
+
+    expect(component.chapterStart).toBe(15);
+    expect(video.currentTime).toBe(15);
+
+    component.onRangeInput('end', {
+      target: { value: '32' }
+    } as unknown as Event);
+
+    expect(component.chapterEnd).toBe(32);
+    expect(video.currentTime).toBe(32);
+  });
+
+  it('navigates to add chapter route with range in query params and state', async () => {
+    const mediaData = createMediaReadModel('chapter-parent');
+    const { component, mocks } = await createComponent();
+    component.mediaId = 'chapter-parent';
+    component.mediaData = mediaData;
+    component.chapterStart = 12.5;
+    component.chapterEnd = 45.2;
+
+    component.goToAddChapter();
+
+    expect(mocks.router.navigate).toHaveBeenCalledWith(['/edit', 'chapter-parent', 12.5, 45.2, 'chapter'], {
+      state: {
+        mediaData
+      }
+    });
+  });
+
+  it('does not navigate to add chapter route when range is invalid', async () => {
+    const { component, mocks } = await createComponent();
+    component.mediaId = 'chapter-parent';
+    component.chapterStart = 10;
+    component.chapterEnd = 10;
+
+    component.goToAddChapter();
 
     expect(mocks.router.navigate).not.toHaveBeenCalled();
   });
@@ -256,7 +346,7 @@ describe('PlayerComponent', () => {
     const audio = document.createElement('audio');
     audio.volume = 0.6;
 
-    component.onVolumeChange({ target: audio } as Event);
+    component.onVolumeChange({ target: audio } as unknown as Event);
 
     expect(localStorage.getItem('mediaBrowser_volume')).toBe('0.6');
   });
@@ -276,10 +366,10 @@ describe('PlayerComponent', () => {
     const { component } = await createComponent();
 
     component.onMouseLeave();
-    expect((component as any).hideTimeout).not.toBeNull();
+    expect((component as any).hideTimeout).toBeDefined();
 
     component.ngOnDestroy();
 
-    expect((component as any).hideTimeout).toBeNull();
+    expect((component as any).hideTimeout).toBeUndefined();
   });
 });

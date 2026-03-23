@@ -11,37 +11,44 @@
         </button>
       }
       <h2>{{ mediaData.title }}</h2>
-      <button (click)="editMedia()" class="edit-button">
-        <i class="fa-solid fa-file-pen"></i>
-      </button>
+      <div class="header-actions">
+        <button (click)="editMedia()" class="edit-button">
+          <i class="fa-solid fa-file-pen"></i>
+        </button>
+        @if (mediaData && mediaData.duration && !mediaData.mime.startsWith('image/')) {
+          <button (click)="toggleChapterPanel()" class="chapter-toggle-button" title="Create chapter range">
+            <i class="fa-solid fa-bookmark"></i>
+          </button>
+        }
+      </div>
     </div>
   }
   
   <div class="player">
     @if (mediaData && mediaData.mime.startsWith('video/')) {
       <video 
-        (loadedmetadata)="applySavedVolume()"
+        (loadedmetadata)="onMediaMetadataLoaded()"
         (volumechange)="onVolumeChange($event)"
         [poster]="mediaData.thumbnailUrl"
         #videoElement
         autoplay
         class="video-element"
         controls>
-        <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+        <source [src]="mediaSourceUrl" [type]="mediaData.mime">
         Your browser does not support the video tag.
       </video>
     }
 
     @if (mediaData && mediaData.mime.startsWith('audio/')) {
       <audio 
-        (loadedmetadata)="applySavedVolume()"
+        (loadedmetadata)="onMediaMetadataLoaded()"
         (volumechange)="onVolumeChange($event)"
         [ngStyle]="{'backgroundImage':'url(' + mediaData.thumbnailUrl + ')'}"
         #audioElement
         autoplay
         class="audio-element"
         controls>
-        <source [src]="mediaData.url" type="{{ mediaData.mime }}">
+        <source [src]="mediaSourceUrl" [type]="mediaData.mime">
         Your browser does not support the audio element.
       </audio>
     }
@@ -53,6 +60,43 @@
         class="image-element"/>
     }
   </div>
+
+  @if (mediaData && mediaData.duration && !mediaData.mime.startsWith('image/') && chapterPanelVisible) {
+    <div class="chapter-panel">
+      <div class="chapter-slider-container">
+        <div class="chapter-slider-track"></div>
+        <div class="chapter-slider-range" [style.left.%]="startPercent" [style.width.%]="selectedRangeWidth"></div>
+        <input
+          (input)="onRangeInput('start', $event)"
+          [max]="mediaDuration"
+          [min]="0"
+          [step]="RANGE_STEP"
+          [value]="chapterStart"
+          class="chapter-slider chapter-slider-start"
+          type="range" />
+        <input
+          (input)="onRangeInput('end', $event)"
+          [max]="mediaDuration"
+          [min]="0"
+          [step]="RANGE_STEP"
+          [value]="chapterEnd"
+          class="chapter-slider chapter-slider-end"
+          type="range" />
+        <span class="chapter-handle-label chapter-handle-label-start" [style.left.%]="startPercent">Start</span>
+        <span class="chapter-handle-label chapter-handle-label-end" [style.left.%]="endPercent">Stop</span>
+      </div>
+
+      <div class="chapter-time-values">
+        <span>Start {{ formatTimestamp(chapterStart) }}</span>
+        <span>Stop {{ formatTimestamp(chapterEnd) }}</span>
+      </div>
+
+      <button (click)="goToAddChapter()" class="add-chapter-button" [disabled]="!canAddChapter">
+        <i class="fa-solid fa-plus"></i>
+        Add Chapter
+      </button>
+    </div>
+  }
   
   @if (!mediaData) {
     <div class="no-media">
