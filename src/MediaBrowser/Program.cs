@@ -7,7 +7,7 @@ public static class Program
 {
     public async static Task Main(string[] args)
     {
-        var builder = CreateHostBuilder(args, []);
+        var builder = CreateHostBuilder(args, [], typeof(Program).Assembly.GetName().Version!.ToString());
 
         using var app = builder.Build();
         var cancellationToken = app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopped;
