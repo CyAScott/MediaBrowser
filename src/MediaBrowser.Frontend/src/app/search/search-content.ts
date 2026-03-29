@@ -28,7 +28,7 @@ export class SearchContentComponent {
   getTooltip(result: MediaReadModel): string {
     let tooltip = result.title;
 
-    if (result.duration) {
+    if (result.duration && !result.mime.startsWith('image/')) {
       tooltip += `\nDuration: ${ReadonlyInfoSectionComponent.formatDuration(result.duration)}`;
     }
     
