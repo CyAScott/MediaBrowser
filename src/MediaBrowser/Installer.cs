@@ -2,10 +2,8 @@ namespace MediaBrowser;
 
 public class Installer
 {
-    public const string Version = "v1";
-
     public const string CliArgsKey = "CliArgs", TestConfigsKey = "TestConfigs";
-    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs, DbConnection? connection = null)
+    public static IHostBuilder CreateHostBuilder(string[] args, IReadOnlyList<JsonObject> configs, string version, DbConnection? connection = null)
     {
         var builder = Host.CreateDefaultBuilder(args)
             .ConfigureAppConfiguration(configurationBuilder =>
@@ -14,12 +12,12 @@ public class Installer
                 configurationBuilder.Properties.Add(TestConfigsKey, configs);
             })
             .ConfigureAppConfiguration(ConfigureSettings)
-            .ConfigureServices(ConfigureServices)
+            .ConfigureServices((_, services) => ConfigureServices(services, version))
             .ConfigureServices((context, services) =>
                 MediaInstaller.ConfigureServices(context, services, connection))
             .ConfigureServices(ImportInstaller.ConfigureServices)
             .ConfigureServices(UserInstaller.ConfigureServices)
-            .ConfigureWebHostDefaults(webBuilder => webBuilder.Configure(ConfigureApp));
+            .ConfigureWebHostDefaults(webBuilder => webBuilder.Configure(app => ConfigureApp(app, version)));
 
         return builder;
     }
@@ -41,7 +39,7 @@ public class Installer
         }
     }
 
-    static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+    static void ConfigureServices(IServiceCollection services, string version)
     {
         // Add services to the container
         services.AddControllers()
@@ -52,14 +50,14 @@ public class Installer
         services.Configure<MvcOptions>(options => options.Filters.Add(new ValidationStatus417Filter()));
 
         // Add Swagger services
-        services.AddSwaggerGen(options => options.SwaggerDoc(Version, new()
+        services.AddSwaggerGen(options => options.SwaggerDoc(version, new()
         {
             Title = "MediaBrowser API",
-            Version = Version
+            Version = version
         }));
     }
 
-    static void ConfigureApp(IApplicationBuilder app)
+    static void ConfigureApp(IApplicationBuilder app, string version)
     {
         // Configure the HTTP request pipeline
         app.UseDefaultFiles()
@@ -70,7 +68,7 @@ public class Installer
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint($"/swagger/{Version}/swagger.json", $"MediaBrowser API {Version}");
+            c.SwaggerEndpoint($"/swagger/{version}/swagger.json", $"MediaBrowser API {version}");
             c.RoutePrefix = "swagger";
         });
 

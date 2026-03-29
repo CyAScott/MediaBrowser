@@ -14,7 +14,7 @@ public class SwaggerTest
         using var swaggerPage = await client.GetAsync("/swagger");
         swaggerPage.EnsureSuccessStatusCode();
 
-        using var swaggerJsonFile = await client.GetAsync($"/swagger/{Installer.Version}/swagger.json");
+        using var swaggerJsonFile = await client.GetAsync($"/swagger/{MediaBrowserWebApplicationFactory.Version}/swagger.json");
         swaggerJsonFile.EnsureSuccessStatusCode();
     }
 }

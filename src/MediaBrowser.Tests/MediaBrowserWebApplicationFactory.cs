@@ -94,6 +94,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     public DbConnection? Connection { get; private set; }
     public DbType DbType { get; }
     public List<JsonObject> ConfigurationFiles { get; }
+    public const string Version = "v1";
     public string CastDirectory { get; }
     public string DirectorsDirectory { get; }
     public string GenresDirectory { get; }
@@ -121,7 +122,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
         StartServer();
         await Installer.OnStartup(Services, CancellationTokenSource.Token);
     }
-    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles, Connection);
+    protected override IHostBuilder CreateHostBuilder() => Installer.CreateHostBuilder([], ConfigurationFiles, Version, Connection);
 
     public string GetJwtForTestUser(UserReadModel? user = null)
     {
