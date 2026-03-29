@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http.Features;
-
 namespace MediaBrowser.Media;
 
 static class MediaInstaller
@@ -11,9 +9,6 @@ static class MediaInstaller
 
         var dbConfig = new DbConfig(context.Configuration);
         services.AddSingleton(dbConfig);
-
-        services.Configure<FormOptions>(options =>
-            options.MultipartBodyLengthLimit = context.Configuration.GetValue<long>("request:multipartLimit"));
 
         switch (dbConfig.DbType)
         {

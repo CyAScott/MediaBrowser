@@ -9,7 +9,7 @@ public class ImportController(Ffmpeg ffmpeg, MediaConfig mediaConfig, MediaDbCon
         .Concat(['/', '\\', ':', '*', '?', '"', '<', '>', '|'])
         .Distinct()
         .ToArray();
-    [HttpPost("files")]
+    [HttpPost("files"), DisableRequestSizeLimit]
     public async Task<ActionResult> Add([FromForm] AddFileRequest request)
     {
         if (!Directory.Exists(mediaConfig.ImportDirectory)
