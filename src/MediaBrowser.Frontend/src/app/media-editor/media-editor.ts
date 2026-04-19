@@ -173,6 +173,8 @@ export class MediaEditorComponent implements OnInit {
     this.isSaving = true;
 
     try {
+      let createdChapter: MediaReadModel | undefined;
+
       if (this.mode === MediaEditorMode.AddChapter) {
 
         let thumbnailData: number | undefined;
@@ -190,7 +192,7 @@ export class MediaEditorComponent implements OnInit {
           thumbnail: thumbnailData
         };
 
-        await firstValueFrom(this.mediaService.addChapter(this.mediaId!, chapterRequest));
+        createdChapter = await firstValueFrom(this.mediaService.addChapter(this.mediaId!, chapterRequest));
       } else if (this.mode === MediaEditorMode.Edit) {
         this.mediaData = await firstValueFrom(this.mediaService.update(this.mediaId!, {
           ...this.editableData
@@ -217,7 +219,13 @@ export class MediaEditorComponent implements OnInit {
       SearchComponent.clearCachedResults();
       PeopleSectionComponent.clearCacheIfStale(this.peopleData);
 
-      this.cancel();
+      if (this.mode === MediaEditorMode.AddChapter && createdChapter) {
+        await this.router.navigate(['/player', createdChapter.id], {
+          state: { mediaData: createdChapter }
+        });
+      } else {
+        this.cancel();
+      }
     } catch (error) {
       console.error('Error saving media changes:', error);
     } finally {

@@ -67,6 +67,10 @@ describe('MediaEditorComponent', () => {
   let locationMock: {
     back: ReturnType<typeof vi.fn>;
   };
+  let routerMock: {
+    currentNavigation: ReturnType<typeof vi.fn>;
+    navigate: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     routeParams = {};
@@ -103,6 +107,11 @@ describe('MediaEditorComponent', () => {
       back: vi.fn()
     };
 
+    routerMock = {
+      currentNavigation: vi.fn(() => currentNavigation),
+      navigate: vi.fn().mockResolvedValue(true)
+    };
+
     await TestBed.configureTestingModule({
       imports: [MediaEditorComponent],
       providers: [
@@ -111,10 +120,7 @@ describe('MediaEditorComponent', () => {
         { provide: Location, useValue: locationMock },
         {
           provide: Router,
-          useValue: {
-            currentNavigation: vi.fn(() => currentNavigation),
-            navigate: vi.fn().mockResolvedValue(true)
-          }
+          useValue: routerMock
         },
         {
           provide: ActivatedRoute,
@@ -339,6 +345,12 @@ describe('MediaEditorComponent', () => {
       thumbnail: 12.5
     });
     expect(mediaServiceMock.update).not.toHaveBeenCalled();
+    expect(routerMock.navigate).toHaveBeenCalledWith(['/player', 'chapter-id'], {
+      state: {
+        mediaData: expect.objectContaining({ id: 'chapter-id' })
+      }
+    });
+    expect(locationMock.back).not.toHaveBeenCalled();
   });
 
   it('handles saveChanges errors and always resets saving flag', async () => {
