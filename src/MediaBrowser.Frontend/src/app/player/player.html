@@ -12,13 +12,15 @@
       }
       <h2>{{ mediaData.title }}</h2>
       <div class="header-actions">
-        <button (click)="editMedia()" class="edit-button">
-          <i class="fa-solid fa-file-pen"></i>
-        </button>
-        @if (mediaData && mediaData.duration && !mediaData.mime.startsWith('image/')) {
-          <button (click)="toggleChapterPanel()" class="chapter-toggle-button" title="Create chapter range">
-            <i class="fa-solid fa-bookmark"></i>
+        @if (!chapterPanelVisible) {
+          <button (click)="editMedia()" class="edit-button">
+            <i class="fa-solid fa-file-pen"></i>
           </button>
+          @if (mediaData && mediaData.duration && !mediaData.mime.startsWith('image/')) {
+            <button (click)="toggleChapterPanel()" class="chapter-toggle-button" title="Create chapter range">
+              <i class="fa-solid fa-bookmark"></i>
+            </button>
+          }
         }
       </div>
     </div>
@@ -91,10 +93,16 @@
         <span>Stop {{ formatTimestamp(chapterEnd) }}</span>
       </div>
 
-      <button (click)="goToAddChapter()" class="add-chapter-button" [disabled]="!canAddChapter">
-        <i class="fa-solid fa-plus"></i>
-        Add Chapter
-      </button>
+      <div class="chapter-panel-actions">
+        <button (click)="toggleChapterPanel()" class="cancel-chapter-button" title="Cancel chapter creation">
+          <i class="fa-solid fa-xmark"></i>
+          Cancel
+        </button>
+        <button (click)="goToAddChapter()" class="add-chapter-button" [disabled]="!canAddChapter">
+          <i class="fa-solid fa-plus"></i>
+          Add Chapter
+        </button>
+      </div>
     </div>
   }
   
