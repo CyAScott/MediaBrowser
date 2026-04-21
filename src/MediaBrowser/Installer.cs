@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http.Features;
+
 namespace MediaBrowser;
 
 public class Installer
@@ -41,6 +43,11 @@ public class Installer
 
     static void ConfigureServices(IServiceCollection services, string version)
     {
+        services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = long.MaxValue;
+        });
+
         // Add services to the container
         services.AddControllers()
             .AddApplicationPart(typeof(DbConfig).Assembly)
