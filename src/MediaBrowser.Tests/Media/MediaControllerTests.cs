@@ -181,6 +181,8 @@ public class MediaControllerTests
         await UpdateThumbnailWithTimestampTests(mediaConfig, mediaClient, testVideoFile, testImageFile);
 
         await AddChapterTests(mediaClient, testVideoFile, testImageFile);
+
+        await DeleteTests(mediaClient, testVideoFile, testImageFile);
     }
 
     async Task StreamTests(MediaConfig mediaConfig, MediaClient mediaClient, MediaReadModel testFile)
@@ -662,5 +664,23 @@ public class MediaControllerTests
         await Files.Cast(Path.Combine(mediaConfig.WritersDirectory, $"{response.Content.Writers[0]}.jpg"));
 
         return response.Content;
+    }
+
+    async Task DeleteTests(MediaClient mediaClient, MediaReadModel testVideoFile, MediaReadModel testImageFile)
+    {
+        await MediaNotFoundTest();
+        async Task MediaNotFoundTest()
+        {
+            using var response = await mediaClient.Delete(Guid.NewGuid());
+            response.StatusCode.ShouldBe(HttpStatusCode.NotFound, "The media does not exist because this is a random media ID, so it should return 404 Not Found.");
+        }
+
+        await DeleteTest(testImageFile);
+        await DeleteTest(testVideoFile);
+        async Task DeleteTest(MediaReadModel media)
+        {
+            using var response = await mediaClient.Delete(media.Id);
+            response.StatusCode.ShouldBe(HttpStatusCode.OK, "The media should be deleted successfully since we are using a valid media ID, so it should return 200 Ok.");
+        }
     }
 }

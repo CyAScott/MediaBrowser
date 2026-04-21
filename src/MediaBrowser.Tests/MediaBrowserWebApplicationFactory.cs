@@ -28,6 +28,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
                     "media", new JsonObject
                     {
                         {"castDirectory", CastDirectory},
+                        {"deletedDirectory", DeletedDirectory},
                         {"directorsDirectory", DirectorsDirectory},
                         {"genresDirectory", GenresDirectory},
                         {"importDirectory", ImportDirectory},
@@ -53,6 +54,8 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
 
         CastDirectory = Path.Combine(tempDirectory, "cast");
         Directory.CreateDirectory(CastDirectory);
+        DeletedDirectory = Path.Combine(tempDirectory, "deleted");
+        Directory.CreateDirectory(DeletedDirectory);
         DirectorsDirectory = Path.Combine(tempDirectory, "directors");
         Directory.CreateDirectory(DirectorsDirectory);
         GenresDirectory = Path.Combine(tempDirectory, "genres");
@@ -78,6 +81,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
                 "media", new JsonObject
                 {
                     {"castDirectory", CastDirectory},
+                    {"deletedDirectory", DeletedDirectory},
                     {"directorsDirectory", DirectorsDirectory},
                     {"genresDirectory", GenresDirectory},
                     {"importDirectory", ImportDirectory},
@@ -96,6 +100,7 @@ public class MediaBrowserWebApplicationFactory : WebApplicationFactory<Installer
     public List<JsonObject> ConfigurationFiles { get; }
     public const string Version = "v1";
     public string CastDirectory { get; }
+    public string DeletedDirectory { get; }
     public string DirectorsDirectory { get; }
     public string GenresDirectory { get; }
     public string ImportDirectory { get; }
