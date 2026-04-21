@@ -4,21 +4,21 @@
       <input 
         (input)="onKeywordsChange()" 
         (keydown.enter)="onSearch()" 
-        [(ngModel)]="keywords" 
+        [(ngModel)]="parameters.keywords" 
         class="search-input" 
         placeholder="Search for media files..." 
         type="text" />
       
       <button 
         (click)="toggleSortDirection()" 
-        [title]="descending ? 'Sort Ascending' : 'Sort Descending'"
+        [title]="parameters.descending ? 'Sort Ascending' : 'Sort Descending'"
         class="sort-direction-button">
-        <i class="fa-solid" [class.fa-arrow-up-wide-short]="descending" [class.fa-arrow-up-short-wide]="!descending"></i>
+        <i class="fa-solid" [class.fa-arrow-up-wide-short]="parameters.descending" [class.fa-arrow-up-short-wide]="!parameters.descending"></i>
       </button>
       
       <select 
         (change)="onSortChange()" 
-        [(ngModel)]="sort" 
+        [(ngModel)]="parameters.sort" 
         class="sort-dropdown">
         @for (option of sortOptions; track option.value) {
           <option [value]="option.value">
@@ -51,10 +51,10 @@
               @for (option of sortOptions; track option.value) {
                 <button 
                   (click)="selectSortOption(option.value)"
-                  [class.selected]="option.value === sort"
+                  [class.selected]="option.value === parameters.sort"
                   class="sort-option">
                   <span class="sort-option-label">{{ option.label }}</span>
-                  @if (option.value === sort) {
+                  @if (option.value === parameters.sort) {
                     <i class="fa-solid fa-check sort-option-check"></i>
                   }
                 </button>
@@ -77,6 +77,7 @@
     [hasMoreResults]="hasMoreResults"
     [isLoading]="isLoading"
     [results]="results"
+    [parameters]="parameters"
     #searchContent>
   </app-search-content>
 </div>

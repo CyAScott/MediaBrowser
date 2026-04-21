@@ -8,8 +8,9 @@
       <a 
           (mousedown)="onCardClick()"
           [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
+          [queryParams]="parameters.getQueryParams()"
           [routerLink]="['/player', result.id]"
-          [state]="{ mediaData: result }"
+          [state]="getPlayerNavigationState(result, $index)"
           [title]="getTooltip(result)"
           class="result-card" >
         <div class="card-overlay">

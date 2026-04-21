@@ -4,6 +4,7 @@ import { ActivatedRoute, convertToParamMap, ParamMap, Router } from '@angular/ro
 import { BehaviorSubject, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 import { MediaService } from '../services';
 import { MetaComponent } from './meta';
 
@@ -80,7 +81,7 @@ describe('MetaComponent', () => {
       {
         name: 'Keanu Reeves',
         imageUrl: '/api/media/cast/Keanu%20Reeves/thumbnail',
-        queryParams: { cast: ['Keanu Reeves'], sort: SearchComponent.DEFAULT_SORT }
+        queryParams: { cast: ['Keanu Reeves'], sort: SearchQueryParams.DEFAULT_SORT }
       }
     ]);
   });
@@ -121,7 +122,7 @@ describe('MetaComponent', () => {
 
     component.metaGrid = new ElementRef(host);
     component.metaMembers = [
-      { name: 'A', imageUrl: '/x', queryParams: { cast: ['A'], sort: SearchComponent.DEFAULT_SORT } }
+      { name: 'A', imageUrl: '/x', queryParams: { cast: ['A'], sort: SearchQueryParams.DEFAULT_SORT } }
     ];
     (component as any).scrollPosition = 90;
 
@@ -179,7 +180,7 @@ describe('MetaComponent', () => {
       expect(component.metaMembers[0].imageUrl).toContain(`/api/media/${testCase.expectedPrefix}/`);
       expect(component.metaMembers[0].queryParams).toEqual({
         [testCase.type]: [component.metaMembers[0].name],
-        sort: SearchComponent.DEFAULT_SORT
+        sort: SearchQueryParams.DEFAULT_SORT
       });
     }
   });
@@ -280,7 +281,7 @@ describe('MetaComponent', () => {
     const metaMember = {
       name: 'Keanu Reeves',
       imageUrl: '/api/media/cast/Keanu%20Reeves/thumbnail',
-      queryParams: { cast: ['Keanu Reeves'], sort: SearchComponent.DEFAULT_SORT }
+      queryParams: { cast: ['Keanu Reeves'], sort: SearchQueryParams.DEFAULT_SORT }
     };
 
     Object.defineProperty(input, 'files', { value: [file], configurable: true });
@@ -301,7 +302,7 @@ describe('MetaComponent', () => {
     const metaMember = {
       name: 'Keanu Reeves',
       imageUrl: '/api/media/cast/Keanu%20Reeves/thumbnail',
-      queryParams: { cast: ['Keanu Reeves'], sort: SearchComponent.DEFAULT_SORT }
+      queryParams: { cast: ['Keanu Reeves'], sort: SearchQueryParams.DEFAULT_SORT }
     };
 
     Object.defineProperty(input, 'files', { value: [file], configurable: true });

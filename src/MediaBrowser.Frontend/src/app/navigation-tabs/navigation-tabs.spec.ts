@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { NavigationTabsComponent } from './navigation-tabs';
 import { UsersService } from '../services/users.service';
-import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 
 describe('NavigationTabsComponent', () => {
   let component: NavigationTabsComponent;
@@ -38,7 +38,7 @@ describe('NavigationTabsComponent', () => {
   });
 
   it('uses SearchComponent default sort', () => {
-    expect(component.defaultSort).toBe(SearchComponent.DEFAULT_SORT);
+    expect(component.defaultSort).toBe(SearchQueryParams.DEFAULT_SORT);
   });
 
   it('returns true only for the exact active route', () => {

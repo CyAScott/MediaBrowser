@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MediaReadModel, MediaService, SearchMediaRequest } from '../services/media.service';
 import { firstValueFrom } from 'rxjs/internal/firstValueFrom';
 import { SearchContentComponent } from './search-content';
+import { SearchQueryParams } from './search-query-params';
 
 interface CacheData {
   hasMoreResults: boolean;
@@ -17,11 +18,14 @@ interface CacheData {
  * This allows for bookmarkable search results and proper browser navigation.
  * 
  * Query parameters correspond directly to SearchMediaRequest interface:
- * - keywords: string search term
  * - cast: array of cast member names
- * - genres: array of genre names  
- * - sort: sort field ('title' | 'createdOn' | 'duration' | 'userStarRating' | 'random')
  * - descending: boolean for sort direction
+ * - directors: array of director names
+ * - genres: array of genre names
+ * - keywords: string search term
+ * - producers: array of producer names
+ * - sort: sort field ('title' | 'createdOn' | 'duration' | 'userStarRating' | 'random')
+ * - writers: array of writer names
  * 
  * Example URLs:
  * /search?keywords=action&sort=createdOn&descending=true
@@ -46,18 +50,10 @@ export class SearchComponent implements OnInit {
     { value: 'userStarRating', label: 'Rating' },
     { value: 'random', label: 'Random' }
   ] as const;
-  static readonly DEFAULT_SORT = 'title';
-  
+
   // Search parameters that match SearchMediaRequest
   readonly pageSize: number = 25;
-  cast: string[] = [];
-  descending: boolean = false;
-  directors: string[] = [];
-  genres: string[] = [];
-  keywords: string = '';
-  producers: string[] = [];
-  sort: 'title' | 'createdOn' | 'duration' | 'userStarRating' | 'random' = SearchComponent.DEFAULT_SORT;
-  writers: string[] = [];
+  parameters: SearchQueryParams = new SearchQueryParams();
   
   // UI state
   results: MediaReadModel[] = [];
@@ -66,7 +62,6 @@ export class SearchComponent implements OnInit {
   showSortModal: boolean = false;
 
   // Page management
-  private pageIndex: number = 0;
   private pendingScrollUpdate: boolean = false;
   private scrollPosition: number = 0;
   static readonly CACHE_KEY = 'cached-results';
@@ -85,55 +80,20 @@ export class SearchComponent implements OnInit {
     const savedPagePosition = new URLSearchParams(sessionStorage.getItem(SearchComponent.PAGE_KEY) || '');
     if (savedPagePosition) {
       this.scrollPosition = parseInt(savedPagePosition.get('scroll') || '0', 10);
-      this.pageIndex = parseInt(savedPagePosition.get('pageIndex') || '0', 10);
+      this.parameters.pageIndex = parseInt(savedPagePosition.get('pageIndex') || '0', 10);
     }
   }
 
   private loadFromQueryParams(): void {
     const params = this.route.snapshot.queryParams;
-    
-    // Load search parameters from URL
-    this.keywords = params['keywords'] || '';
-    this.sort = params['sort'] || SearchComponent.DEFAULT_SORT;
-    this.descending = params['descending'] === 'true';
-    
-    // Handle array parameters
-    if (params['cast']) {
-      this.cast = Array.isArray(params['cast']) ? params['cast'] : [params['cast']];
-    } else {
-      this.cast = [];
-    }
-    
-    if (params['directors']) {
-      this.directors = Array.isArray(params['directors']) ? params['directors'] : [params['directors']];
-    } else {
-      this.directors = [];
-    }
-    
-    if (params['genres']) {
-      this.genres = Array.isArray(params['genres']) ? params['genres'] : [params['genres']];
-    } else {
-      this.genres = [];
-    }
-
-    if (params['producers']) {
-      this.producers = Array.isArray(params['producers']) ? params['producers'] : [params['producers']];
-    } else {
-      this.producers = [];
-    }
-
-    if (params['writers']) {
-      this.writers = Array.isArray(params['writers']) ? params['writers'] : [params['writers']];
-    } else {
-      this.writers = [];
-    }
+    this.parameters.loadFromQueryParams(params);
   }
 
   private savePagePosition(): void {
     try {
       if (this.searchContentComponent?.searchResultsElement) {
         this.scrollPosition = this.searchContentComponent.searchResultsElement.nativeElement.scrollTop;
-        sessionStorage.setItem(SearchComponent.PAGE_KEY, `scroll=${this.scrollPosition}&pageIndex=${this.pageIndex}`);
+        sessionStorage.setItem(SearchComponent.PAGE_KEY, `scroll=${this.scrollPosition}&pageIndex=${this.parameters.pageIndex}`);
       } else {
         this.clearPagePosition();
       }
@@ -143,31 +103,7 @@ export class SearchComponent implements OnInit {
   }
 
   private updateQueryParams(): void {
-    const queryParams: any = {};
-    
-    // Only add parameters that have values to keep URL clean
-    if (this.keywords?.trim()) {
-      queryParams['keywords'] = this.keywords.trim();
-    }
-    if (this.cast.length > 0) {
-      queryParams['cast'] = this.cast;
-    }
-    if (this.directors.length > 0) {
-      queryParams['directors'] = this.directors;
-    }
-    if (this.genres.length > 0) {
-      queryParams['genres'] = this.genres;
-    }
-    if (this.producers.length > 0) {
-      queryParams['producers'] = this.producers;
-    }
-    if (this.writers.length > 0) {
-      queryParams['writers'] = this.writers;
-    }
-    queryParams['sort'] = this.sort;
-    if (this.descending) {
-      queryParams['descending'] = 'true';
-    }
+    const queryParams: any = this.parameters.getQueryParams();
 
     // Update URL without triggering navigation
     this.router.navigate([], {
@@ -178,7 +114,7 @@ export class SearchComponent implements OnInit {
   }
 
   clearPagePosition(): void {
-    this.pageIndex = 0;
+    this.parameters.pageIndex = 0;
     this.scrollPosition = 0;
     SearchComponent.clearPagePositionState();
     if (this.searchContentComponent?.searchResultsElement) {
@@ -192,7 +128,7 @@ export class SearchComponent implements OnInit {
 
   async loadResults(
     autoIncrementPage: boolean = true,
-    skip: number = this.pageIndex * this.pageSize,
+    skip: number = this.parameters.pageIndex * this.pageSize,
     take: number = this.pageSize): Promise<void> {
     if (this.isLoading || !this.hasMoreResults) {
       return;
@@ -202,34 +138,7 @@ export class SearchComponent implements OnInit {
       this.isLoading = true;
       
       // Build search request matching SearchMediaRequest interface
-      const searchRequest: SearchMediaRequest = {
-        skip: skip,
-        sort: this.sort,
-        take: take,
-      };
-
-      // Add optional parameters only if they have values
-      if (this.keywords?.trim()) {
-        searchRequest.keywords = this.keywords.trim();
-      }
-      if (this.cast.length > 0) {
-        searchRequest.cast = [...this.cast];
-      }
-      if (this.directors.length > 0) {
-        searchRequest.directors = [...this.directors];
-      }
-      if (this.genres.length > 0) {
-        searchRequest.genres = [...this.genres];
-      }
-      if (this.descending) {
-        searchRequest.descending = this.descending;
-      }
-      if (this.producers.length > 0) {
-        searchRequest.producers = [...this.producers];
-      }
-      if (this.writers.length > 0) {
-        searchRequest.writers = [...this.writers];
-      }
+      const searchRequest: SearchMediaRequest = this.parameters.getSearchMediaRequest(skip, take);
 
       const cachedDataValue = sessionStorage.getItem(SearchComponent.CACHE_KEY);
       const cachedData: CacheData | null = cachedDataValue && !autoIncrementPage ? JSON.parse(cachedDataValue) : null;
@@ -251,7 +160,7 @@ export class SearchComponent implements OnInit {
         
         // Increment for next load
         if (autoIncrementPage && response.results.length > 0) {
-          this.pageIndex++;
+          this.parameters.pageIndex++;
         }
 
         delete searchRequest.skip;
@@ -292,15 +201,15 @@ export class SearchComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     // Load initial state from query parameters
     this.loadFromQueryParams();
-    if (this.pageIndex === 0) {
+    if (this.parameters.pageIndex === 0) {
       this.clearPagePosition();
     }
 
     // Always perform search based on current parameters
     await this.loadResults(
-      this.pageIndex === 0,
+      this.parameters.pageIndex === 0,
       0,
-      Math.max(this.pageIndex * this.pageSize, this.pageSize)
+      Math.max(this.parameters.pageIndex * this.pageSize, this.pageSize)
     );
   }
 
@@ -340,13 +249,13 @@ export class SearchComponent implements OnInit {
   }
 
   selectSortOption(sortValue: 'title' | 'createdOn' | 'duration' | 'userStarRating' | 'random'): void {
-    this.sort = sortValue;
+    this.parameters.sort = sortValue;
     this.showSortModal = false;
     this.onSearch();
   }
 
   toggleSortDirection(): void {
-    this.descending = !this.descending;
+    this.parameters.descending = !this.parameters.descending;
     this.onSearch();
   }
 

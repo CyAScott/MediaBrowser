@@ -3,7 +3,7 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { UsersService } from '../services/users.service';
 import { firstValueFrom } from 'rxjs';
-import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 
 @Component({
   selector: 'app-navigation-tabs',
@@ -16,7 +16,7 @@ export class NavigationTabsComponent {
   private router = inject(Router);
   protected usersService = inject(UsersService);
 
-  defaultSort = SearchComponent.DEFAULT_SORT;
+  defaultSort = SearchQueryParams.DEFAULT_SORT;
   isDropdownOpen = false;
 
   constructor() {}

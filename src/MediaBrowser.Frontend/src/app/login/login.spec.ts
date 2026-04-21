@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 import { UsersService } from '../services/users.service';
 import { LoginComponent } from './login';
 
@@ -101,7 +102,7 @@ describe('LoginComponent', () => {
     expect(clearPagePositionSpy).toHaveBeenCalledTimes(1);
     expect(mocks.router.navigate).toHaveBeenCalledWith(['/search'], {
       queryParams: {
-        sort: SearchComponent.DEFAULT_SORT
+        sort: SearchQueryParams.DEFAULT_SORT
       },
       queryParamsHandling: 'replace'
     });

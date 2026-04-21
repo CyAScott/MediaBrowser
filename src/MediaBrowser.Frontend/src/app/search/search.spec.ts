@@ -99,7 +99,7 @@ describe('SearchComponent', () => {
 
     expect(component).toBeTruthy();
     expect((component as any).scrollPosition).toBe(120);
-    expect((component as any).pageIndex).toBe(3);
+    expect(component.parameters.pageIndex).toBe(3);
   });
 
   it('clears static cache and page state entries', () => {
@@ -135,14 +135,14 @@ describe('SearchComponent', () => {
 
     await component.ngOnInit();
 
-    expect(component.keywords).toBe('  hero ');
-    expect(component.sort).toBe('createdOn');
-    expect(component.descending).toBe(true);
-    expect(component.cast).toEqual(['Cast A', 'Cast B']);
-    expect(component.directors).toEqual(['Director A']);
-    expect(component.genres).toEqual(['Drama']);
-    expect(component.producers).toEqual(['Producer A']);
-    expect(component.writers).toEqual(['Writer A']);
+    expect(component.parameters.keywords).toBe('  hero ');
+    expect(component.parameters.sort).toBe('createdOn');
+    expect(component.parameters.descending).toBe(true);
+    expect(component.parameters.cast).toEqual(['Cast A', 'Cast B']);
+    expect(component.parameters.directors).toEqual(['Director A']);
+    expect(component.parameters.genres).toEqual(['Drama']);
+    expect(component.parameters.producers).toEqual(['Producer A']);
+    expect(component.parameters.writers).toEqual(['Writer A']);
 
     expect(mocks.mediaService.search).toHaveBeenCalledWith(expect.objectContaining({
       sort: 'createdOn',
@@ -166,8 +166,8 @@ describe('SearchComponent', () => {
   it('uses cached results when request matches and autoIncrementPage is false', async () => {
     const { component, mocks } = await createComponent();
 
-    component.sort = 'title';
-    component.keywords = 'cache-keyword';
+    component.parameters.sort = 'title';
+    component.parameters.keywords = 'cache-keyword';
 
     sessionStorage.setItem(SearchComponent.CACHE_KEY, JSON.stringify({
       hasMoreResults: false,
@@ -193,19 +193,19 @@ describe('SearchComponent', () => {
       searchResponse: createSearchResponse([first, second])
     });
 
-    component.cast = ['A'];
-    component.directors = ['B'];
-    component.genres = ['C'];
-    component.producers = ['D'];
-    component.writers = ['E'];
-    component.descending = true;
-    component.keywords = '  test  ';
+    component.parameters.cast = ['A'];
+    component.parameters.directors = ['B'];
+    component.parameters.genres = ['C'];
+    component.parameters.producers = ['D'];
+    component.parameters.writers = ['E'];
+    component.parameters.descending = true;
+    component.parameters.keywords = '  test  ';
 
     await component.loadResults(true, 0, 2);
 
     expect(component.results.map(result => result.id)).toEqual(['first', 'second']);
     expect(component.hasMoreResults).toBe(true);
-    expect((component as any).pageIndex).toBe(1);
+    expect(component.parameters.pageIndex).toBe(1);
 
     const cachedRaw = sessionStorage.getItem(SearchComponent.CACHE_KEY);
     expect(cachedRaw).toBeTruthy();
@@ -299,12 +299,12 @@ describe('SearchComponent', () => {
     component.searchContentComponent = {
       searchResultsElement: new ElementRef(scrollHost)
     } as unknown as any;
-    (component as any).pageIndex = 6;
+    component.parameters.pageIndex = 6;
     (component as any).scrollPosition = 250;
 
     component.clearPagePosition();
 
-    expect((component as any).pageIndex).toBe(0);
+    expect(component.parameters.pageIndex).toBe(0);
     expect((component as any).scrollPosition).toBe(0);
     expect(scrollHost.scrollTop).toBe(0);
   });
@@ -318,8 +318,8 @@ describe('SearchComponent', () => {
     component.toggleSortDirection();
     component.selectSortOption('duration');
 
-    expect(component.descending).toBe(true);
-    expect(component.sort).toBe('duration');
+    expect(component.parameters.descending).toBe(true);
+    expect(component.parameters.sort).toBe('duration');
     expect(onSearchSpy).toHaveBeenCalledTimes(4);
 
     onSearchSpy.mockRestore();
@@ -368,14 +368,14 @@ describe('SearchComponent', () => {
 
     component.results = [createMediaResult('old')];
     component.hasMoreResults = false;
-    (component as any).pageIndex = 5;
+    component.parameters.pageIndex = 5;
     (component as any).scrollPosition = 30;
 
     await component.onSearch();
 
     expect(component.results).toEqual([]);
     expect(component.hasMoreResults).toBe(true);
-    expect((component as any).pageIndex).toBe(0);
+    expect(component.parameters.pageIndex).toBe(0);
     expect((component as any).scrollPosition).toBe(0);
     expect(loadSpy).toHaveBeenCalledTimes(1);
 

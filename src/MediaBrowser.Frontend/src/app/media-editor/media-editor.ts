@@ -14,6 +14,7 @@ import { ReadonlyInfoSectionComponent, MediaReadOnlyData } from './readonly-info
 import { ThumbnailSectionComponent, ThumbnailData, MediaThumbnailData } from './thumbnail-section/thumbnail-section.component';
 import { ImportComponent } from '../import/import';
 import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 
 export enum MediaEditorMode {
   Edit = 'Edit',
@@ -237,7 +238,7 @@ export class MediaEditorComponent implements OnInit {
     if (this.hasNavigationHistory) {
       this.location.back();
     } else {
-      this.router.navigate(['/search'], { queryParams: { sort: SearchComponent.DEFAULT_SORT } });
+      this.router.navigate(['/search'], { queryParams: { sort: SearchQueryParams.DEFAULT_SORT } });
     }
   }
 
