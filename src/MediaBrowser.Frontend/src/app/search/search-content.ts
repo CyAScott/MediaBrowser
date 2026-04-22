@@ -80,4 +80,38 @@ export class SearchContentComponent {
   trackByResultId(index: number, result: MediaReadModel): string {
     return result.id;
   }
+
+  isImage(result: MediaReadModel): boolean {
+    return result.mime.startsWith('image/');
+  }
+
+  isVideo(result: MediaReadModel): boolean {
+    return result.mime.startsWith('video/');
+  }
+
+  isAudio(result: MediaReadModel): boolean {
+    return result.mime.startsWith('audio/');
+  }
+
+  getCenterIconClass(result: MediaReadModel): string {
+    if (this.isImage(result)) {
+      return 'fa-magnifying-glass';
+    } else if (this.isVideo(result)) {
+      return 'fa-play';
+    } else if (this.isAudio(result)) {
+      return 'fa-volume-high';
+    }
+    return 'fa-play';
+  }
+
+  getFileTypeIcon(result: MediaReadModel): string {
+    if (this.isImage(result)) {
+      return 'fa-image';
+    } else if (this.isVideo(result)) {
+      return 'fa-film';
+    } else if (this.isAudio(result)) {
+      return 'fa-music';
+    }
+    return 'fa-file';
+  }
 }
