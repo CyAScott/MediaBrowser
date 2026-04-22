@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { UsersService } from '../services/users.service';
 import { firstValueFrom } from 'rxjs';
 import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 
 @Component({
   selector: 'app-login',
@@ -39,13 +40,12 @@ export class LoginComponent {
       SearchComponent.clearPagePositionState();
       this.router.navigate(['/search'], {
         queryParams: {
-          sort: SearchComponent.DEFAULT_SORT
+          sort: SearchQueryParams.DEFAULT_SORT
         },
         queryParamsHandling: 'replace'
       });
     } catch (error) {
       console.error('Login error:', error);
-      this.errorMessage = 'An error occurred during login. Please try again.';
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();

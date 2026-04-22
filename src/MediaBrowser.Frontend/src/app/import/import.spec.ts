@@ -161,7 +161,7 @@ describe('ImportComponent', () => {
     expect(component.uploadError).toBeNull();
   });
 
-  it('shows an upload error when dropped file upload fails', async () => {
+  it('does not show an inline upload error when dropped file upload fails', async () => {
     const importService = getImportServiceMock();
     const uploadError = new Error('upload failed');
     importService.files.mockReturnValue(of([]));
@@ -186,12 +186,12 @@ describe('ImportComponent', () => {
     await fixture.whenStable();
 
     expect(importService.uploadFile).toHaveBeenCalledWith(droppedFile);
-    expect(component.uploadError).toBe('Failed to upload file. Please try again.');
+    expect(component.uploadError).toBeNull();
     expect(consoleErrorSpy).toHaveBeenCalledWith('Error uploading file:', uploadError);
 
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.upload-error')?.textContent).toContain('Failed to upload file. Please try again.');
+    expect(compiled.querySelector('.upload-error')).toBeNull();
 
     consoleErrorSpy.mockRestore();
   });

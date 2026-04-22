@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SearchComponent } from '../search/search';
+import { SearchQueryParams } from '../search/search-query-params';
 import { UsersService } from '../services/users.service';
 import { LoginComponent } from './login';
 
@@ -101,7 +102,7 @@ describe('LoginComponent', () => {
     expect(clearPagePositionSpy).toHaveBeenCalledTimes(1);
     expect(mocks.router.navigate).toHaveBeenCalledWith(['/search'], {
       queryParams: {
-        sort: SearchComponent.DEFAULT_SORT
+        sort: SearchQueryParams.DEFAULT_SORT
       },
       queryParamsHandling: 'replace'
     });
@@ -110,9 +111,10 @@ describe('LoginComponent', () => {
     expect(detectChanges).toHaveBeenCalledTimes(1);
   });
 
-  it('shows a generic error message when login fails', async () => {
+  it('does not show an inline API error when login fails', async () => {
     const { component, mocks } = await createComponent();
     const detectChanges = vi.fn();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     (component as any).cdr = { detectChanges };
 
@@ -127,9 +129,11 @@ describe('LoginComponent', () => {
       password: 'wrong-password'
     });
     expect(mocks.router.navigate).not.toHaveBeenCalled();
-    expect(component.errorMessage).toBe('An error occurred during login. Please try again.');
+    expect(component.errorMessage).toBe('');
     expect(component.isLoading).toBe(false);
     expect(detectChanges).toHaveBeenCalledTimes(1);
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('submits only on Enter for username keypress', async () => {

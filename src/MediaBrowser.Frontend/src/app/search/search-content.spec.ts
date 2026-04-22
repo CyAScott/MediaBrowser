@@ -94,4 +94,19 @@ describe('SearchContentComponent', () => {
 
     expect(component.trackByResultId(0, createMediaResult({ id: 'custom-id' }))).toBe('custom-id');
   });
+
+  it('builds player navigation state with current index and search parameters', () => {
+    const fixture = TestBed.createComponent(SearchContentComponent);
+    const component = fixture.componentInstance;
+
+    const first = createMediaResult({ id: 'first' });
+    const second = createMediaResult({ id: 'second', parentId: 'root-1' });
+    component.results = [first, second];
+
+    const state = component.getPlayerNavigationState(second, 1);
+
+    expect(state.mediaData).toBe(second);
+    expect(state.searchContext?.currentIndex).toBe(1);
+    expect(state.searchContext?.searchParams).toBe(component.parameters);
+  });
 });

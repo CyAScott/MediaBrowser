@@ -5,6 +5,9 @@ public class MediaClient(HttpClient client)
     public Task<HttpResponseMessage<MediaReadModel>> Get(Guid id) =>
         client.GetAsync<MediaReadModel>($"/api/media/{id}");
 
+    public Task<HttpResponseMessage> Delete(Guid id) =>
+        client.DeleteAsync($"/api/media/{id}");
+
     public Task<HttpResponseMessage<MediaReadModel>> Update(Guid id, UpdateMediaRequest request) =>
         client.PutAsync<MediaReadModel, UpdateMediaRequest>($"/api/media/{id}", request);
 

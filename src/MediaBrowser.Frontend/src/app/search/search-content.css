@@ -62,6 +62,19 @@
   text-shadow: 0.25rem 0.25rem 1rem black;
 }
 
+.file-type-badge {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  color: var(--fg1);
+  padding: 4px;
+  border-radius: 4px;
+  font-size: 1.25rem;
+  z-index: 10;
+  opacity: 0.7;
+  text-shadow: 0.25rem 0.25rem 1rem black;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .search-grid {

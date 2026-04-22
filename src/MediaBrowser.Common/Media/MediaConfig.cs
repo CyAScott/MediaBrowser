@@ -3,6 +3,7 @@ namespace MediaBrowser.Media;
 public class MediaConfig(IConfiguration configuration)
 {
     public string CastDirectory { get; } = configuration["media:castDirectory"]!;
+    public string DeletedDirectory { get; } = configuration["media:deletedDirectory"]!;
     public string DirectorsDirectory { get; } = configuration["media:directorsDirectory"]!;
     public string GenresDirectory { get; } = configuration["media:genresDirectory"]!;
     public string? ImportDirectory { get; } = configuration["media:importDirectory"];

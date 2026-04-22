@@ -150,7 +150,6 @@ export class ImportComponent implements OnInit {
       await this.scanDirectory();
     } catch (error) {
       console.error('Error uploading file:', error);
-      this.uploadError = 'Failed to upload file. Please try again.';
       this.cdr.detectChanges();
     } finally {
       this.isUploading = false;

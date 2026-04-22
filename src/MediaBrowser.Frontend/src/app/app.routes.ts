@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
-import { SearchComponent } from './search/search';
+import { SearchQueryParams } from './search/search-query-params';
 
 export const routes: Routes = [
   
@@ -55,6 +55,6 @@ export const routes: Routes = [
   },
   { 
     path: '**', 
-    redirectTo: '/search?sort=' + SearchComponent.DEFAULT_SORT
+    redirectTo: '/search?sort=' + SearchQueryParams.DEFAULT_SORT
   }
 ];

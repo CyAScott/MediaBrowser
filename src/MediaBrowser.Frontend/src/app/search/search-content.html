@@ -8,12 +8,13 @@
       <a 
           (mousedown)="onCardClick()"
           [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
+          [queryParams]="SearchQueryParams.getQueryParams(parameters)"
           [routerLink]="['/player', result.id]"
-          [state]="{ mediaData: result }"
+          [state]="getPlayerNavigationState(result, $index)"
           [title]="getTooltip(result)"
           class="result-card" >
         <div class="card-overlay">
-          <i class="fa-solid fa-play"></i>
+          <i [class]="'fa-solid ' + getCenterIconClass(result)"></i>
           <a 
             (click)="$event.stopPropagation()"
             [routerLink]="['/edit', result.id]"
@@ -22,6 +23,9 @@
             title="Edit media">
             <i class="fa-solid fa-file-pen"></i>
           </a>
+        </div>
+        <div class="file-type-badge">
+          <i [class]="'fa-solid ' + getFileTypeIcon(result)"></i>
         </div>
       </a>
     }

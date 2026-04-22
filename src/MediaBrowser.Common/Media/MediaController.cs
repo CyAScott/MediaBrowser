@@ -14,6 +14,59 @@ public partial class MediaController(Ffmpeg ffmpeg, MediaConfig mediaConfig, Med
         return media.ToReadModel(mediaConfig);
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<ActionResult> Delete(Guid id)
+    {
+        var media = await context.Media.Where(m => m.Id == id).FirstOrDefaultAsync();
+        if (media == null)
+        {
+            return NotFound();
+        }
+
+        var ids = new List<Guid>
+        {
+            media.Id
+        };
+
+        IEnumerable<string> GetFiles(MediaEntity mediaEntity)
+        {
+            yield return mediaConfig.MediaFileLocation(media, ".nfo");
+            if (!mediaEntity.IsImage())
+            {
+                yield return mediaConfig.MediaFileLocation(mediaEntity, ".jpg");
+                yield return mediaConfig.MediaFileLocation(mediaEntity, "-fanart.jpg");
+            }
+        }
+
+        var files = GetFiles(media).ToList();
+
+        if (media.ParentId == null)
+        {
+            files.Add(mediaConfig.MediaFileLocation(media));
+
+            foreach (var chapter in await context.Media.Where(m => m.ParentId == id).ToListAsync())
+            {
+                ids.Add(chapter.Id);
+                files.AddRange(GetFiles(chapter));
+            }
+        }
+
+        await context.MediaJoined.Where(m => ids.Contains(m.Id)).ExecuteDeleteAsync();
+
+        foreach (var file in files)
+        {
+            if (System.IO.File.Exists(file))
+            {
+                var deletedFile = Path.Combine(mediaConfig.DeletedDirectory, Path.GetFileName(file));
+                System.IO.File.Move(file, deletedFile);
+            }
+        }
+
+        await context.SaveChangesAsync();
+
+        return Ok();
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<ActionResult<MediaReadModel>> Update(Guid id, [FromBody] UpdateMediaRequest request)
     {

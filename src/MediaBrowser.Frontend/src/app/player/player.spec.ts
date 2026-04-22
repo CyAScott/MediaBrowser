@@ -5,6 +5,7 @@ import { Location } from '@angular/common';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
 import { MediaReadModel, MediaService } from '../services';
+import { SearchQueryParams } from '../search/search-query-params';
 import { PlayerComponent } from './player';
 
 interface PlayerMocks {
@@ -20,6 +21,7 @@ interface PlayerMocks {
   };
   mediaService: {
     get: ReturnType<typeof vi.fn>;
+    search: ReturnType<typeof vi.fn>;
   };
   router: {
     currentNavigation: ReturnType<typeof vi.fn>;
@@ -74,7 +76,8 @@ async function createComponent(overrides?: {
       back: vi.fn()
     },
     mediaService: {
-      get: vi.fn().mockReturnValue(of(overrides?.serviceMediaData ?? createMediaReadModel('service-media')))
+      get: vi.fn().mockReturnValue(of(overrides?.serviceMediaData ?? createMediaReadModel('service-media'))),
+      search: vi.fn().mockReturnValue(of({ results: [], count: 0 }))
     },
     router: {
       currentNavigation: vi.fn().mockReturnValue(navigationState as Navigation | null),
@@ -140,7 +143,7 @@ describe('PlayerComponent', () => {
     await component.loadMedia();
 
     expect(mocks.mediaService.get).not.toHaveBeenCalled();
-    expect(component.mediaData?.id).toBe('from-nav');
+    expect(component.state?.mediaData?.id).toBe('from-nav');
   });
 
   it('loads media from MediaService when navigation state is missing', async () => {
@@ -151,7 +154,7 @@ describe('PlayerComponent', () => {
     await component.loadMedia();
 
     expect(mocks.mediaService.get).toHaveBeenCalledWith('from-service');
-    expect(component.mediaData?.id).toBe('from-service');
+    expect(component.state?.mediaData?.id).toBe('from-service');
   });
 
   it('handles media loading failures gracefully', async () => {
@@ -162,7 +165,7 @@ describe('PlayerComponent', () => {
     component.mediaId = 'broken';
     await component.loadMedia();
 
-    expect(component.mediaData).toBeUndefined();
+    expect(component.state?.mediaData).toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
@@ -178,7 +181,7 @@ describe('PlayerComponent', () => {
     const model = createMediaReadModel('edit-id');
     const { component, mocks } = await createComponent();
     component.mediaId = 'edit-id';
-    component.mediaData = model;
+    component.state = { mediaData: model };
 
     component.editMedia();
 
@@ -195,10 +198,98 @@ describe('PlayerComponent', () => {
     expect(mocks.router.navigate).not.toHaveBeenCalled();
   });
 
+  it('shows next navigation for first item when only two search results are available', async () => {
+    const { component } = await createComponent();
+    const first = createMediaReadModel('first', 'image/jpeg');
+    const second = createMediaReadModel('second', 'image/jpeg');
+
+    component.state = {
+      mediaData: first,
+      searchContext: {
+        currentIndex: 0,
+        searchParams: {} as any
+      }
+    };
+    component.searchResponse = {
+      results: [first, second],
+      count: 2
+    };
+
+    expect(component.hasPreviousItem).toBe(false);
+    expect(component.hasNextItem).toBe(true);
+  });
+
+  it('goToNext selects the immediate next item for a three-item window from the first item', async () => {
+    const { component, mocks } = await createComponent();
+    const first = createMediaReadModel('first', 'image/jpeg');
+    const second = createMediaReadModel('second', 'image/jpeg');
+    const third = createMediaReadModel('third', 'image/jpeg');
+    const searchParams = new SearchQueryParams();
+    vi.spyOn(SearchQueryParams, 'getQueryParams').mockReturnValue({});
+
+    component.state = {
+      mediaData: first,
+      searchContext: {
+        currentIndex: 0,
+        searchParams
+      }
+    };
+    component.searchResponse = {
+      results: [first, second, third],
+      count: 3
+    };
+
+    vi.spyOn(component, 'ngOnInit').mockResolvedValue();
+
+    await component.goToNext();
+
+    expect(mocks.router.navigate).toHaveBeenCalledWith(['/player', 'second'], {
+      state: {
+        mediaData: second,
+        searchContext: component.state?.searchContext
+      },
+      queryParams: {}
+    });
+    expect(component.state?.searchContext?.currentIndex).toBe(1);
+  });
+
+  it('goToPrevious selects the immediate previous item for a two-item trailing window', async () => {
+    const { component, mocks } = await createComponent();
+    const second = createMediaReadModel('second', 'image/jpeg');
+    const third = createMediaReadModel('third', 'image/jpeg');
+    const searchParams = new SearchQueryParams();
+    vi.spyOn(SearchQueryParams, 'getQueryParams').mockReturnValue({});
+
+    component.state = {
+      mediaData: third,
+      searchContext: {
+        currentIndex: 2,
+        searchParams
+      }
+    };
+    component.searchResponse = {
+      results: [second, third],
+      count: 3
+    };
+
+    vi.spyOn(component, 'ngOnInit').mockResolvedValue();
+
+    await component.goToPrevious();
+
+    expect(mocks.router.navigate).toHaveBeenCalledWith(['/player', 'second'], {
+      state: {
+        mediaData: second,
+        searchContext: component.state?.searchContext
+      },
+      queryParams: {}
+    });
+    expect(component.state?.searchContext?.currentIndex).toBe(1);
+  });
+
   it('toggles chapter panel visibility', async () => {
     const { component } = await createComponent();
 
-    component.mediaData = createMediaReadModel();
+    component.state = { mediaData: createMediaReadModel() };
     const video = document.createElement('video');
     Object.defineProperty(video, 'duration', { value: 120 });
     // @ts-ignore
@@ -241,7 +332,7 @@ describe('PlayerComponent', () => {
     const mediaData = createMediaReadModel('chapter-parent');
     const { component, mocks } = await createComponent();
     component.mediaId = 'chapter-parent';
-    component.mediaData = mediaData;
+    component.state = { mediaData };
     component.chapterStart = 12.5;
     component.chapterEnd = 45.2;
 
@@ -371,5 +462,110 @@ describe('PlayerComponent', () => {
     component.ngOnDestroy();
 
     expect((component as any).hideTimeout).toBeUndefined();
+  });
+
+  it('navigates to previous item on ArrowLeft for image media', async () => {
+    const { component } = await createComponent();
+    component.state = {
+      mediaData: createMediaReadModel('image-current', 'image/jpeg'),
+      searchContext: {
+        currentIndex: 1,
+        searchParams: {} as any
+      }
+    };
+    component.searchResponse = {
+      results: [
+        createMediaReadModel('image-previous', 'image/jpeg'),
+        createMediaReadModel('image-current', 'image/jpeg'),
+        createMediaReadModel('image-next', 'image/jpeg')
+      ],
+      count: 3
+    };
+
+    const goToPreviousSpy = vi.spyOn(component, 'goToPrevious').mockResolvedValue();
+    const preventDefault = vi.fn();
+
+    component.onDocumentKeyDown({ key: 'ArrowLeft', preventDefault, target: document.body } as unknown as KeyboardEvent);
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(goToPreviousSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('navigates to next item on ArrowRight for image media', async () => {
+    const { component } = await createComponent();
+    component.state = {
+      mediaData: createMediaReadModel('image-current', 'image/jpeg'),
+      searchContext: {
+        currentIndex: 1,
+        searchParams: {} as any
+      }
+    };
+    component.searchResponse = {
+      results: [
+        createMediaReadModel('image-previous', 'image/jpeg'),
+        createMediaReadModel('image-current', 'image/jpeg'),
+        createMediaReadModel('image-next', 'image/jpeg')
+      ],
+      count: 3
+    };
+
+    const goToNextSpy = vi.spyOn(component, 'goToNext').mockResolvedValue();
+    const preventDefault = vi.fn();
+
+    component.onDocumentKeyDown({ key: 'ArrowRight', preventDefault, target: document.body } as unknown as KeyboardEvent);
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect(goToNextSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not navigate on arrow keys when media is not an image', async () => {
+    const { component } = await createComponent();
+    component.state = {
+      mediaData: createMediaReadModel('video-current', 'video/mp4'),
+      searchContext: {
+        currentIndex: 1,
+        searchParams: {} as any
+      }
+    };
+    component.searchResponse = {
+      results: [createMediaReadModel('video-previous'), createMediaReadModel('video-current'), createMediaReadModel('video-next')],
+      count: 3
+    };
+
+    const goToNextSpy = vi.spyOn(component, 'goToNext').mockResolvedValue();
+    const preventDefault = vi.fn();
+
+    component.onDocumentKeyDown({ key: 'ArrowRight', preventDefault, target: document.body } as unknown as KeyboardEvent);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(goToNextSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not navigate on arrow keys when focus is on interactive elements', async () => {
+    const { component } = await createComponent();
+    component.state = {
+      mediaData: createMediaReadModel('image-current', 'image/jpeg'),
+      searchContext: {
+        currentIndex: 1,
+        searchParams: {} as any
+      }
+    };
+    component.searchResponse = {
+      results: [
+        createMediaReadModel('image-previous', 'image/jpeg'),
+        createMediaReadModel('image-current', 'image/jpeg'),
+        createMediaReadModel('image-next', 'image/jpeg')
+      ],
+      count: 3
+    };
+
+    const goToNextSpy = vi.spyOn(component, 'goToNext').mockResolvedValue();
+    const preventDefault = vi.fn();
+    const input = document.createElement('input');
+
+    component.onDocumentKeyDown({ key: 'ArrowRight', preventDefault, target: input } as unknown as KeyboardEvent);
+
+    expect(preventDefault).not.toHaveBeenCalled();
+    expect(goToNextSpy).not.toHaveBeenCalled();
   });
 });

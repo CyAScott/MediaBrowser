@@ -131,6 +131,47 @@
   overflow: hidden;
 }
 
+.player-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3rem;
+  height: 3rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--fg1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease;
+  z-index: 8;
+}
+
+.player-nav-button:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.08);
+  background: rgba(0, 0, 0, 0.78);
+}
+
+.player-nav-button:disabled {
+  cursor: default;
+}
+
+.player-nav-button-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.player-nav-button-previous {
+  left: 1rem;
+}
+
+.player-nav-button-next {
+  right: 1rem;
+}
+
 .chapter-panel {
   z-index: 20;
   display: flex;
@@ -229,13 +270,14 @@
   white-space: nowrap;
 }
 
-.add-chapter-button {
+.add-chapter-button, .cancel-chapter-button {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   border: none;
   border-radius: var(--radius1);
   padding: 0.6rem 0.9rem;
+  margin-left: 0.5rem;
   background: var(--primary3-bg);
   color: var(--fg4);
   cursor: pointer;
@@ -280,6 +322,12 @@
   .player-container {
     height: 100%;
     width: calc(100% - 1.1rem);
+  }
+
+  .player-nav-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
   }
 
   .chapter-panel {

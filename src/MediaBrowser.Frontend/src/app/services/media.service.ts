@@ -90,6 +90,10 @@ export class MediaService {
     return this.apiService.get<MediaReadModel>(`/media/${id}`);
   }
 
+  delete(id: string): Observable<void> {
+    return this.apiService.delete<void>(`/media/${id}`);
+  }
+
   update(id: string, request: UpdateMediaRequest): Observable<MediaReadModel> {
     return this.apiService.put<MediaReadModel>(`/media/${id}`, request);
   }

@@ -5,6 +5,7 @@ import { MediaService, MediaTagType } from '../services';
 import { SearchComponent } from '../search/search';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { SpinnerComponent } from '../spinner/spinner';
+import { SearchQueryParams } from '../search/search-query-params';
 
 interface MetaMember {
   name: string;
@@ -128,7 +129,7 @@ export class MetaComponent implements OnInit, AfterViewInit, OnDestroy {
       this.metaMembers = results.map(name => ({
         name,
         imageUrl: this.getImageUrl(this.type as MediaTagType, name),
-        queryParams: { [this.type]: [name], sort: SearchComponent.DEFAULT_SORT }
+        queryParams: { [this.type]: [name], sort: SearchQueryParams.DEFAULT_SORT }
       }));
       
       // Restore scroll position after content is loaded and rendered

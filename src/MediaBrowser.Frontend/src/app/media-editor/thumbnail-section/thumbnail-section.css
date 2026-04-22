@@ -172,8 +172,8 @@
   border-radius: var(--radius2);
   position: relative;
   display: inline-block;
+  height: 360px;
   max-width: 100%;
-  max-height: 360px;
 }
 
 .video-overlay {

@@ -4,6 +4,8 @@ import { RouterModule } from '@angular/router';
 import { MediaReadModel } from '../services/media.service';
 import { SpinnerComponent } from '../spinner/spinner';
 import { ReadonlyInfoSectionComponent } from '../media-editor/readonly-info-section/readonly-info-section.component';
+import { SearchQueryParams } from './search-query-params';
+import { PlayerNavigationState } from '../player/player';
 
 @Component({
   selector: 'app-search-content',
@@ -12,9 +14,11 @@ import { ReadonlyInfoSectionComponent } from '../media-editor/readonly-info-sect
   styleUrls: ['./search-content.css']
 })
 export class SearchContentComponent {
+  protected readonly SearchQueryParams = SearchQueryParams;
   @Input() hasMoreResults: boolean = true;
   @Input() isLoading: boolean = false;
   @Input() results: MediaReadModel[] = [];
+  @Input() parameters: SearchQueryParams = new SearchQueryParams();
 
   @Output() scroll = new EventEmitter<Event>();
   @Output() cardClick = new EventEmitter<void>();
@@ -23,6 +27,16 @@ export class SearchContentComponent {
 
   onCardClick(): void {
     this.cardClick.emit();
+  }
+
+  getPlayerNavigationState(result: MediaReadModel, index: number): PlayerNavigationState {
+    return {
+      mediaData: result,
+      searchContext: {
+        currentIndex: index,
+        searchParams: this.parameters
+      }
+    };
   }
 
   getTooltip(result: MediaReadModel): string {
@@ -65,5 +79,39 @@ export class SearchContentComponent {
 
   trackByResultId(index: number, result: MediaReadModel): string {
     return result.id;
+  }
+
+  isImage(result: MediaReadModel): boolean {
+    return result.mime.startsWith('image/');
+  }
+
+  isVideo(result: MediaReadModel): boolean {
+    return result.mime.startsWith('video/');
+  }
+
+  isAudio(result: MediaReadModel): boolean {
+    return result.mime.startsWith('audio/');
+  }
+
+  getCenterIconClass(result: MediaReadModel): string {
+    if (this.isImage(result)) {
+      return 'fa-magnifying-glass';
+    } else if (this.isVideo(result)) {
+      return 'fa-play';
+    } else if (this.isAudio(result)) {
+      return 'fa-volume-high';
+    }
+    return 'fa-play';
+  }
+
+  getFileTypeIcon(result: MediaReadModel): string {
+    if (this.isImage(result)) {
+      return 'fa-image';
+    } else if (this.isVideo(result)) {
+      return 'fa-film';
+    } else if (this.isAudio(result)) {
+      return 'fa-music';
+    }
+    return 'fa-file';
   }
 }
