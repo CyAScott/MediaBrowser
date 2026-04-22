@@ -59,8 +59,7 @@ export class ChangePasswordModalComponent {
       await firstValueFrom(this.usersService.changePassword(request));
       this.successMessage = 'Password changed successfully!';
       this.close.emit();
-    } catch (error: any) {
-      this.errorMessage = error.error?.message || 'Failed to change password';
+    } catch {
       this.userUpdatingFailed.emit();
     } finally {
       this.isSubmitting = false;

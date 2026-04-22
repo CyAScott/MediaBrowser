@@ -116,7 +116,7 @@ describe('ChangePasswordModalComponent', () => {
     expect(detectChanges).toHaveBeenCalledTimes(1);
   });
 
-  it('shows API error message and emits failure when changing password fails with message', async () => {
+  it('does not show an inline API error and emits failure when changing password fails with message', async () => {
     const { component, mocks } = await createComponent();
     const detectChanges = vi.fn();
     const userUpdatingSpy = vi.spyOn(component.userUpdating, 'emit');
@@ -137,13 +137,13 @@ describe('ChangePasswordModalComponent', () => {
     expect(userUpdatingSpy).toHaveBeenCalledTimes(1);
     expect(userUpdatingFailedSpy).toHaveBeenCalledTimes(1);
     expect(closeSpy).not.toHaveBeenCalled();
-    expect(component.errorMessage).toBe('Current password is incorrect');
+    expect(component.errorMessage).toBe('');
     expect(component.successMessage).toBe('');
     expect(component.isSubmitting).toBe(false);
     expect(detectChanges).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to default error message when changing password fails without API message', async () => {
+  it('does not show an inline fallback error when changing password fails without API message', async () => {
     const { component, mocks } = await createComponent();
 
     component.oldPassword = 'old-secret';
@@ -153,7 +153,7 @@ describe('ChangePasswordModalComponent', () => {
 
     await component.onSubmit();
 
-    expect(component.errorMessage).toBe('Failed to change password');
+    expect(component.errorMessage).toBe('');
     expect(component.isSubmitting).toBe(false);
   });
 

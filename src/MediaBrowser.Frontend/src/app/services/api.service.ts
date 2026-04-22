@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ToastService } from '../toast/toast.service';
 
 export interface ApiResponse<T> {
   data: T;
@@ -21,7 +22,10 @@ export interface ApiError {
 export class ApiService {
   private readonly baseUrl = '/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private toastService: ToastService
+  ) {}
 
   delete<T>(endpoint: string, params?: any): Observable<T> {
     const url = `${this.baseUrl}${endpoint}`;
@@ -99,6 +103,7 @@ export class ApiService {
     }
     
     console.error('API Error:', error);
+    this.toastService.showError(errorMessage);
     
     const apiError: ApiError = {
       error: error.error?.error || 'API_ERROR',

@@ -46,7 +46,6 @@ export class LoginComponent {
       });
     } catch (error) {
       console.error('Login error:', error);
-      this.errorMessage = 'An error occurred during login. Please try again.';
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
