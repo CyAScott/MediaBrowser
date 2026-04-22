@@ -14,6 +14,7 @@ import { PlayerNavigationState } from '../player/player';
   styleUrls: ['./search-content.css']
 })
 export class SearchContentComponent {
+  protected readonly SearchQueryParams = SearchQueryParams;
   @Input() hasMoreResults: boolean = true;
   @Input() isLoading: boolean = false;
   @Input() results: MediaReadModel[] = [];

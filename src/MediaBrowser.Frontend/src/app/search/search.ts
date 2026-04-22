@@ -84,11 +84,6 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  private loadFromQueryParams(): void {
-    const params = this.route.snapshot.queryParams;
-    this.parameters.loadFromQueryParams(params);
-  }
-
   private savePagePosition(): void {
     try {
       if (this.searchContentComponent?.searchResultsElement) {
@@ -103,7 +98,7 @@ export class SearchComponent implements OnInit {
   }
 
   private updateQueryParams(): void {
-    const queryParams: any = this.parameters.getQueryParams();
+    const queryParams: any = SearchQueryParams.getQueryParams(this.parameters);
 
     // Update URL without triggering navigation
     this.router.navigate([], {
@@ -138,7 +133,7 @@ export class SearchComponent implements OnInit {
       this.isLoading = true;
       
       // Build search request matching SearchMediaRequest interface
-      const searchRequest: SearchMediaRequest = this.parameters.getSearchMediaRequest(skip, take);
+      const searchRequest: SearchMediaRequest = SearchQueryParams.getSearchMediaRequest(this.parameters, skip, take);
 
       const cachedDataValue = sessionStorage.getItem(SearchComponent.CACHE_KEY);
       const cachedData: CacheData | null = cachedDataValue && !autoIncrementPage ? JSON.parse(cachedDataValue) : null;
@@ -200,7 +195,7 @@ export class SearchComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     // Load initial state from query parameters
-    this.loadFromQueryParams();
+    SearchQueryParams.loadFromQueryParams(this.parameters, this.route.snapshot.queryParams);
     if (this.parameters.pageIndex === 0) {
       this.clearPagePosition();
     }

@@ -5,6 +5,7 @@ import { Location } from '@angular/common';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { of, throwError } from 'rxjs';
 import { MediaReadModel, MediaService } from '../services';
+import { SearchQueryParams } from '../search/search-query-params';
 import { PlayerComponent } from './player';
 
 interface PlayerMocks {
@@ -20,6 +21,7 @@ interface PlayerMocks {
   };
   mediaService: {
     get: ReturnType<typeof vi.fn>;
+    search: ReturnType<typeof vi.fn>;
   };
   router: {
     currentNavigation: ReturnType<typeof vi.fn>;
@@ -74,7 +76,8 @@ async function createComponent(overrides?: {
       back: vi.fn()
     },
     mediaService: {
-      get: vi.fn().mockReturnValue(of(overrides?.serviceMediaData ?? createMediaReadModel('service-media')))
+      get: vi.fn().mockReturnValue(of(overrides?.serviceMediaData ?? createMediaReadModel('service-media'))),
+      search: vi.fn().mockReturnValue(of({ results: [], count: 0 }))
     },
     router: {
       currentNavigation: vi.fn().mockReturnValue(navigationState as Navigation | null),
@@ -193,6 +196,94 @@ describe('PlayerComponent', () => {
     component.editMedia();
 
     expect(mocks.router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('shows next navigation for first item when only two search results are available', async () => {
+    const { component } = await createComponent();
+    const first = createMediaReadModel('first', 'image/jpeg');
+    const second = createMediaReadModel('second', 'image/jpeg');
+
+    component.state = {
+      mediaData: first,
+      searchContext: {
+        currentIndex: 0,
+        searchParams: {} as any
+      }
+    };
+    component.searchResponse = {
+      results: [first, second],
+      count: 2
+    };
+
+    expect(component.hasPreviousItem).toBe(false);
+    expect(component.hasNextItem).toBe(true);
+  });
+
+  it('goToNext selects the immediate next item for a three-item window from the first item', async () => {
+    const { component, mocks } = await createComponent();
+    const first = createMediaReadModel('first', 'image/jpeg');
+    const second = createMediaReadModel('second', 'image/jpeg');
+    const third = createMediaReadModel('third', 'image/jpeg');
+    const searchParams = new SearchQueryParams();
+    vi.spyOn(SearchQueryParams, 'getQueryParams').mockReturnValue({});
+
+    component.state = {
+      mediaData: first,
+      searchContext: {
+        currentIndex: 0,
+        searchParams
+      }
+    };
+    component.searchResponse = {
+      results: [first, second, third],
+      count: 3
+    };
+
+    vi.spyOn(component, 'ngOnInit').mockResolvedValue();
+
+    await component.goToNext();
+
+    expect(mocks.router.navigate).toHaveBeenCalledWith(['/player', 'second'], {
+      state: {
+        mediaData: second,
+        searchContext: component.state?.searchContext
+      },
+      queryParams: {}
+    });
+    expect(component.state?.searchContext?.currentIndex).toBe(1);
+  });
+
+  it('goToPrevious selects the immediate previous item for a two-item trailing window', async () => {
+    const { component, mocks } = await createComponent();
+    const second = createMediaReadModel('second', 'image/jpeg');
+    const third = createMediaReadModel('third', 'image/jpeg');
+    const searchParams = new SearchQueryParams();
+    vi.spyOn(SearchQueryParams, 'getQueryParams').mockReturnValue({});
+
+    component.state = {
+      mediaData: third,
+      searchContext: {
+        currentIndex: 2,
+        searchParams
+      }
+    };
+    component.searchResponse = {
+      results: [second, third],
+      count: 3
+    };
+
+    vi.spyOn(component, 'ngOnInit').mockResolvedValue();
+
+    await component.goToPrevious();
+
+    expect(mocks.router.navigate).toHaveBeenCalledWith(['/player', 'second'], {
+      state: {
+        mediaData: second,
+        searchContext: component.state?.searchContext
+      },
+      queryParams: {}
+    });
+    expect(component.state?.searchContext?.currentIndex).toBe(1);
   });
 
   it('toggles chapter panel visibility', async () => {

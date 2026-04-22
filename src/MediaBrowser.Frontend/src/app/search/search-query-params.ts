@@ -14,105 +14,105 @@ export class SearchQueryParams {
 
   static readonly DEFAULT_SORT = 'title';
 
-  public loadFromQueryParams(params: Params): void {
+  public static loadFromQueryParams(searchQueryParams: SearchQueryParams, params: Params): void {
     // Load search parameters from URL
-    this.keywords = params['keywords'] || '';
-    this.sort = params['sort'] || SearchQueryParams.DEFAULT_SORT;
-    this.descending = params['descending'] === 'true';
+    searchQueryParams.keywords = params['keywords'] || '';
+    searchQueryParams.sort = params['sort'] || SearchQueryParams.DEFAULT_SORT;
+    searchQueryParams.descending = params['descending'] === 'true';
     
     // Handle array parameters
     if (params['cast']) {
-      this.cast = Array.isArray(params['cast']) ? params['cast'] : [params['cast']];
+      searchQueryParams.cast = Array.isArray(params['cast']) ? params['cast'] : [params['cast']];
     } else {
-      this.cast = [];
+      searchQueryParams.cast = [];
     }
     
     if (params['directors']) {
-      this.directors = Array.isArray(params['directors']) ? params['directors'] : [params['directors']];
+      searchQueryParams.directors = Array.isArray(params['directors']) ? params['directors'] : [params['directors']];
     } else {
-      this.directors = [];
+      searchQueryParams.directors = [];
     }
     
     if (params['genres']) {
-      this.genres = Array.isArray(params['genres']) ? params['genres'] : [params['genres']];
+      searchQueryParams.genres = Array.isArray(params['genres']) ? params['genres'] : [params['genres']];
     } else {
-      this.genres = [];
+      searchQueryParams.genres = [];
     }
 
-    this.pageIndex = params['pageIndex'] ? parseInt(params['pageIndex'], 10) : 0;
+    searchQueryParams.pageIndex = params['pageIndex'] ? parseInt(params['pageIndex'], 10) : 0;
 
     if (params['producers']) {
-      this.producers = Array.isArray(params['producers']) ? params['producers'] : [params['producers']];
+      searchQueryParams.producers = Array.isArray(params['producers']) ? params['producers'] : [params['producers']];
     } else {
-      this.producers = [];
+      searchQueryParams.producers = [];
     }
 
     if (params['writers']) {
-      this.writers = Array.isArray(params['writers']) ? params['writers'] : [params['writers']];
+      searchQueryParams.writers = Array.isArray(params['writers']) ? params['writers'] : [params['writers']];
     } else {
-      this.writers = [];
+      searchQueryParams.writers = [];
     }
   }
 
-  public getQueryParams(includePageIndex: boolean = false): any {
+  public static getQueryParams(searchQueryParams: SearchQueryParams, includePageIndex: boolean = false): any {
     const queryParams: any = {};
     
     // Only add parameters that have values to keep URL clean
-    if (this.keywords?.trim()) {
-      queryParams['keywords'] = this.keywords.trim();
+    if (searchQueryParams.keywords?.trim()) {
+      queryParams['keywords'] = searchQueryParams.keywords.trim();
     }
-    if (this.cast.length > 0) {
-      queryParams['cast'] = this.cast;
+    if (searchQueryParams.cast.length > 0) {
+      queryParams['cast'] = searchQueryParams.cast;
     }
-    if (this.directors.length > 0) {
-      queryParams['directors'] = this.directors;
+    if (searchQueryParams.directors.length > 0) {
+      queryParams['directors'] = searchQueryParams.directors;
     }
-    if (this.genres.length > 0) {
-      queryParams['genres'] = this.genres;
+    if (searchQueryParams.genres.length > 0) {
+      queryParams['genres'] = searchQueryParams.genres;
     }
-    if (this.producers.length > 0) {
-      queryParams['producers'] = this.producers;
+    if (searchQueryParams.producers.length > 0) {
+      queryParams['producers'] = searchQueryParams.producers;
     }
-    if (this.writers.length > 0) {
-      queryParams['writers'] = this.writers;
+    if (searchQueryParams.writers.length > 0) {
+      queryParams['writers'] = searchQueryParams.writers;
     }
-    queryParams['sort'] = this.sort;
-    if (this.descending) {
+    queryParams['sort'] = searchQueryParams.sort;
+    if (searchQueryParams.descending) {
       queryParams['descending'] = 'true';
     }
     if (includePageIndex) {
-      queryParams['pageIndex'] = this.pageIndex;
+      queryParams['pageIndex'] = searchQueryParams.pageIndex;
     }
     return queryParams;
   }
 
-  public getSearchMediaRequest(skip?: number, take?: number): SearchMediaRequest {
+  public static getSearchMediaRequest(searchQueryParams: SearchQueryParams, skip?: number, take?: number): SearchMediaRequest {
     const request: SearchMediaRequest = {
       skip: skip,
-      sort: this.sort,
+      sort: searchQueryParams.sort,
       take: take,
     };
 
-    if (this.keywords?.trim()) {
-      request.keywords = this.keywords.trim();
+    if (searchQueryParams.keywords?.trim()) {
+      request.keywords = searchQueryParams.keywords.trim();
     }
-    if (this.cast.length > 0) {
-      request.cast = [...this.cast];
+    if (searchQueryParams.cast.length > 0) {
+      request.cast = [...searchQueryParams.cast];
     }
-    if (this.directors.length > 0) {
-      request.directors = [...this.directors];
+    if (searchQueryParams.directors.length > 0) {
+      request.directors = [...searchQueryParams.directors];
     }
-    if (this.genres.length > 0) {
-      request.genres = [...this.genres];
+    if (searchQueryParams.genres.length > 0) {
+      request.genres = [...searchQueryParams.genres];
     }
-    if (this.descending) {
-      request.descending = this.descending;
+    if (searchQueryParams.descending) {
+      request.descending = searchQueryParams.descending;
     }
-    if (this.producers.length > 0) {
-      request.producers = [...this.producers];
+    if (searchQueryParams.producers.length > 0) {
+      request.producers = [...searchQueryParams.producers];
     }
-    if (this.writers.length > 0) {
-      request.writers = [...this.writers];
+    if (searchQueryParams.writers.length > 0) {
+      request.writers = [...searchQueryParams.writers];
     }
 
     return request;

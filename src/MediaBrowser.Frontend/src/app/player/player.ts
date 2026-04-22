@@ -34,6 +34,22 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
   
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
   @ViewChild('audioElement', { static: false }) audioElement!: ElementRef<HTMLAudioElement>;
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeyDown(event: KeyboardEvent): void {
+    if (!this.state?.mediaData?.mime.startsWith('image/') || !this.state.searchContext || this.isInteractiveTarget(event.target)) {
+      return;
+    }
+
+    if (event.key === 'ArrowLeft' && this.hasPreviousItem) {
+      event.preventDefault();
+      void this.goToPrevious();
+    }
+
+    if (event.key === 'ArrowRight' && this.hasNextItem) {
+      event.preventDefault();
+      void this.goToNext();
+    }
+  }
   
   get mediaSourceUrl(): string {
     if (!this.state?.mediaData) {
@@ -68,11 +84,12 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
         this.state = { ...this.state, mediaData: await firstValueFrom(this.mediaService.get(this.mediaId!)) };
       }
 
-      const params = this.route.snapshot.queryParams;
-      this.state.searchContext?.searchParams.loadFromQueryParams(params);
       if (this.state.searchContext) {
+        const params = this.route.snapshot.queryParams;
+        SearchQueryParams.loadFromQueryParams(this.state.searchContext.searchParams, params);
         const skip = Math.max(this.state.searchContext.currentIndex - 1, 0);
-        this.searchResponse = await firstValueFrom(this.mediaService.search(this.state.searchContext.searchParams.getSearchMediaRequest(skip, 3)));
+        const searchRequest = SearchQueryParams.getSearchMediaRequest(this.state.searchContext.searchParams, skip, 3);
+        this.searchResponse = await firstValueFrom(this.mediaService.search(searchRequest));
       }
 
       this.cdr.detectChanges();
@@ -209,10 +226,33 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     return window.history.length > 1;
   }
   get hasNextItem(): boolean {
-    return !!(this.searchResponse && this.searchResponse.results.length > 2);
+    const currentIndex = this.currentSearchWindowIndex;
+    return currentIndex !== undefined && currentIndex < this.searchResponse!.results.length - 1;
   }
   get hasPreviousItem(): boolean {
-    return !!(this.searchResponse && this.state?.searchContext?.currentIndex);
+    const currentIndex = this.currentSearchWindowIndex;
+    return currentIndex !== undefined && currentIndex > 0;
+  }
+  get currentSearchWindowIndex(): number | undefined {
+    const results = this.searchResponse?.results;
+    const searchContext = this.state?.searchContext;
+    if (!results || !searchContext) {
+      return undefined;
+    }
+
+    const currentMediaId = this.state?.mediaData?.id;
+    if (currentMediaId) {
+      const indexById = results.findIndex(media => media.id === currentMediaId);
+      if (indexById >= 0) {
+        return indexById;
+      }
+    }
+
+    const windowStartIndex = Math.max(searchContext.currentIndex - 1, 0);
+    const indexBySearchContext = searchContext.currentIndex - windowStartIndex;
+    return indexBySearchContext >= 0 && indexBySearchContext < results.length
+      ? indexBySearchContext
+      : undefined;
   }
   editMedia(): void {
     if (this.mediaId) {
@@ -225,46 +265,36 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     this.location.back();
   }
   async goToNext(): Promise<void> {
-    if (this.hasNextItem) {
-      this.state!.searchContext!.currentIndex++;
-      const mediaData = this.searchResponse!.results[2];
-      await this.router.navigate(['/player', mediaData.id], {
-        state: { mediaData, searchContext: this.state?.searchContext },
-        queryParams: this.state?.searchContext?.searchParams.getQueryParams()
-      });
-      await this.ngOnInit();
+    if (!this.hasNextItem) {
+      return;
     }
+
+    const currentIndex = this.currentSearchWindowIndex!;
+    this.state!.searchContext!.currentIndex++;
+    const mediaData = this.searchResponse!.results[currentIndex + 1];
+    await this.router.navigate(['/player', mediaData.id], {
+      state: { mediaData, searchContext: this.state?.searchContext },
+      queryParams: this.state?.searchContext?.searchParams ? SearchQueryParams.getQueryParams(this.state.searchContext.searchParams) : undefined
+    });
+    await this.ngOnInit();
   }
   async goToPrevious(): Promise<void> {
-    if (this.hasPreviousItem) {
-      this.state!.searchContext!.currentIndex--;
-      const mediaData = this.searchResponse!.results[0];
-      await this.router.navigate(['/player', mediaData.id], {
-        state: { mediaData, searchContext: this.state?.searchContext },
-        queryParams: this.state?.searchContext?.searchParams.getQueryParams()
-      });
-      await this.ngOnInit();
+    if (!this.hasPreviousItem) {
+      return;
     }
+
+    const currentIndex = this.currentSearchWindowIndex!;
+    this.state!.searchContext!.currentIndex--;
+    const mediaData = this.searchResponse!.results[currentIndex - 1];
+    await this.router.navigate(['/player', mediaData.id], {
+      state: { mediaData, searchContext: this.state?.searchContext },
+      queryParams: this.state?.searchContext?.searchParams ? SearchQueryParams.getQueryParams(this.state.searchContext.searchParams) : undefined
+    });
+    await this.ngOnInit();
   }
   async onMediaEnded(): Promise<void> {
     this.reachedSegmentEnd = true;
     await this.goToNext();
-  }
-  @HostListener('document:keydown', ['$event'])
-  onDocumentKeyDown(event: KeyboardEvent): void {
-    if (!this.state?.mediaData?.mime.startsWith('image/') || !this.state.searchContext || this.isInteractiveTarget(event.target)) {
-      return;
-    }
-
-    if (event.key === 'ArrowLeft' && this.hasPreviousItem) {
-      event.preventDefault();
-      void this.goToPrevious();
-    }
-
-    if (event.key === 'ArrowRight' && this.hasNextItem) {
-      event.preventDefault();
-      void this.goToNext();
-    }
   }
 
   // chapter management
