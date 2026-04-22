@@ -53,7 +53,10 @@ export class MediaEditorComponent implements OnInit {
     return this.navigation?.previousNavigation != null;
   }
   get readWriteInProgress(): boolean {
-    return this.isCreatingThumbnail || this.isLoading || this.isSaving;
+    return this.isCreatingThumbnail || this.isDeleting || this.isLoading || this.isSaving;
+  }
+  get canConfirmDelete(): boolean {
+    return this.deleteConfirmationTitle === this.mediaData?.title;
   }
 
   chapterDuration?: number;
@@ -70,11 +73,14 @@ export class MediaEditorComponent implements OnInit {
   };
   filename?: string;
   isCreatingThumbnail: boolean = false;
+  isDeleteModalOpen: boolean = false;
+  isDeleting: boolean = false;
   isLoading: boolean = false;
   isSaving: boolean = false;
   mediaData?: MediaReadModel;
   mediaId?: string;
   mode: MediaEditorMode = MediaEditorMode.Edit;
+  deleteConfirmationTitle: string = '';
   thumbnail?: ThumbnailData;
 
   // init component based on route params and load media data if needed
@@ -149,7 +155,6 @@ export class MediaEditorComponent implements OnInit {
         thumbnailPreviewUrl: ''
       };
     }
-    console.log('Initial thumbnail set:', this.thumbnail);
   }
   setEditableData(): void {
     this.editableData = {
@@ -241,6 +246,37 @@ export class MediaEditorComponent implements OnInit {
       this.router.navigate(['/search'], { queryParams: { sort: SearchQueryParams.DEFAULT_SORT } });
     }
   }
+  closeDeleteModal(): void {
+    if (this.isDeleting) {
+      return;
+    }
+
+    this.isDeleteModalOpen = false;
+    this.deleteConfirmationTitle = '';
+  }
+  async confirmDelete(): Promise<void> {
+    if (!this.mediaId || !this.canConfirmDelete) {
+      return;
+    }
+
+    this.isDeleting = true;
+
+    try {
+      await firstValueFrom(this.mediaService.delete(this.mediaId));
+      SearchComponent.clearCachedResults();
+      this.closeDeleteModal();
+      await this.router.navigate(['/search'], { queryParams: { sort: SearchQueryParams.DEFAULT_SORT } });
+    } catch (error) {
+      console.error('Error deleting media:', error);
+    } finally {
+      this.isDeleting = false;
+      this.cdr.detectChanges();
+    }
+  }
+  openDeleteModal(): void {
+    this.deleteConfirmationTitle = '';
+    this.isDeleteModalOpen = true;
+  }
 
   // Component data getters
   get titleData(): TitleData {
@@ -308,6 +344,11 @@ export class MediaEditorComponent implements OnInit {
     this.editableData.genres = peopleData.genres;
     this.editableData.producers = peopleData.producers;
     this.editableData.writers = peopleData.writers;
+  }
+  onDeleteModalBackdropClick(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.closeDeleteModal();
+    }
   }
   onRatingChange(rating: number): void {
     this.editableData.userStarRating = rating;

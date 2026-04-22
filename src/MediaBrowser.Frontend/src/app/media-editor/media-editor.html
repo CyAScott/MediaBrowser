@@ -8,6 +8,12 @@
       }
       <h1>{{ headerTitle }}</h1>
       <div class="header-actions">
+        @if (mode === 'Edit') {
+          <button class="delete-button" (click)="openDeleteModal()" [disabled]="readWriteInProgress">
+            <i class="fa-solid fa-trash"></i>
+            Delete
+          </button>
+        }
         <button class="cancel-button" (click)="cancel()" [disabled]="readWriteInProgress">
           Cancel
         </button>
@@ -59,6 +65,52 @@
         </div>
       </div>
     }
+  </div>
+}
+
+@if (isDeleteModalOpen && mediaData) {
+  <div class="modal-backdrop" (click)="onDeleteModalBackdropClick($event)">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Delete Media</h3>
+        <button class="close-button" (click)="closeDeleteModal()" [disabled]="isDeleting" title="Close">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+
+      <form (ngSubmit)="confirmDelete()" class="modal-body">
+        <p class="modal-text">
+          Enter <strong>{{ mediaData.title }}</strong> to confirm deletion.
+        </p>
+
+        <div class="form-group">
+          <label for="deleteConfirmationTitle">Title</label>
+          <input
+            type="text"
+            id="deleteConfirmationTitle"
+            [(ngModel)]="deleteConfirmationTitle"
+            name="deleteConfirmationTitle"
+            class="form-input"
+            [placeholder]="mediaData.title"
+            [disabled]="isDeleting">
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="modal-button cancel-modal-button" (click)="closeDeleteModal()" [disabled]="isDeleting">
+            Cancel
+          </button>
+          <button type="submit" class="modal-button confirm-delete-button" [disabled]="isDeleting || !canConfirmDelete">
+            @if (isDeleting) {
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Deleting...
+            } @else {
+              <i class="fa-solid fa-trash"></i>
+              Delete Media
+            }
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 }
 
