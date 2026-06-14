@@ -98,7 +98,7 @@ export class SearchComponent implements OnInit {
   }
 
   private updateQueryParams(): void {
-    const queryParams: any = SearchQueryParams.getQueryParams(this.parameters);
+    const queryParams: any = SearchQueryParams.getQueryParams(this.parameters, false);
 
     // Update URL without triggering navigation
     this.router.navigate([], {
@@ -195,7 +195,7 @@ export class SearchComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     // Load initial state from query parameters
-    SearchQueryParams.loadFromQueryParams(this.parameters, this.route.snapshot.queryParams);
+    SearchQueryParams.loadFromQueryParams(this.parameters, this.route.snapshot.queryParams, false);
     if (this.parameters.pageIndex === 0) {
       this.clearPagePosition();
     }

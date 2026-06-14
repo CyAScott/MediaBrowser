@@ -86,7 +86,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
 
       if (this.state.searchContext) {
         const params = this.route.snapshot.queryParams;
-        SearchQueryParams.loadFromQueryParams(this.state.searchContext.searchParams, params);
+        SearchQueryParams.loadFromQueryParams(this.state.searchContext.searchParams, params, true);
         const skip = Math.max(this.state.searchContext.currentIndex - 1, 0);
         const searchRequest = SearchQueryParams.getSearchMediaRequest(this.state.searchContext.searchParams, skip, 3);
         this.searchResponse = await firstValueFrom(this.mediaService.search(searchRequest));
@@ -274,7 +274,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     const mediaData = this.searchResponse!.results[currentIndex + 1];
     await this.router.navigate(['/player', mediaData.id], {
       state: { mediaData, searchContext: this.state?.searchContext },
-      queryParams: this.state?.searchContext?.searchParams ? SearchQueryParams.getQueryParams(this.state.searchContext.searchParams) : undefined
+      queryParams: this.state?.searchContext?.searchParams ? SearchQueryParams.getQueryParams(this.state.searchContext.searchParams, true) : undefined
     });
     await this.ngOnInit();
   }
@@ -288,7 +288,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit {
     const mediaData = this.searchResponse!.results[currentIndex - 1];
     await this.router.navigate(['/player', mediaData.id], {
       state: { mediaData, searchContext: this.state?.searchContext },
-      queryParams: this.state?.searchContext?.searchParams ? SearchQueryParams.getQueryParams(this.state.searchContext.searchParams) : undefined
+      queryParams: this.state?.searchContext?.searchParams ? SearchQueryParams.getQueryParams(this.state.searchContext.searchParams, true) : undefined
     });
     await this.ngOnInit();
   }

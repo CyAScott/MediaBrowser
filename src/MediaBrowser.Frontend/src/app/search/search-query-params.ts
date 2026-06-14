@@ -14,7 +14,7 @@ export class SearchQueryParams {
 
   static readonly DEFAULT_SORT = 'title';
 
-  public static loadFromQueryParams(searchQueryParams: SearchQueryParams, params: Params): void {
+  public static loadFromQueryParams(searchQueryParams: SearchQueryParams, params: Params, setPageIndex: boolean): void {
     // Load search parameters from URL
     searchQueryParams.keywords = params['keywords'] || '';
     searchQueryParams.sort = params['sort'] || SearchQueryParams.DEFAULT_SORT;
@@ -39,7 +39,9 @@ export class SearchQueryParams {
       searchQueryParams.genres = [];
     }
 
-    searchQueryParams.pageIndex = params['pageIndex'] ? parseInt(params['pageIndex'], 10) : 0;
+    if (setPageIndex) {
+      searchQueryParams.pageIndex = params['pageIndex'] ? parseInt(params['pageIndex'], 10) : 0;
+    }
 
     if (params['producers']) {
       searchQueryParams.producers = Array.isArray(params['producers']) ? params['producers'] : [params['producers']];
@@ -54,7 +56,7 @@ export class SearchQueryParams {
     }
   }
 
-  public static getQueryParams(searchQueryParams: SearchQueryParams, includePageIndex: boolean = false): any {
+  public static getQueryParams(searchQueryParams: SearchQueryParams, includePageIndex: boolean): any {
     const queryParams: any = {};
     
     // Only add parameters that have values to keep URL clean
