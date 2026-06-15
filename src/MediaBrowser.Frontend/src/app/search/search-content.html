@@ -8,7 +8,7 @@
       <a 
           (mousedown)="onCardClick()"
           [ngStyle]="{'backgroundImage':'url(' + result.thumbnailUrl + ')'}"
-          [queryParams]="SearchQueryParams.getQueryParams(parameters)"
+          [queryParams]="SearchQueryParams.getQueryParams(parameters, true)"
           [routerLink]="['/player', result.id]"
           [state]="getPlayerNavigationState(result, $index)"
           [title]="getTooltip(result)"
